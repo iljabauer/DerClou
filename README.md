@@ -2,12 +2,15 @@
 Based on V0.8 (2019-11-26) of http://sourceforge.net/projects/cosp
 
 ## Roadmap
+The overall goal is to make the game accessible for more people either for gaming or for modding.
+
 1. Prebuilt Releases
     - [ ] MacOSX
     - [ ] Linux
     - [ ] Windows
     - [ ] Steam?
     - [ ] iOS?
+2. 
 
 ## CREDITS
 ```
