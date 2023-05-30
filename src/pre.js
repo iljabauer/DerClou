@@ -1,0 +1,1 @@
+Module.preRun.push(function() {ENV.DERCLOU_ROOTDIR = "../gamedata"})

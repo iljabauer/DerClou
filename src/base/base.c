@@ -467,12 +467,11 @@ int tcStartGame(int argc, char **argv)
 
     rndInit();
 
-    char *rootPath = dirname(argv[0]);
-    if (strcmp(rootPath, CMAKE_INSTALL_PREFIX DIR_SEPARATOR INSTALL_PATH_BIN) == 0)
-    {
-        // game is installed in install prefix -> gamedata is in other directory
-        rootPath = CMAKE_INSTALL_PREFIX DIR_SEPARATOR INSTALL_PATH_BIN;
+    char *rootPath = NULL;
+    if (!(rootPath = getenv("DERCLOU_ROOTDIR"))) {
+        rootPath = dirname(argv[0]);
     }
+
     dskSetRootPath(rootPath);
     // und den Pfad für BuildPathName setzen!
     dskInitUserDataPath();
