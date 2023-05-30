@@ -1,7 +1,15 @@
 # Der Clou! Open Source Project
 Based on V0.8 (2019-11-26) of http://sourceforge.net/projects/cosp
 
-# CREDITS
+## Roadmap
+1. Prebuilt Releases
+- [ ] MacOSX
+- [ ] Linux
+- [ ] Windows
+- [ ] Steam?
+- [ ] iOS?
+
+## CREDITS
 ```
 Idea & concept:  ...and avoid panic by
 Programming:     Helmut Gaberschek, Kaweh Kazemi
