@@ -8,9 +8,13 @@ The overall goal is to make the game accessible for more people either for gamin
     - [ ] MacOSX
     - [ ] Linux
     - [ ] Windows
+    - [ ] Web (WASM)
     - [ ] Steam?
     - [ ] iOS?
-2. 
+2. Improve Graphic System
+    - [ ] Allow pictures with 640x200 px and change base resolution to 640x240
+    - [ ] Use SDL Image for Image loading, to allow PNG images
+    - [ ] Increase color depth from 8bit to 16bit or 32bit
 
 ## CREDITS
 ```
