@@ -15,6 +15,11 @@ The overall goal is to make the game accessible for more people either for gamin
     - [ ] Allow pictures with 640x200 px and change base resolution to 640x240
     - [ ] Use SDL Image for Image loading, to allow PNG images
     - [ ] Increase color depth from 8bit to 16bit or 32bit
+3. Improve Audio / Music system
+    - Change Music files to ogg or similiar
+4. Ongoing Changes
+    - [ ] Find better names for functions and variables
+    - [ ] Make code readable
 
 ## CREDITS
 ```
