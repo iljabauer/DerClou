@@ -9,6 +9,7 @@ The overall goal is to make the game accessible for more people either for gamin
     - [ ] Linux
     - [ ] Windows
     - [ ] Web (WASM)
+        - [ ] Saving should work
     - [ ] Steam?
     - [ ] iOS?
 2. Improve Graphic System
