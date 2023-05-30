@@ -21,6 +21,7 @@ The overall goal is to make the game accessible for more people either for gamin
 4. Ongoing Changes
     - [ ] Find better names for functions and variables
     - [ ] Make code readable
+    - [ ] Rewrite (parts like story code) in python
 
 ## CREDITS
 ```
