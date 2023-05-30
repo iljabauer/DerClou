@@ -14,7 +14,7 @@ The overall goal is to make the game accessible for more people either for gamin
     - [ ] iOS?
 2. Improve Graphic System
     - [ ] Allow pictures with 640x200 px and change base resolution to 640x240
-    - [ ] Use SDL Image for Image loading, to allow PNG images
+    - [x] Use SDL Image for Image loading, to allow PNG images
     - [ ] Increase color depth from 8bit to 16bit or 32bit
 3. Improve Audio / Music system
     - [ ] Change Music files to ogg or similiar
