@@ -5,6 +5,7 @@
    Based on the original by neo Software GmbH
 */
 #include "SDL.h"
+#include "SDL_image.h"
 #include "gfx/gfx.h"
 #include "memory/memory.h"
 // #include "base\base.h"
@@ -288,18 +289,10 @@ SDL_Surface *gfxLoadImage(const char *puch_Pathname)
         return NULL;
     }
 
-    if (!memcmp(&p_FileBuffer[0], idFORM, 4) && !memcmp(&p_FileBuffer[8], idILBM, 4))
+    pSurface = IMG_Load(puch_Pathname);
+    if (!pSurface)
     {
-        // IFF ILBM (standard)
-        pSurface = gfxLoadILBM(p_FileBuffer, ul_SizeOfFile, puch_Pathname);
-        if (!pSurface)
-        {
-            Log("gfxLoadImage pSurface = NULL: %s", puch_Pathname);
-        }
-    }
-    else
-    {
-        Log("gfxLoadImage not an IFF file: %s", puch_Pathname);
+        Log("gfxLoadImage pSurface = NULL: %s", puch_Pathname);
     }
 
     MemFree(p_FileBuffer, ul_SizeOfFile);
