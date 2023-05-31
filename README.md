@@ -8,7 +8,7 @@ The overall goal is to make the game accessible for more people either for gamin
     - [ ] MacOSX
     - [ ] Linux
     - [ ] Windows
-    - [ ] Web (WASM)
+    - [ ] Web (WASM): [theclue.netlify.app](https://theclue.netlify.app)
         - [ ] Saving should work
     - [ ] Steam?
     - [ ] iOS?
