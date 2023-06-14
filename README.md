@@ -1,4 +1,6 @@
 # Der Clou! Open Source Project
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/W7W8M9SU8)
+
 Based on V0.8 (2019-11-26) of http://sourceforge.net/projects/cosp
 
 ## Roadmap
