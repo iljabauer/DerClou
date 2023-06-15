@@ -9,6 +9,10 @@
 #include "organisa/organisa.h"
 #include "port/port.h"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 void tcSaveTheClou(int bAutoSave)
 {
     char line[TXT_KEY_LENGTH];
@@ -129,6 +133,14 @@ void tcSaveTheClou(int bAutoSave)
             sprintf(line, "%s%d%s", STORY_DATA_NAME, activ, GAME_DATA_EXT);
             dskBuildPathNameUser(DATADISK_DIRECTORY, line, pathname);
             tcSaveChangesInScenes(pathname);
+
+            #ifdef __EMSCRIPTEN__
+            // Sync filesystem in browser to save files to indexdb
+            EM_ASM(
+                console.debug("syncfs in tcSaveTheClou");
+                FS.syncfs(false, function (err) {if (err) {console.error("syncing failed in tcSaveTheClou", err)}});
+            );
+            #endif
         }
     }
 

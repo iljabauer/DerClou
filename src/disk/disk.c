@@ -19,6 +19,10 @@
 #define mkdir(A, B) _mkdir(A)
 #endif
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
 static char RootPathName[FILENAME_MAX] = {0};
 static char UserPathName[FILENAME_MAX] = {0};
 
@@ -50,6 +54,24 @@ void dskInitUserDataPath(void)
         char result[FILENAME_MAX];
         dskBuildPathNameUser(DATADISK_DIRECTORY, "", &result[0]);
         dskMakeDirectory(result);
+
+        #ifdef __EMSCRIPTEN__
+        // Create UserDataPath and mount it to indexdb to persist saves on browser reload
+        EM_ASM(
+            const result = UTF8ToString($0);
+            let infos = FS.analyzePath(result);
+            if (!infos.exists) {
+                console.debug("dskInitUserDataPath: Path does not exist", result);
+                FS.mkdir(result);
+            }
+            else {
+                console.debug("dskInitUserDataPath: Path does exist", result);
+            }
+
+            FS.mount(IDBFS, {}, result);
+            FS.syncfs(true, function (err) {if (err) {console.error("dskInitUserDataPath: syncing failed", err)}});
+        , result);
+        #endif
     }
 }
 

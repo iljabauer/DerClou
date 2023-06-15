@@ -11,7 +11,9 @@ The overall goal is to make the game accessible for more people either for gamin
     - [ ] Linux
     - [ ] Windows
     - [ ] Web (WASM): [theclue.netlify.app](https://theclue.netlify.app)
-        - [ ] Saving should work
+        - [x] Saving should work
+        - [ ] Plans should work
+        - [ ] Audio should work on start
     - [ ] Steam?
     - [ ] iOS?
 2. Improve Graphic System
