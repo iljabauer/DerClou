@@ -69,7 +69,7 @@ set(SOURCE_FILES
 add_executable(DerClou ${SOURCE_FILES})
 
 target_include_directories(DerClou PUBLIC ${CMAKE_CURRENT_LIST_DIR}
-                                          ${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS})
+                                          ${SDL2_INCLUDE_DIRS} ${SDL2_image_INCLUDE_DIRS})
 target_compile_options(DerClou PUBLIC ${SDL2_CFLAGS_OTHER} -Wall
                                       -Wno-format-overflow)
 
@@ -78,7 +78,8 @@ add_compile_options("$<$<CONFIG:RELEASE>:-O2>")
 add_link_options("$<$<CONFIG:RELEASE>:-s>")
 add_compile_definitions(CMAKE_INSTALL_PREFIX="${CMAKE_INSTALL_PREFIX}"
                         INSTALL_PATH_BIN="${INSTALL_PATH_BIN}")
-target_link_libraries(DerClou ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} m)
+                        
+target_link_libraries(DerClou PRIVATE SDL2::SDL2 SDL2_image::SDL2_image)
 
 if(NOT DEFINED INSTALL_PATH_BIN)
   set(INSTALL_PATH_BIN ${CMAKE_INSTALL_BINDIR})

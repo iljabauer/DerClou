@@ -1,0 +1,161 @@
+{
+  "lockfile_version": "1",
+  "packages": {
+    "cmake@latest": {
+      "last_modified": "2024-09-10T15:01:03Z",
+      "resolved": "github:NixOS/nixpkgs/5ed627539ac84809c78b2dd6d26a5cebeb5ae269#cmake",
+      "source": "devbox-search",
+      "version": "3.29.6",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/bnw436hkmrzi6wa2i8n6swyc35hw63zk-cmake-3.29.6",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/bnw436hkmrzi6wa2i8n6swyc35hw63zk-cmake-3.29.6"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/rd3byxvm1pxl923nc5vx79pykq4wh4li-cmake-3.29.6",
+              "default": true
+            },
+            {
+              "name": "debug",
+              "path": "/nix/store/nxhkn6c32i7rvjw3i12bffb3q911g7hj-cmake-3.29.6-debug"
+            }
+          ],
+          "store_path": "/nix/store/rd3byxvm1pxl923nc5vx79pykq4wh4li-cmake-3.29.6"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/zjv124gn2b7zkxjf97plmf9hl5fxnpvi-cmake-3.29.6",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/zjv124gn2b7zkxjf97plmf9hl5fxnpvi-cmake-3.29.6"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/yzi080r2c1zn2jzrhcfdv7dmr92yw07l-cmake-3.29.6",
+              "default": true
+            },
+            {
+              "name": "debug",
+              "path": "/nix/store/rjyfyyrfshs95b5mj6spr0ywgkiajidw-cmake-3.29.6-debug"
+            }
+          ],
+          "store_path": "/nix/store/yzi080r2c1zn2jzrhcfdv7dmr92yw07l-cmake-3.29.6"
+        }
+      }
+    },
+    "conan@latest": {
+      "last_modified": "2024-09-12T02:28:40Z",
+      "resolved": "github:NixOS/nixpkgs/111ed8812c10d7dc3017de46cbf509600c93f551#conan",
+      "source": "devbox-search",
+      "version": "2.5.0",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/qldz8n8dqs1bg65a57j31s3ln8n999xn-conan-2.5.0",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/gqpqj4pncx2y43vgpr0m6bxn4hwplzr0-conan-2.5.0-dist"
+            }
+          ],
+          "store_path": "/nix/store/qldz8n8dqs1bg65a57j31s3ln8n999xn-conan-2.5.0"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/w69vqi287kvfydg1sl18s4jzyzvv9fxr-conan-2.5.0",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/4hx56vy5k2q7nfxvk47xx5sgz4acsvr1-conan-2.5.0-dist"
+            }
+          ],
+          "store_path": "/nix/store/w69vqi287kvfydg1sl18s4jzyzvv9fxr-conan-2.5.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/5y77wgx78qb8kpm4h5r3x5m5qhihfnad-conan-2.5.0",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/0dny2r1lzp1n367d3p3hz5naplah6bxa-conan-2.5.0-dist"
+            }
+          ],
+          "store_path": "/nix/store/5y77wgx78qb8kpm4h5r3x5m5qhihfnad-conan-2.5.0"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/cr4nffi0lzi6j19aad9pf75g8q7ny76m-conan-2.5.0",
+              "default": true
+            },
+            {
+              "name": "dist",
+              "path": "/nix/store/racmhxbbgm2dhv7lg07g4jbax5svzzrc-conan-2.5.0-dist"
+            }
+          ],
+          "store_path": "/nix/store/cr4nffi0lzi6j19aad9pf75g8q7ny76m-conan-2.5.0"
+        }
+      }
+    },
+    "darwin.apple_sdk.frameworks.AVFoundation": {
+      "resolved": "github:NixOS/nixpkgs/75a52265bda7fd25e06e3a67dee3f0354e73243c#darwin.apple_sdk.frameworks.AVFoundation",
+      "source": "nixpkg"
+    },
+    "darwin.apple_sdk.frameworks.Cocoa": {
+      "resolved": "github:NixOS/nixpkgs/75a52265bda7fd25e06e3a67dee3f0354e73243c#darwin.apple_sdk.frameworks.Cocoa",
+      "source": "nixpkg"
+    },
+    "darwin.apple_sdk.frameworks.CoreAudio": {
+      "resolved": "github:NixOS/nixpkgs/75a52265bda7fd25e06e3a67dee3f0354e73243c#darwin.apple_sdk.frameworks.CoreAudio",
+      "source": "nixpkg"
+    },
+    "darwin.apple_sdk.frameworks.CoreHaptics": {
+      "resolved": "github:NixOS/nixpkgs/75a52265bda7fd25e06e3a67dee3f0354e73243c#darwin.apple_sdk.frameworks.CoreHaptics",
+      "source": "nixpkg"
+    },
+    "darwin.apple_sdk.frameworks.ForceFeedback": {
+      "resolved": "github:NixOS/nixpkgs/75a52265bda7fd25e06e3a67dee3f0354e73243c#darwin.apple_sdk.frameworks.ForceFeedback",
+      "source": "nixpkg"
+    },
+    "darwin.apple_sdk.frameworks.Foundation": {
+      "resolved": "github:NixOS/nixpkgs/75a52265bda7fd25e06e3a67dee3f0354e73243c#darwin.apple_sdk.frameworks.Foundation",
+      "source": "nixpkg"
+    },
+    "darwin.apple_sdk.frameworks.GameController": {
+      "resolved": "github:NixOS/nixpkgs/75a52265bda7fd25e06e3a67dee3f0354e73243c#darwin.apple_sdk.frameworks.GameController",
+      "source": "nixpkg"
+    },
+    "darwin.apple_sdk.frameworks.IOKit": {
+      "resolved": "github:NixOS/nixpkgs/75a52265bda7fd25e06e3a67dee3f0354e73243c#darwin.apple_sdk.frameworks.IOKit",
+      "source": "nixpkg"
+    },
+    "darwin.apple_sdk.frameworks.OpenGL": {
+      "resolved": "github:NixOS/nixpkgs/75a52265bda7fd25e06e3a67dee3f0354e73243c#darwin.apple_sdk.frameworks.OpenGL",
+      "source": "nixpkg"
+    }
+  }
+}
