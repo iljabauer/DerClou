@@ -10,9 +10,16 @@ cmake_print_variables(CMAKE_C_COMPILER)
 cmake_print_variables(CMAKE_SYSTEM_NAME)
 if( ${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
   set(CMAKE_C_COMPILER "emcc")
-  set(USE_FLAGS "-g -lidbfs.js -sASYNCIFY -s USE_SDL=2 -s USE_SDL_IMAGE=2 -s SDL2_IMAGE_FORMATS='[\"lbm\", \"png\"]' --pre-js ./pre.js --preload-file ../gamedata")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${USE_FLAGS}")
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${USE_FLAGS}")
+
+  # Override default optimization for release builds
+  set(CMAKE_C_FLAGS_RELEASE "-O1 -DNDEBUG" CACHE STRING "Release flags" FORCE)
+  
+  set(COMPILE_FLAGS "-g --use-port=sdl2 -sASYNCIFY -sLEGACY_GL_EMULATION --use-port=sdl2_image:formats=lbm,png")
+  set(LINK_FLAGS "-sASYNCIFY -sLEGACY_GL_EMULATION --preload-file ../../gamedata -lidbfs.js")
+
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COMPILE_FLAGS}")
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LINK_FLAGS}")
+
   set(CMAKE_EXECUTABLE_SUFFIX .html)
   set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/web)
 else()

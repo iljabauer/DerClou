@@ -11,7 +11,9 @@
     "darwin.apple_sdk.frameworks.ForceFeedback",
     "darwin.apple_sdk.frameworks.CoreHaptics",
     "darwin.apple_sdk.frameworks.AVFoundation",
-    "darwin.apple_sdk.frameworks.GameController"
+    "darwin.apple_sdk.frameworks.GameController",
+    "nodejs@latest",
+    "emscripten@3.1.55"
   ],
   "shell": {
     "init_hook": [

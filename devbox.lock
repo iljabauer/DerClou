@@ -156,6 +156,119 @@
     "darwin.apple_sdk.frameworks.OpenGL": {
       "resolved": "github:NixOS/nixpkgs/75a52265bda7fd25e06e3a67dee3f0354e73243c#darwin.apple_sdk.frameworks.OpenGL",
       "source": "nixpkg"
+    },
+    "emscripten@3.1.55": {
+      "last_modified": "2024-07-10T06:55:44Z",
+      "resolved": "github:NixOS/nixpkgs/aa9461550594533c29866d42f861b6ff079a7fb6#emscripten",
+      "source": "devbox-search",
+      "version": "3.1.55",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/7ccmzb32nr9g0m81kz85ng88irfyylgc-emscripten-3.1.55",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/7ccmzb32nr9g0m81kz85ng88irfyylgc-emscripten-3.1.55"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/94b90wl7qxh839k1gdbcimbbak98nzls-emscripten-3.1.55",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/94b90wl7qxh839k1gdbcimbbak98nzls-emscripten-3.1.55"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/pwv0gxm0rgyhkva5dwz5fhy0w0vkrmaz-emscripten-3.1.55",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/pwv0gxm0rgyhkva5dwz5fhy0w0vkrmaz-emscripten-3.1.55"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/jhl112rdylxbc5d1lcsv7yl2db1zymqk-emscripten-3.1.55",
+              "default": true
+            }
+          ],
+          "store_path": "/nix/store/jhl112rdylxbc5d1lcsv7yl2db1zymqk-emscripten-3.1.55"
+        }
+      }
+    },
+    "nodejs@latest": {
+      "last_modified": "2024-09-10T15:01:03Z",
+      "plugin_version": "0.0.2",
+      "resolved": "github:NixOS/nixpkgs/5ed627539ac84809c78b2dd6d26a5cebeb5ae269#nodejs_22",
+      "source": "devbox-search",
+      "version": "22.8.0",
+      "systems": {
+        "aarch64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/4r8kqr24z88m1xjbb1qf19p1mi6q35lp-nodejs-22.8.0",
+              "default": true
+            },
+            {
+              "name": "libv8",
+              "path": "/nix/store/rqpibvqcpjxx26ls9kmdq1fr5yckss9l-nodejs-22.8.0-libv8"
+            }
+          ],
+          "store_path": "/nix/store/4r8kqr24z88m1xjbb1qf19p1mi6q35lp-nodejs-22.8.0"
+        },
+        "aarch64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/1wzl2brm8p6sb5b3wsdnn02m56cq36d4-nodejs-22.8.0",
+              "default": true
+            },
+            {
+              "name": "libv8",
+              "path": "/nix/store/4dwa28gc3w0gr672pcf3j4lfncymdqjf-nodejs-22.8.0-libv8"
+            }
+          ],
+          "store_path": "/nix/store/1wzl2brm8p6sb5b3wsdnn02m56cq36d4-nodejs-22.8.0"
+        },
+        "x86_64-darwin": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/mcdq9d48r8c2j29zgr7i80vnjzwh2lc3-nodejs-22.8.0",
+              "default": true
+            },
+            {
+              "name": "libv8",
+              "path": "/nix/store/16kfmgbsspjg1kpdvf9np5v2h371dh40-nodejs-22.8.0-libv8"
+            }
+          ],
+          "store_path": "/nix/store/mcdq9d48r8c2j29zgr7i80vnjzwh2lc3-nodejs-22.8.0"
+        },
+        "x86_64-linux": {
+          "outputs": [
+            {
+              "name": "out",
+              "path": "/nix/store/xsrv93rg8vi05k9ig6v9mcvcyn01n6n2-nodejs-22.8.0",
+              "default": true
+            },
+            {
+              "name": "libv8",
+              "path": "/nix/store/gp8fkyafy0anm5pgdcq2x3qs2fm8syhl-nodejs-22.8.0-libv8"
+            }
+          ],
+          "store_path": "/nix/store/xsrv93rg8vi05k9ig6v9mcvcyn01n6n2-nodejs-22.8.0"
+        }
+      }
     }
   }
 }
