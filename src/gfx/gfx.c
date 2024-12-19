@@ -968,6 +968,14 @@ struct RastPort *gfxPrepareColl(uword us_CollId)
             SDL_Surface *pSurface = NULL;
             pSurface = gfxLoadImage(Result);
 
+            if (pSurface->w == 320 && pSurface->h == 200)
+            {
+                SDL_Surface *pScaledSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, 640, 400, 8, 0, 0, 0, 0);
+                gfxFilter_x2_Copy(pSurface->pixels, pSurface->w, pSurface->h, pScaledSurface->pixels, pScaledSurface->pitch);
+                SDL_FreeSurface(pSurface);
+                pSurface = pScaledSurface;
+            }
+
             gfxSetColorTable_hack(pSurface);
 
             /* Collection in den PrepareRP kopieren */
