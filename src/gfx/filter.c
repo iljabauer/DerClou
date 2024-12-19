@@ -312,3 +312,23 @@ void gfxFilter_x4_Scale4x(void *srcmem, int32_t srcw, int32_t srch, void *dstmem
     gfxFilter_x2_Scale2x(srcmem, srcw, srch, gfxFilter_x4_Buffer, 640);
     gfxFilter_x2_Scale2x(gfxFilter_x4_Buffer, 640, 400, dstmem, dstpitch);
 }
+
+SDL_Surface *gfxLoadImage(const char *puch_Pathname)
+{
+    SDL_Surface *pSurface = IMG_Load(puch_Pathname);
+    if (!pSurface)
+    {
+        Log("gfxLoadImage pSurface = NULL: %s", puch_Pathname);
+        return NULL;
+    }
+
+    if (pSurface->w == 320 && pSurface->h == 200)
+    {
+        SDL_Surface *pScaledSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, 640, 400, 8, 0, 0, 0, 0);
+        gfxFilter_x2_Copy(pSurface->pixels, pSurface->w, pSurface->h, pScaledSurface->pixels, pScaledSurface->pitch);
+        SDL_FreeSurface(pSurface);
+        pSurface = pScaledSurface;
+    }
+
+    return pSurface;
+}

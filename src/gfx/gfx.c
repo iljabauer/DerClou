@@ -22,7 +22,7 @@
 
 enum
 {
-    GFX_NCH4_BUFFER_SIZE = (320 * 200) /* 320*200 = 64000 Bytes gross */
+    GFX_NCH4_BUFFER_SIZE = (640 * 240) /* 640*240 = 153600 Bytes gross */
 };
 
 #define GFX_BUBBLE_FONT_NAME ((char *)"bubble.fnt")
@@ -30,7 +30,7 @@ enum
 
 enum
 {
-    GFX_CMAP_OFFSET = 61440  // -> Maximalgroesse 320 * 192
+    GFX_CMAP_OFFSET = 61440  // -> Maximalgroesse 640 * 240
 };
 
 struct PrintRect
@@ -92,7 +92,7 @@ struct XMSRastPort LSObjectRPInXMS;
 /* in diesem RastPort befinden sich einige Objekte während der Planung */
 
 static SDL_Surface *pShadowSurface = NULL;   // 640x328 pixels
-static SDL_Surface *pRefreshSurface = NULL;  // 320x140 pixels
+static SDL_Surface *pRefreshSurface = NULL;  // 640x240 pixels
 
 struct PrintRect GlobalPrintRect;
 struct ColorRange GlobalColorRange;
@@ -252,7 +252,7 @@ int gfxInitSDL(void)
             flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
         }
 
-        gfxScalingFactor = min((Config.gfxScreenWidth / 320), (Config.gfxScreenHeight / 200));
+        gfxScalingFactor = min((Config.gfxScreenWidth / 640), (Config.gfxScreenHeight / 240));
         if (gfxScalingFactor > 4)
         {
             gfxScalingFactor = 4;
@@ -261,8 +261,8 @@ int gfxInitSDL(void)
         {
             Log("%s|%s: screen too small", __FILE__, __func__);
             gfxScalingFactor = 1;
-            Config.gfxScreenWidth = 320;
-            Config.gfxScreenHeight = 200;
+            Config.gfxScreenWidth = 640;
+            Config.gfxScreenHeight = 240;
         }
 
         switch (gfxScalingFactor)
@@ -291,7 +291,7 @@ int gfxInitSDL(void)
                 if (Config.gfxScaleNx)
                 {
                     gfxFilter = gfxFilter_x4_Scale4x;
-                    gfxFilter_x4_Buffer = (unsigned char *)MemAlloc(640 * 400);
+                    gfxFilter_x4_Buffer = (unsigned char *)MemAlloc(1280 * 480);
                     if (!gfxFilter_x4_Buffer)
                     {
                         gfxFilter = gfxFilter_x4_Copy;
@@ -307,8 +307,8 @@ int gfxInitSDL(void)
                 break;
         }
 
-        gfxScalingOffsetX = (Config.gfxScreenWidth - (320 * gfxScalingFactor)) / 2;
-        gfxScalingOffsetY = (Config.gfxScreenHeight - (200 * gfxScalingFactor)) / 2;
+        gfxScalingOffsetX = (Config.gfxScreenWidth - (640 * gfxScalingFactor)) / 2;
+        gfxScalingOffsetY = (Config.gfxScreenHeight - (240 * gfxScalingFactor)) / 2;
 
         dskBuildPathName(PICTURE_DIRECTORY, "icon.bmp", iconPath);
         SDL_CreateWindowAndRenderer(Config.gfxScreenWidth, Config.gfxScreenHeight, flags, &Window, &Renderer);
@@ -319,10 +319,10 @@ int gfxInitSDL(void)
         ScreenTexture = SDL_CreateTextureFromSurface(Renderer, SurfaceScreen);
         if (SurfaceScreen)
         {
-            pShadowSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, 640, 328, 8, 0, 0, 0, 0);
+            pShadowSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, 1280, 656, 8, 0, 0, 0, 0);
             if (pShadowSurface)
             {
-                pRefreshSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, 320, 140, 8, 0, 0, 0, 0);
+                pRefreshSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, 640, 240, 8, 0, 0, 0, 0);
                 if (pRefreshSurface)
                 {
                     NCH4Buffer = (ubyte *)MemAlloc(GFX_NCH4_BUFFER_SIZE);
@@ -349,7 +349,7 @@ void gfxDoneSDL(void)
     if (NCH4Buffer) MemFree(NCH4Buffer, GFX_NCH4_BUFFER_SIZE);
     if (gfxFilter_x4_Buffer)
     {
-        MemFree(gfxFilter_x4_Buffer, 640 * 400);
+        MemFree(gfxFilter_x4_Buffer, 1280 * 480);
     }
     SDL_QuitSubSystem(SDL_INIT_VIDEO);
 }
@@ -366,8 +366,8 @@ void gfxUpdateSDL(struct RastPort *rp)
 
         if (GfxBase.uch_VideoMode == GFX_VIDEO_NCH4)
         {
-            gfxNCH4PutNCH4ToMCGA(src + gfxNCH4GetCurrScrollOffset(), NCH4Buffer, 0, 0, 0, 0, 320, 128, 160, 320);
-            gfxNCH4PutNCH4ToMCGA(src, NCH4Buffer + (320 * 128), 0, 0, 0, 0, 320, 72, 160, 320);
+            gfxNCH4PutNCH4ToMCGA(src + gfxNCH4GetCurrScrollOffset(), NCH4Buffer, 0, 0, 0, 0, 640, 256, 320, 640);
+            gfxNCH4PutNCH4ToMCGA(src, NCH4Buffer + (640 * 256), 0, 0, 0, 0, 640, 144, 320, 640);
             src = NCH4Buffer;
         }
 
@@ -391,7 +391,7 @@ void gfxUpdateSDL(struct RastPort *rp)
             dst += dstpitch * gfxScalingOffsetY;
         }
 
-        gfxFilter(src, 320, 200, dst, dstpitch);
+        gfxFilter(src, 640, 240, dst, dstpitch);
 
         SDL_UnlockSurface(SurfaceScreen);
 
@@ -423,18 +423,18 @@ void gfxInit(void)
     /* gross sind und auch gleich gross wie die StdBuffer sind */
     /* StdBuffer = 61 * 1024 = 62464, XMS: 62400 */
 
-    /* Ausnahme (nachtraeglich) : der RefreshRP ist nur 320 * 140 Pixel gross!! */
+    /* Ausnahme (nachtraeglich) : der RefreshRP ist nur 640 * 240 Pixel gross!! */
 
-    gfxInitXMSRastPort(&StdRP0InXMS, 320, 195); /* CMAP muss auch Platz haben ! */
-    gfxInitXMSRastPort(&StdRP1InXMS, 320, 195);
-    gfxInitXMSRastPort(&AnimRPInXMS, 320, 195);
-    gfxInitXMSRastPort(&AddRPInXMS, 320, 195);
-    gfxInitXMSRastPort(&LSObjectRPInXMS, 320, 195);
+    gfxInitXMSRastPort(&StdRP0InXMS, 640, 390); /* CMAP muss auch Platz haben ! */
+    gfxInitXMSRastPort(&StdRP1InXMS, 640, 390);
+    gfxInitXMSRastPort(&AnimRPInXMS, 640, 390);
+    gfxInitXMSRastPort(&AddRPInXMS, 640, 390);
+    gfxInitXMSRastPort(&LSObjectRPInXMS, 640, 390);
 
-    gfxInitXMSRastPort(&LSFloorRPInXMS, 320, 32);
+    gfxInitXMSRastPort(&LSFloorRPInXMS, 640, 64);
 
     /* der RefreshRP muss den ganzen Bildschirm aufnehmen koennen */
-    gfxInitXMSRastPort(&RefreshRPInXMS, 320, 200);
+    gfxInitXMSRastPort(&RefreshRPInXMS, 640, 400);
 
     /*
     #define GFX_NCH4_SCROLLOFFSET 	(640 * 72)  // Speicher , den die fixe Anzeige belegt
@@ -443,15 +443,15 @@ void gfxInit(void)
     BitMap);
     */
 
-    gfxInitRastPort(&RefreshRP, 0, 0, 320, 140, 0, 0, pRefreshSurface->pixels);
-    gfxInitRastPort(&PrepareRP, 0, 0, 320, 192, 0, 0, StdBuffer1);
+    gfxInitRastPort(&RefreshRP, 0, 0, 640, 240, 0, 0, pRefreshSurface->pixels);
+    gfxInitRastPort(&PrepareRP, 0, 0, 640, 384, 0, 0, StdBuffer1);
 
-    gfxInitRastPort(&LowerRP, 0, 0, 320, 140, 0, 191, pShadowSurface->pixels);
-    gfxInitRastPort(&MenuRP, 0, 140, 320, 50, 191, 255, (ubyte *)pShadowSurface->pixels + 320 * 140);
+    gfxInitRastPort(&LowerRP, 0, 0, 640, 280, 0, 191, pShadowSurface->pixels);
+    gfxInitRastPort(&MenuRP, 0, 280, 640, 100, 191, 255, (ubyte *)pShadowSurface->pixels + 640 * 280);
 
-    gfxInitRastPort(&NCH4ScrollRP, 0, 0, 640, 256, 0, 191, (ubyte *)pShadowSurface->pixels + GFX_NCH4_SCROLLOFFSET);
-    gfxInitRastPort(&NCH4MenuRP, 0, 128, 320, 72, 191, 255, pShadowSurface->pixels);
-    gfxInitRastPort(&NCH4UpperRP, 0, 0, 320, 60, 0, 191,
+    gfxInitRastPort(&NCH4ScrollRP, 0, 0, 1280, 512, 0, 191, (ubyte *)pShadowSurface->pixels + GFX_NCH4_SCROLLOFFSET);
+    gfxInitRastPort(&NCH4MenuRP, 0, 256, 640, 144, 191, 255, pShadowSurface->pixels);
+    gfxInitRastPort(&NCH4UpperRP, 0, 0, 640, 120, 0, 191,
                     (ubyte *)pShadowSurface->pixels + GFX_NCH4_SCROLLOFFSET);  // this one moves
     // TopEdge von diesem RP muss 0 sein, da der Offset schon bei der Adresse
     // der BitMap richtig uebergeben wird
@@ -460,8 +460,8 @@ void gfxInit(void)
     u_wrp = &LowerRP;
     m_wrp = &MenuRP;
 
-    bubbleFont = gfxOpenFont(GFX_BUBBLE_FONT_NAME, 4, 8, 32, 255, 320, 24);
-    menuFont = gfxOpenFont(GFX_MENU_FONT_NAME, 5, 9, 32, 255, 320, 36);
+    bubbleFont = gfxOpenFont(GFX_BUBBLE_FONT_NAME, 4, 8, 32, 255, 640, 48);
+    menuFont = gfxOpenFont(GFX_MENU_FONT_NAME, 5, 9, 32, 255, 640, 72);
 
     gfxSetFont(l_wrp, bubbleFont);
     gfxSetFont(u_wrp, bubbleFont);
@@ -968,6 +968,14 @@ struct RastPort *gfxPrepareColl(uword us_CollId)
             SDL_Surface *pSurface = NULL;
             pSurface = gfxLoadImage(Result);
 
+            if (pSurface->w == 320 && pSurface->h == 200)
+            {
+                SDL_Surface *pScaledSurface = SDL_CreateRGBSurface(SDL_SWSURFACE, 640, 400, 8, 0, 0, 0, 0);
+                gfxFilter_x2_Copy(pSurface->pixels, pSurface->w, pSurface->h, pScaledSurface->pixels, pScaledSurface->pitch);
+                SDL_FreeSurface(pSurface);
+                pSurface = pScaledSurface;
+            }
+
             gfxSetColorTable_hack(pSurface);
 
             /* Collection in den PrepareRP kopieren */
@@ -1149,12 +1157,12 @@ void gfxPrepareRefresh(void)
     switch (GfxBase.uch_VideoMode)
     {
         case GFX_VIDEO_MCGA:
-            memcpy(mem, gfxGetGfxBoardBase(), 320 * 200);
+            memcpy(mem, gfxGetGfxBoardBase(), 640 * 240);
             break;
         case GFX_VIDEO_NCH4:
-            gfxNCH4PutNCH4ToMCGA(gfxGetGfxBoardBase() + gfxNCH4GetCurrScrollOffset(), mem, 0, 0, 0, 0, 320, 128, 160,
-                                 320);
-            gfxNCH4PutNCH4ToMCGA(gfxGetGfxBoardBase(), mem + (320 * 128), 0, 0, 0, 0, 320, 72, 160, 320);
+            gfxNCH4PutNCH4ToMCGA(gfxGetGfxBoardBase() + gfxNCH4GetCurrScrollOffset(), mem, 0, 0, 0, 0, 640, 256, 320,
+                                 640);
+            gfxNCH4PutNCH4ToMCGA(gfxGetGfxBoardBase(), mem + (640 * 256), 0, 0, 0, 0, 640, 144, 320, 640);
             break;
     }
 
@@ -1176,13 +1184,13 @@ void gfxRefresh(void)
     switch (GfxBase.uch_VideoMode)
     {
         case GFX_VIDEO_NCH4:
-            gfxNCH4PutMCGAToNCH4(mem, gfxGetGfxBoardBase() + gfxNCH4GetCurrScrollOffset(), 0, 0, 0, 0, 320, 128, 320,
-                                 160);
-            gfxNCH4PutMCGAToNCH4(mem + (320 * 128), gfxGetGfxBoardBase(), 0, 0, 0, 0, 320, 72, 320, 160);
+            gfxNCH4PutMCGAToNCH4(mem, gfxGetGfxBoardBase() + gfxNCH4GetCurrScrollOffset(), 0, 0, 0, 0, 640, 256, 640,
+                                 320);
+            gfxNCH4PutMCGAToNCH4(mem + (640 * 256), gfxGetGfxBoardBase(), 0, 0, 0, 0, 640, 144, 640, 320);
             break;
         case GFX_VIDEO_MCGA:
         default:
-            memcpy(gfxGetGfxBoardBase(), mem, 320 * 200);
+            memcpy(gfxGetGfxBoardBase(), mem, 640 * 240);
             break;
     }
 
@@ -1221,11 +1229,11 @@ void gfxBlit(struct RastPort *srp, uword us_SourceX, uword us_SourceY, struct Ra
     {
         if (ul_BlitMode & GFX_ONE_STEP)
             gfxNCH4PutMCGAToNCH4(srp->p_BitMap, drp->p_BitMap, us_SourceX, us_SourceY, us_DestX, us_DestY, us_Width,
-                                 us_Height, 320, 160);
+                                 us_Height, 640, 320);
 
         if (ul_BlitMode & GFX_OVERLAY)
             gfxNCH4OLMCGAToNCH4(srp->p_BitMap, drp->p_BitMap, us_SourceX, us_SourceY, us_DestX, us_DestY, us_Width,
-                                us_Height, 320, 160);
+                                us_Height, 640, 320);
     }
 
     // gfxUpdateSDL(rp);
@@ -1255,9 +1263,9 @@ struct RastPort *gfxGetDestRP(int32_t l_DestX, int32_t l_DestY)
         // if ((l_DestY < 60) || (l_DestY >= 140))
         //	rp = m_wrp;
 
-        if (l_DestY < 60) rp = u_wrp;
+        if (l_DestY < 120) rp = u_wrp;
 
-        if (l_DestY >= 140) rp = m_wrp;
+        if (l_DestY >= 280) rp = m_wrp;
     }
 
     return rp;
