@@ -4,3 +4,4 @@ conan install . -pr:b ./conan-mac.profile -pr:h ./conan-mac.profile --output-fol
 cd build
 cmake .. -G "Unix Makefiles" -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_BUILD_TYPE=Release
 cmake --build . -v
+cp ./build/x64/DerClou ../gamedata/DerClou
