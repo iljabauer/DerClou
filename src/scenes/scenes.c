@@ -353,7 +353,7 @@ uint32_t tcTelefon(void)
 
                 if (livesIn(London_London_1, persID))
                 {
-                    if (CalcRandomNr(0L, 9L) == 3)
+                    if (CalcRandomNrForGameLogic(0L, 9L) == 3)
                         Say(BUSINESS_TXT, 0, ben->PictID, "OCCUPIED");
                     else
                     {

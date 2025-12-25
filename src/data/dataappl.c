@@ -319,9 +319,9 @@ void tcPersonLearns(uint32_t pId)
 
     if (pers->OldHealth) pers->Health = pers->OldHealth; /* Verletzung ist kuriert */
 
-    tcImprovePanic(pers, (1 + CalcRandomNr(4, 6))); /* 25 bis 16 % besser ! */
+    tcImprovePanic(pers, (1 + CalcRandomNrForGameLogic(4, 6))); /* 25 bis 16 % besser ! */
 
-    growth = max((pers->Known / (1 + CalcRandomNr(8, 10))), 20);
+    growth = max((pers->Known / (1 + CalcRandomNrForGameLogic(8, 10))), 20);
     tcImproveKnown(pers, pers->Known + ((pers->Known * growth) / 100)); /* 10 bis 12 % */
 }
 
@@ -332,7 +332,7 @@ uint32_t tcGetBuildValues(Building bui)
 
     x = (255 - bui->Exactlyness) / 3;
 
-    v = CalcValue(bui->Values, 0, bui->Values + 500000L, CalcRandomNr(0, 255), x);
+    v = CalcValue(bui->Values, 0, bui->Values + 500000L, CalcRandomNrForGameLogic(0, 255), x);
 
     return ((uint32_t)(Round(v, 3)));
 }
@@ -372,7 +372,7 @@ int32_t tcGuyInAction(uint32_t persId, int32_t exhaustion)
 {
     int32_t state = tcGetGuyState(persId);
 
-    if (CalcRandomNr(0, 15) == 1)
+    if (CalcRandomNrForGameLogic(0, 15) == 1)
         state = (255 - state) / 90; /* Erschöpfungszuwachs = Invers von Zustand */
     else
         state = 0;
@@ -390,7 +390,7 @@ int32_t tcGuyIsWaiting(uint32_t persId, int32_t exhaustion)
 {
     int32_t state = tcGetGuyState(persId);
 
-    if (CalcRandomNr(0, 4) == 1)
+    if (CalcRandomNrForGameLogic(0, 4) == 1)
         state = state / 10; /* Erschöpfungsabnahme */
     else
         state = 0;
@@ -512,8 +512,8 @@ uint32_t tcGuyUsesToolInPlayer(uint32_t persId, Building b, uint32_t toolId, uin
     uint32_t time = tcGuyUsesTool(persId, b, toolId, itemId);
     uint32_t ability = tcGetNecessaryAbility(persId, toolId);
 
-    if (ability < (CalcRandomNr(0, 230)))
-        if (CalcRandomNr(0, ability / 20) == 1) time = CalcValue(time, 0, time * 4, ability / 2, 10);
+    if (ability < (CalcRandomNrForGameLogic(0, 230)))
+        if (CalcRandomNrForGameLogic(0, ability / 20) == 1) time = CalcValue(time, 0, time * 4, ability / 2, 10);
 
     if (time < needTime) time = needTime;
 
@@ -620,9 +620,9 @@ int32_t tcGetDanger(uint32_t persId, uint32_t toolId, uint32_t itemId)
     danger = CalcValue(danger, 0, 255, 255 - p->Stamina, 10);
     danger = CalcValue(danger, 0, 255, p->Panic, 5);
 
-    if (danger > CalcRandomNr(40, 255)) /* Verletzt ! */
+    if (danger > CalcRandomNrForGameLogic(40, 255)) /* Verletzt ! */
     {
-        if (CalcRandomNr(0, 10) == 1) /* ...oder vielleicht doch nicht */
+        if (CalcRandomNrForGameLogic(0, 10) == 1) /* ...oder vielleicht doch nicht */
         {
             p->OldHealth = p->Health;
             p->Health = CalcValue(p->Health, 0, 255, 127 - danger, 90);
@@ -702,7 +702,8 @@ int32_t tcAlarmByLoudness(Building b, int32_t totalLoudness)
 /* nach jedem Funkspruch aufrufen */
 int32_t tcAlarmByRadio(Building b)
 {
-    int32_t random = CalcRandomNr(0, 2500) + CalcRandomNr(0, 2500); /* 10 mal funken bei Guarding = 250 -> Alarm */
+    int32_t random = CalcRandomNrForGameLogic(0, 2500) +
+                     CalcRandomNrForGameLogic(0, 2500); /* 10 mal funken bei Guarding = 250 -> Alarm */
 
     if (random < b->RadioGuarding)
         return 1;
@@ -802,11 +803,11 @@ int32_t tcWatchDogWarning(uint32_t persId)
     int32_t watch = hasGet(persId, Ability_Aufpassen);
     int32_t random = 0;
 
-    random = CalcRandomNr(0, 200) + /* Joe soll nicht gleich in der ersten */
-             CalcRandomNr(0, 200) + /* Sekunde etwas bemerken!             */
-             CalcRandomNr(0, 200);  /* Risiko wird durch Addition GRÖSSER!! */
+    random = CalcRandomNrForGameLogic(0, 200) + /* Joe soll nicht gleich in der ersten */
+             CalcRandomNrForGameLogic(0, 200) + /* Sekunde etwas bemerken!             */
+             CalcRandomNrForGameLogic(0, 200);  /* Risiko wird durch Addition GRÖSSER!! */
 
-    if ((watch > random) && (CalcRandomNr(0, 40) == 1)) return 1;
+    if ((watch > random) && (CalcRandomNrForGameLogic(0, 40) == 1)) return 1;
 
     return 0;
 }
@@ -820,9 +821,9 @@ int32_t tcWrongWatchDogWarning(uint32_t persId)
 {
     int32_t watch = (int32_t)hasGet(persId, Ability_Aufpassen);
 
-    if (CalcRandomNr(0, 255) > watch) /* Irrtum */
+    if (CalcRandomNrForGameLogic(0, 255) > watch) /* Irrtum */
     {
-        if (CalcRandomNr(0, watch * 50) == 1) /* umso besser, umso kleiner Wahrscheinlichkeit */
+        if (CalcRandomNrForGameLogic(0, watch * 50) == 1) /* umso besser, umso kleiner Wahrscheinlichkeit */
             return 1;
     }
 
@@ -840,7 +841,7 @@ int32_t tcIsCarRecognised(Car car, int32_t time)
     weight = 127 + CalcValue(time / 8, 0, 127, 0, 0); /* nur wegen Bereichsüberprüfung */
     strike = CalcValue(strike, 0, 255, weight, 100);
 
-    if ((strike > 220) || ((strike > (CalcRandomNr(10, 220) + CalcRandomNr(20, 220)))))
+    if ((strike > 220) || ((strike > (CalcRandomNrForGameLogic(10, 220) + CalcRandomNrForGameLogic(20, 220)))))
         return 1;
     else
         return 0;

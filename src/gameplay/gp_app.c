@@ -35,7 +35,7 @@ void tcAsDaysGoBy(uint32_t day, uint32_t stepSize)
     {
         inpDelay(GP_TICKS_PER_DAY);
 
-        add = CalcRandomNr(stepSize - stepSize / 30, stepSize + stepSize / 30);
+        add = CalcRandomNrForGameLogic(stepSize - stepSize / 30, stepSize + stepSize / 30);
 
         SetDay(GetDay + add);
 
@@ -68,11 +68,11 @@ void tcMovePersons(uint32_t personCount, uint32_t time)
     {
         if (bProfidisk)
         {
-            persID = CalcRandomNr(Person_Paul_O_Conner, Person_Pere_Ubu + 1);
+            persID = CalcRandomNrForGameLogic(Person_Paul_O_Conner, Person_Pere_Ubu + 1);
         }
         else
         {
-            persID = CalcRandomNr(Person_Paul_O_Conner, Person_Red_Stanson + 1);
+            persID = CalcRandomNrForGameLogic(Person_Paul_O_Conner, Person_Red_Stanson + 1);
         }
 
         if (livesIn(London_London_1, persID))
@@ -339,9 +339,9 @@ void tcPlayStreetSound()
 
                 if (!counter || noStreetMusic)
                 {
-                    counter = CalcRandomNr(7, 13);
+                    counter = CalcRandomNrForCosmetics(7, 13);
 
-                    switch (CalcRandomNr(0, 3))
+                    switch (CalcRandomNrForCosmetics(0, 3))
                     {
                         case 0:
                             sndPlaySound("street1.bk", 0);
@@ -444,7 +444,7 @@ uint32_t StdHandle(uint32_t choice)
             ShowTime(0);
             break;
         case CALL_TAXI:
-            if (CalcRandomNr(0, 10) == 1)
+            if (CalcRandomNrForCosmetics(0, 10) == 1)
             {
                 sndPlayFX("taxi.voc");
             }
@@ -790,10 +790,10 @@ void tcPersonGreetsMatt(void)
     static uint32_t upper = 4L;
     uint32_t locNr = 0;
 
-    if (CalcRandomNr(0L, upper) == 1) /* alle upper mal wird Matt gegrüßt ! */
+    if (CalcRandomNrForGameLogic(0L, upper) == 1) /* alle upper mal wird Matt gegrüßt ! */
     {
-        if (CalcRandomNr(0L, 4L) == 1) /* alle 4 mal */
-            upper += 2;                /* wahrscheinlichkeit wird kleiner ! */
+        if (CalcRandomNrForGameLogic(0L, 4L) == 1) /* alle 4 mal */
+            upper += 2;                            /* wahrscheinlichkeit wird kleiner ! */
 
         locNr = GetObjNrOfLocation(GetLocation);
 

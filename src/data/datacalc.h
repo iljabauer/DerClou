@@ -21,7 +21,7 @@
 #include "random/random.h"
 #endif
 
-#define tcDerivation(min, max) (CalcRandomNr(min, max))
+#define tcDerivation(min, max) (CalcRandomNrForGameLogic(min, max))
 
 extern int32_t Round(int32_t v, int32_t p);
 extern int32_t CalcValue(int32_t value, int32_t min, int32_t max, int32_t fact, int32_t perc);

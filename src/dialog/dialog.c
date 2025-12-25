@@ -41,7 +41,7 @@ LIST *PrepareQuestions(LIST *keyWords, uint32_t talkBits, ubyte textID)
 
     for (n = LIST_HEAD(keyWords); NODE_SUCC((NODE *)n); n = (NODE *)NODE_SUCC(n))
     {
-        r = CalcRandomNr(0L, 6L);
+        r = CalcRandomNrForGameLogic(0L, 6L);
         if ((n2 = (NODE *)GetNthNode(questionList, r)))
         {
             name = NODE_NAME(n2);

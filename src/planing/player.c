@@ -32,14 +32,14 @@ enum
 };
 
 // derivation defines
-#define PLANING_DERI_ALARM (PD.realTime / CalcRandomNr(1, 3))
-#define PLANING_DERI_WATCHDOG (PD.realTime / CalcRandomNr(6, 10))
+#define PLANING_DERI_ALARM (PD.realTime / CalcRandomNrForGameLogic(1, 3))
+#define PLANING_DERI_WATCHDOG (PD.realTime / CalcRandomNrForGameLogic(6, 10))
 enum
 {
     PLANING_DERI_UNABLE_TO_WORK = 3
 };
-#define PLANING_DERI_IGNORE_ACTION (PD.realTime / CalcRandomNr(15, 20))
-#define PLANING_DERI_GUARD_ESCAPED (PD.realTime / CalcRandomNr(4, 8))
+#define PLANING_DERI_IGNORE_ACTION (PD.realTime / CalcRandomNrForGameLogic(15, 20))
+#define PLANING_DERI_GUARD_ESCAPED (PD.realTime / CalcRandomNrForGameLogic(4, 8))
 
 // sound system
 #define PLANING_MUSIC_PLAYER_BEGIN_KASERNE "final.bk"
@@ -299,7 +299,7 @@ static void plPlayerAction(void)
     if (!(PD.timer % patroCounter))
     {
 #ifndef PLAN_IS_PERFECT
-        if ((CalcRandomNr(0, 30 * (270 - tcRGetGRate(PD.bldObj) / 2 + 1))) == 0)
+        if ((CalcRandomNrForGameLogic(0, 30 * (270 - tcRGetGRate(PD.bldObj) / 2 + 1))) == 0)
         {
             plSay("PLAYER_PATROL", 0);
             inpSetWaitTicks(INP_AS_FAST_AS_POSSIBLE);
@@ -1078,7 +1078,7 @@ static void plPlayerAction(void)
 
                                     if ((((LSObject)dbGetObject(ActionData(PD.action, struct ActionOpen *)->ItemId))
                                              ->Type == Item_WC) &&
-                                        (CalcRandomNr(0, 3) == 1))
+                                        (CalcRandomNrForCosmetics(0, 3) == 1))
                                     {
                                         sndPlayFX("wc.voc");
                                     }

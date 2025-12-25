@@ -26,7 +26,7 @@ static void tcSomebodyIsCalling(void)
 {
     ubyte i = 0;
 
-    for (i = 0; i < CalcRandomNr(1, 4); i++)
+    for (i = 0; i < CalcRandomNrForCosmetics(1, 4); i++)
     {
         inpDelay(180);
         sndPlayFX("ring.voc");
@@ -1294,7 +1294,7 @@ void tcDoneBirthday(void)
             case Person_Red_Stanson:
                 break;
             default:
-                if (livesIn(London_London_1, OL_NR(n)) && (CalcRandomNr(0, 10) < 7))
+                if (livesIn(London_London_1, OL_NR(n)) && (CalcRandomNrForGameLogic(0, 10) < 7))
                 {
                     tcMoveAPerson(OL_NR(n), Location_Walrus);
 
@@ -1570,7 +1570,7 @@ static void tcDoneFirstTimeLonelyInSouth(void)
         inpTurnESC(1);
         inpTurnFunctionKey(1);
 
-        actionTime = CalcRandomNr(180, 300); /* 2 bis 5 Stunden */
+        actionTime = CalcRandomNrForGameLogic(180, 300); /* 2 bis 5 Stunden */
 
         switch (activ)
         {
@@ -1672,7 +1672,7 @@ void tcDoneSouthhampton(void)
 
     SetEnabledChoices(GP_ALL_CHOICES_ENABLED);
 
-    AddVTime(CalcRandomNr(560, 830));
+    AddVTime(CalcRandomNrForGameLogic(560, 830));
     ShowTime(0);
 
     if (Env->FirstTimeInSouth)
@@ -1700,7 +1700,7 @@ void tcDoneSouthhampton(void)
         }
         else
         {
-            actionTime = CalcRandomNr(180, 300); /* 2 bis 5 Stunden */
+            actionTime = CalcRandomNrForGameLogic(180, 300); /* 2 bis 5 Stunden */
 
             switch (activ)
             {
@@ -1744,7 +1744,7 @@ void tcDoneSouthhampton(void)
 
     if (!activ)
     {
-        AddVTime(CalcRandomNr(560, 830));
+        AddVTime(CalcRandomNrForGameLogic(560, 830));
         SceneArgs.ReturnValue = SCENE_TOWER_OUT;
     }
 

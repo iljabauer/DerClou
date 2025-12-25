@@ -276,7 +276,7 @@ struct Scene *GetStoryScene(struct Scene *curr)
 
             if (sc != curr)
             {
-                j = CalcRandomNr(0L, 255L);
+                j = CalcRandomNrForGameLogic(0L, 255L);
 
                 if (j <= (uint32_t)(sc->Probability))
                     if (CheckConditions(sc)) return (sc);

@@ -274,7 +274,7 @@ void animator(void)
             {
                 if ((--Handler.WaitCounter) == 0)
                 {
-                    Handler.WaitCounter = Handler.PictureRate + CalcRandomNr(0, 3);
+                    Handler.WaitCounter = Handler.PictureRate + CalcRandomNrForCosmetics(0, 3);
 
                     if (Handler.CurrPictNr == 0)
                     {

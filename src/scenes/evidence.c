@@ -28,7 +28,7 @@ ubyte tcCarFound(Car car, uint32_t time)
         {
             Say(BUSINESS_TXT, 0, john->PictID, "CAR_RECOG");
 
-            hours = CalcRandomNr(2L, 5L);
+            hours = CalcRandomNrForGameLogic(2L, 5L);
 
             while ((i++) < hours)
             {
@@ -40,7 +40,7 @@ ubyte tcCarFound(Car car, uint32_t time)
             if (!tcIsCarRecognised(car, time)) /* Wagen wird nicht gefunden */
             {
                 Say(BUSINESS_TXT, 0, john->PictID, "CAR_NOT_FOUND");
-                car->Strike = CalcRandomNr(200, 255);
+                car->Strike = CalcRandomNrForGameLogic(200, 255);
             }
             else /* Wagen wird gefunden! */
             {
@@ -90,9 +90,9 @@ uint32_t tcIsThereATraitor(void)
     uint32_t caught = 0;
     NODE *n = NULL;
 
-    if (player->JobOfferCount > 50 + CalcRandomNr(0, 20)) /* ein Verrat?! */
+    if (player->JobOfferCount > 50 + CalcRandomNrForGameLogic(0, 20)) /* ein Verrat?! */
     {
-        if (CalcRandomNr(0, 255) < matt->Popularity) /* Verrat ! */
+        if (CalcRandomNrForGameLogic(0, 255) < matt->Popularity) /* Verrat ! */
         {
             joined_byAll(Person_Matt_Stuvysunt, OLF_INCLUDE_NAME, Object_Person);
 
@@ -188,7 +188,8 @@ uint32_t tcStartEvidence(void)
                              ((int32_t)Search.TimeOfBurglary + 1)));
         MyEvidence[i][4] = ChangeAbs(0, (int32_t)Search.CallCount * radio / 5, 0, 255);
         MyEvidence[i][5] = (p[i]->KnownToPolice * (max(1, guarded))) / (div * 3);
-        MyEvidence[i][6] = ChangeAbs(0, (int32_t)CalcRandomNr(200, 255) * (int32_t)Search.SpotTouchCount[i], 0, 255);
+        MyEvidence[i][6] =
+            ChangeAbs(0, (int32_t)CalcRandomNrForGameLogic(200, 255) * (int32_t)Search.SpotTouchCount[i], 0, 255);
 
         for (j = 0; j < 7; j++) /* jeden Betrag != 0 AUFRUNDEN auf 1% ! */
             if (MyEvidence[i][j]) MyEvidence[i][j] = max(MyEvidence[i][j], 5);
@@ -197,7 +198,7 @@ uint32_t tcStartEvidence(void)
 
         /* im Fluchtfall viele Gehspuren! */
         if (Search.EscapeBits & FAHN_ESCAPE)
-            MyEvidence[i][0] = CalcValue(MyEvidence[i][0], CalcRandomNr(80, 120), 255, 255, 50);
+            MyEvidence[i][0] = CalcValue(MyEvidence[i][0], CalcRandomNrForGameLogic(80, 120), 255, 255, 50);
 
         totalEvidence[i] = MyEvidence[i][0] + MyEvidence[i][1] + MyEvidence[i][2] + MyEvidence[i][3] +
                            MyEvidence[i][4] + MyEvidence[i][5] + MyEvidence[i][6];
@@ -218,22 +219,22 @@ uint32_t tcStartEvidence(void)
         {
             ShowTime(0);
             inpDelay(35L);
-            AddVTime(CalcRandomNr(1, 11));
+            AddVTime(CalcRandomNrForGameLogic(1, 11));
 
             shown = 0;
         }
 
-        guyNr = CalcRandomNr(0, guyCount);
+        guyNr = CalcRandomNrForGameLogic(0, guyCount);
 
         /* wer ist den noch nicht fertig? */
         while ((1 << guyNr) & guyReady) guyNr = (guyNr + 1) % guyCount;
 
-        /* bei folgendem CalcRandomNr darf nicht 4 - guyCount stehe, sonst
+        /* bei folgendem CalcRandomNrForGameLogic darf nicht 4 - guyCount stehe, sonst
          * Division durch 0!
          */
 
         /* zufällig eine Spurenart auswählen */
-        evidenceNr = CalcRandomNr(0, 7);
+        evidenceNr = CalcRandomNrForGameLogic(0, 7);
 
         /* wenn diese Spurenart schon angzeigt wurde, eine freie
          * Spur suchen
@@ -400,7 +401,7 @@ uint32_t tcPersonWanted(uint32_t persId)
     livesInUnSet(London_London_1, persId);
     tcMoveAPerson(persId, Location_Nirvana);
 
-    hours = CalcRandomNr(4L, 7L);
+    hours = CalcRandomNrForGameLogic(4L, 7L);
 
     while ((i++) < hours)
     {
@@ -409,7 +410,7 @@ uint32_t tcPersonWanted(uint32_t persId)
         ShowTime(2);
     }
 
-    if (tcGuyCanEscape((Person)dbGetObject(persId)) > CalcRandomNr(100, 255)) /* Flucht gelingt */
+    if (tcGuyCanEscape((Person)dbGetObject(persId)) > CalcRandomNrForGameLogic(100, 255)) /* Flucht gelingt */
     {
         Say(BUSINESS_TXT, 0, john->PictID, "ESCAPED");
 
@@ -437,7 +438,7 @@ uint32_t tcPersonQuestioning(Person person)
 
     if (person != dbGetObject(Person_Matt_Stuvysunt))
     {
-        if (tcGuyTellsAll(person) > CalcRandomNr(0, 180)) /* er spricht */
+        if (tcGuyTellsAll(person) > CalcRandomNrForGameLogic(0, 180)) /* er spricht */
         {
             Say(BUSINESS_TXT, 0, john->PictID, "ER_GESTEHT");
             Say(BUSINESS_TXT, 0, miles->PictID, "GUTE_ARBEIT");
@@ -652,11 +653,11 @@ int32_t tcCalcCarEscape(int32_t timeLeft)
         /* Einheit = m pro Schleifendurchlauf */
         unrealSpeed = (kmh * kmhWeight[wayType] + ps * psWeight[wayType]) / 100;
 
-        unrealSpeed = unrealSpeed + 5 - (int32_t)(CalcRandomNr(0, 10));
+        unrealSpeed = unrealSpeed + 5 - (int32_t)(CalcRandomNrForGameLogic(0, 10));
 
         if (unrealSpeed <= 0) unrealSpeed = 5;
 
-        policeSpeed[wayType] = policeSpeed[wayType] + 5 - CalcRandomNr(0, 10);
+        policeSpeed[wayType] = policeSpeed[wayType] + 5 - CalcRandomNrForGameLogic(0, 10);
         policeSpeed[wayType] = CalcValue(policeSpeed[wayType], 0, 255, build->GRate, 25);
 
         /* Vorsprung berechnen */

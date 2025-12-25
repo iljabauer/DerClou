@@ -77,7 +77,7 @@ void tcDealerDlg(void)
 static int32_t moreRandom(int32_t v)
 {
     int32_t r = 0;
-    r = CalcRandomNr(0, (v / 4) + 1);
+    r = CalcRandomNrForGameLogic(0, (v / 4) + 1);
     r -= (v / 8);
     v += r;
     return (min(v, 250));

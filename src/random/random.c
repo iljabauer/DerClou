@@ -21,3 +21,7 @@ uint32_t CalcRandomNr(uint32_t l_limit, uint32_t u_limit)
 
     return x;
 }
+
+uint32_t CalcRandomNrForGameLogic(uint32_t l_limit, uint32_t u_limit) { return CalcRandomNr(l_limit, u_limit); }
+
+uint32_t CalcRandomNrForCosmetics(uint32_t l_limit, uint32_t u_limit) { return CalcRandomNr(l_limit, u_limit); }
