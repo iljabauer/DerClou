@@ -18,7 +18,7 @@
 #endif
 
 #define INP_TICKS_PER_SECOND 60  // 2014-07-04
-#define INP_TICKS_TO_MS(t) (((t)*1000) / INP_TICKS_PER_SECOND)
+#define INP_TICKS_TO_MS(t) (((t) * 1000) / INP_TICKS_PER_SECOND)
 
 #define INP_AS_FAST_AS_POSSIBLE 2
 
@@ -60,6 +60,8 @@ extern uword inpGetMouseY(struct RastPort *p_RP);
 extern int32_t inpWaitFor(int32_t l_Mask); /* retourniert was passiert ist
                                             * (siehe defines) */
 extern void inpSetWaitTicks(int32_t l_Ticks);
+
+extern void inpInitGameLoop(void);
 
 extern void inpTurnESC(uword us_NewStatus);         /* 0 means off, 1 means on */
 extern void inpTurnFunctionKey(uword us_NewStatus); /* 0 means off, 1 means on */

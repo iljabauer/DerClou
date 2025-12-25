@@ -34,6 +34,102 @@ struct IHandler
 
 struct IHandler IHandler;
 
+/* Fixed Time Step Loop State */
+#define FIX_DT_FREQ 60
+#define MAX_ACCUMULATOR_CLAMP_MS 250 /* Max catch-up time in ms */
+
+typedef struct
+{
+    uint64_t currentTime;
+    uint64_t accumulator;
+    uint64_t performanceFrequency;
+    uint64_t fixedStepTicks; /* Cycles per fixed step */
+} GameLoopState;
+
+static GameLoopState gameLoop = {0, 0, 0, 0};
+
+/* Input Queue */
+#define INPUT_QUEUE_SIZE 64
+typedef struct
+{
+    int32_t events[INPUT_QUEUE_SIZE];
+    int head;
+    int tail;
+    int count;
+} InputQueue;
+
+static InputQueue inputQueue = {{0}, 0, 0, 0};
+
+void inpInitGameLoop(void)
+{
+    gameLoop.performanceFrequency = SDL_GetPerformanceFrequency();
+    gameLoop.fixedStepTicks = gameLoop.performanceFrequency / FIX_DT_FREQ;
+    gameLoop.currentTime = SDL_GetPerformanceCounter();
+    gameLoop.accumulator = 0;
+
+    /* Init Input Queue */
+    inputQueue.head = 0;
+    inputQueue.tail = 0;
+    inputQueue.count = 0;
+}
+
+static void inpEnqueueEvent(int32_t action)
+{
+    if (inputQueue.count < INPUT_QUEUE_SIZE)
+    {
+        inputQueue.events[inputQueue.tail] = action;
+        inputQueue.tail = (inputQueue.tail + 1) % INPUT_QUEUE_SIZE;
+        inputQueue.count++;
+    }
+    /* Else: drop event (buffer full) - robust behavior */
+}
+
+static int32_t inpDequeueEvent(int32_t mask)
+{
+    /* Peek/Scan for matching event to preserve order */
+    /* Note: Ideally we process FIFO. This simple scan finds the FIRST match?
+       Actually, `inpWaitFor` asks for specific masks.
+       If we have [KEY, MOUSE], and ask for MOUSE, should we skip KEY?
+       Legacy behavior: `SDL_PollEvent` returns whatever is next.
+       Wait, `inpWaitFor` loops calling PollEvent until `action` is found.
+       So if Key is first, it sets action |= KEY. If mask has KEY, it returns.
+       If mask doesn't have KEY, it keeps polling.
+       So we should scan the queue. If we find a match, we remove it?
+       Removing from middle of circular buffer is hard.
+
+       Simplification: Just peek head. If head matches mask, dequeue and return.
+       If head doesn't match mask, but IS an input event, what did legacy do?
+       Legacy:
+         while (!action) {
+           while(SDL_Poll) { match -> action |= ... }
+         }
+       It effectively drained the entire SDL queue every frame and set bits.
+       Events not in mask were implicitly DROPPED/IGNORED by `switch(event.type)`.
+
+       Wait, look at legacy `inpWaitFor`:
+       It loops `SDL_PollEvent`. Inside switch, it checks `if (l_Mask & INP_...)`.
+       If the mask matches, it adds to `action`.
+       If mask doesn't match, the event is consumed from SDL and DISCARDED.
+
+       SO: We can just Dequeue everything, check if it matches mask.
+       If it matches, return it. If not, discard it.
+       Verify: did legacy buffer events? No. `inpWaitFor` is the only consumer.
+       If you call `inpWaitFor(INP_A)` and press `INP_B`, `INP_B` is lost.
+       Correct.
+
+       So `inpDequeueEvent` just needs to return the next event, and `inpWaitFor` decides keep or drop.
+    */
+
+    if (inputQueue.count > 0)
+    {
+        int32_t evt = inputQueue.events[inputQueue.head];
+        inputQueue.head = (inputQueue.head + 1) % INPUT_QUEUE_SIZE;
+        inputQueue.count--;
+        return evt;
+    }
+    return 0;
+}
+
 static SDL_Cursor *init_system_cursor(char *image[])
 {
     int i = 0;
@@ -203,25 +299,173 @@ void inpOpenAllInputDevs(void)
     }
 }
 
+static void inpSimulateOneTick(void)
+{
+    sndDoFading();
+    animator();
+}
+
+static void inpPumpEvents(void)
+{
+    SDL_Event event;
+    int32_t action = 0;
+    SDL_Keycode sym = (SDL_Keycode)0;
+
+    while (SDL_PollEvent(&event))
+    {
+        action = 0;
+        switch (event.type)
+        {
+            case SDL_KEYDOWN:
+                sym = event.key.keysym.sym;
+                if (sym == SDLK_LEFT)
+                    action |= INP_KEYBOARD | INP_LEFT;
+                else if (sym == SDLK_RIGHT)
+                    action |= INP_KEYBOARD | INP_RIGHT;
+                else if (sym == SDLK_UP)
+                    action |= INP_KEYBOARD | INP_UP;
+                else if (sym == SDLK_DOWN)
+                    action |= INP_KEYBOARD | INP_DOWN;
+                break;
+            case SDL_KEYUP:
+                sym = event.key.keysym.sym;
+                if ((sym == SDLK_SPACE) || (sym == SDLK_RETURN) || (sym == SDLK_KP_ENTER))
+                    action |= INP_KEYBOARD | INP_LBUTTONP;
+                if (sym == SDLK_ESCAPE)
+                {
+                    /* Check ESC status later or here?
+                       Legacy checked `if (IHandler.uch_EscStatus && (l_Mask & INP_ESC)...)`
+                       Here we assume raw input. Filter in WaitFor?
+                       Let's map it to INP_ESC here. */
+                    action |= INP_KEYBOARD | INP_ESC;
+                }
+                if ((sym >= SDLK_F1) && (sym <= SDLK_F11)) action |= INP_KEYBOARD | INP_FUNCTION_KEY;
+
+                /* Handle global keys (F11, F12, Volume) immediately or queue?
+                   Legacy handled them inside the loop. To maintain "pump works everywhere",
+                   we should probably handle them here. */
+                switch (sym)
+                {
+                    case SDLK_F11:
+                        gfxScreenshotShadow();
+                        break;
+                    case SDLK_F12:
+                        gfxScreenshot();
+                        break;
+                    case SDLK_INSERT:
+                        Config.MusicVolume =
+                            (Config.MusicVolume + 25 > SND_MAX_VOLUME) ? SND_MAX_VOLUME : Config.MusicVolume + 25;
+                        break;
+                    case SDLK_DELETE:
+                        Config.MusicVolume = (Config.MusicVolume - 25 < 0) ? 0 : Config.MusicVolume - 25;
+                        break;
+                    case SDLK_HOME:
+                        Config.SfxVolume =
+                            (Config.SfxVolume + 25 > SND_MAX_VOLUME) ? SND_MAX_VOLUME : Config.SfxVolume + 25;
+                        break;
+                    case SDLK_END:
+                        Config.SfxVolume = (Config.SfxVolume - 25 < 0) ? 0 : Config.SfxVolume - 25;
+                        break;
+                    case SDLK_PAGEUP:
+                        Config.VoiceVolume =
+                            (Config.VoiceVolume + 25 > SND_MAX_VOLUME) ? SND_MAX_VOLUME : Config.VoiceVolume + 25;
+                        break;
+                    case SDLK_PAGEDOWN:
+                        Config.VoiceVolume = (Config.VoiceVolume - 25 < 0) ? 0 : Config.VoiceVolume - 25;
+                        break;
+                }
+                break;
+            case SDL_MOUSEMOTION:
+                event.motion.x = (event.motion.x - gfxScalingOffsetX) / gfxScalingFactor;
+                event.motion.y = (event.motion.y - gfxScalingOffsetY) / gfxScalingFactor;
+                if (event.motion.x < IHandler.us_MouseX)
+                    action |= INP_MOUSE | INP_LEFT;
+                else if (event.motion.x > IHandler.us_MouseX)
+                    action |= INP_MOUSE | INP_RIGHT;
+                if (event.motion.y < IHandler.us_MouseY)
+                    action |= INP_MOUSE | INP_UP;
+                else if (event.motion.y > IHandler.us_MouseY)
+                    action |= INP_MOUSE | INP_DOWN;
+                IHandler.us_MouseX = event.motion.x;
+                IHandler.us_MouseY = event.motion.y;
+                break;
+            case SDL_MOUSEBUTTONDOWN:
+                if (event.button.button == SDL_BUTTON_LEFT) action |= INP_MOUSE | INP_LBUTTONP;
+                if (event.button.button == SDL_BUTTON_RIGHT) action |= INP_MOUSE | INP_RBUTTONP;
+                IHandler.us_MouseX = (event.button.x - gfxScalingOffsetX) / gfxScalingFactor;
+                IHandler.us_MouseY = (event.button.y - gfxScalingOffsetY) / gfxScalingFactor;
+                break;
+            case SDL_MOUSEBUTTONUP:
+                if (event.button.button == SDL_BUTTON_LEFT) action |= INP_MOUSE | INP_LBUTTONR;
+                if (event.button.button == SDL_BUTTON_RIGHT) action |= INP_MOUSE | INP_RBUTTONR;
+                IHandler.us_MouseX = (event.button.x - gfxScalingOffsetX) / gfxScalingFactor;
+                IHandler.us_MouseY = (event.button.y - gfxScalingOffsetY) / gfxScalingFactor;
+                break;
+            case SDL_MOUSEWHEEL:
+                if (event.wheel.y >= 0)
+                    action |= INP_MOUSEWHEEL | INP_UP;
+                else
+                    action |= INP_MOUSEWHEEL | INP_DOWN;
+                break;
+            case SDL_JOYAXISMOTION:
+                if (event.jaxis.axis == 0)
+                {
+                    if (event.jaxis.value < -10000)
+                        action |= INP_KEYBOARD | INP_LEFT;
+                    else if (event.jaxis.value > 10000)
+                        action |= INP_KEYBOARD | INP_RIGHT;
+                }
+                else if (event.jaxis.axis == 1)
+                {
+                    if (event.jaxis.value < -10000)
+                        action |= INP_KEYBOARD | INP_UP;
+                    else if (event.jaxis.value > 10000)
+                        action |= INP_KEYBOARD | INP_DOWN;
+                }
+                break;
+            case SDL_JOYBUTTONUP:
+                action |= INP_KEYBOARD | INP_LBUTTONP;
+                break;
+            case SDL_QUIT:
+                action |= INP_QUIT;
+                break;
+        }
+
+        if (action)
+        {
+            inpEnqueueEvent(action);
+        }
+    }
+}
+
 static void inpDoPseudoMultiTasking(void)
 {
-    // 2014-06-30 LucyG : rewritten
-    static uint32_t timePrev = 0;
-    uint32_t timeNow = 0;
-    uint32_t timePassed = 0;
-    timeNow = SDL_GetTicks();
-    if (!timePrev)
-    {
-        timePrev = timeNow;
-    }
-    timePassed = timeNow - timePrev;
-    if (timePassed >= INP_TICKS_TO_MS(1))
-    {
-        timePrev = timeNow;
+    /* Use fixed loop logic implicitly?
+       Legacy code called this to run anims/sound.
+       Now we want `inpWaitFor` and `inpDelay` to run the loop.
+       Existing calls to `inpDoPseudoMultiTasking` outside `inpWaitFor` (if any?)
+       might be problematic. grep says it's only called in `inpWaitFor` and `inpDelay`?
+       Let's check.
+       Grep showed: inphdl.c:206 (def), inphdl.c:248 (in inpDelay), inphdl.c:495 (in inpWaitFor).
+       So replacing its body is not sufficient, we need to replace the call sites.
+       But for safety, let's make this function just perform *one* tick if called?
+       No, `inpSimulateOneTick` does that.
+       Legacy `inpDoPseudoMultiTasking` used `SDL_GetTicks` to throttle itself.
+       If I keep it, it should use the new `GameLoopState` to ensure consistency.
+       */
+    uint64_t newTime = SDL_GetPerformanceCounter();
+    uint64_t frameTime = newTime - gameLoop.currentTime;
+    gameLoop.currentTime = newTime;
+    gameLoop.accumulator += frameTime;
 
-        sndDoFading();  // 2014-07-17 LucyG
+    /* Clamp */
+    if (gameLoop.accumulator > gameLoop.fixedStepTicks * 5) /* Clamp to ~5 frames */
+        gameLoop.accumulator = gameLoop.fixedStepTicks * 5;
 
-        animator();
+    while (gameLoop.accumulator >= gameLoop.fixedStepTicks)
+    {
+        inpSimulateOneTick();
+        gameLoop.accumulator -= gameLoop.fixedStepTicks;
     }
 }
 
@@ -238,14 +482,38 @@ void inpCloseAllInputDevs(void)
 
 void inpDelay(int32_t l_Ticks)
 {
-    // 2014-07-03 LucyG : rewritten
-    uint32_t timePrev = 0;
-    timePrev = SDL_GetTicks();
-    l_Ticks = INP_TICKS_TO_MS(l_Ticks);
-    while ((SDL_GetTicks() - timePrev) < l_Ticks)
+    int32_t ticksWaited = 0;
+
+    // Ensure loop is initialized
+    if (gameLoop.performanceFrequency == 0) inpInitGameLoop();
+
+    while (ticksWaited < l_Ticks)
     {
+        uint64_t newTime = SDL_GetPerformanceCounter();
+        uint64_t frameTime = newTime - gameLoop.currentTime;
+        gameLoop.currentTime = newTime;
+        gameLoop.accumulator += frameTime;
+
+        /* Clamp accumulator */
+        if (gameLoop.accumulator > gameLoop.fixedStepTicks * 4) gameLoop.accumulator = gameLoop.fixedStepTicks * 4;
+
+        while (gameLoop.accumulator >= gameLoop.fixedStepTicks)
+        {
+            inpSimulateOneTick();
+            gameLoop.accumulator -= gameLoop.fixedStepTicks;
+            ticksWaited++;
+            if (ticksWaited >= l_Ticks) break;
+        }
+
+        inpPumpEvents();
         wfr();
-        inpDoPseudoMultiTasking();
+
+        /* Yield if ahead */
+        if (gameLoop.accumulator < gameLoop.fixedStepTicks)
+        {
+            /* Simple yield to avoid 100% CPU */
+            SDL_Delay(1);
+        }
     }
 }
 
@@ -276,227 +544,86 @@ void inpTurnMouse(uword us_NewStatus) { IHandler.uch_MouseStatus = (ubyte)us_New
 int32_t inpWaitFor(int32_t l_Mask)
 {
     int32_t action = 0;
-    uint32_t WaitTime = 0;
+    int32_t ticksForTimeout = 0;
+    int32_t ticksElapsed = 0;
 
-    uint32_t timePrev = SDL_GetTicks();
+    // Ensure loop is initialized
+    if (gameLoop.performanceFrequency == 0) inpInitGameLoop();
 
-    SDL_Event event;
-    SDL_Keycode sym = (SDL_Keycode)0;
-
+    /* Prepare Mask */
     if (IHandler.uch_EscStatus && !(l_Mask & INP_NO_ESC)) l_Mask |= INP_ESC;
     if (IHandler.uch_FunctionKeyStatus) l_Mask |= INP_FUNCTION_KEY;
 
+    if (l_Mask & INP_TIME)
+    {
+        ticksForTimeout = IHandler.ul_WaitTicks;
+    }
+
     while (!action)
     {
-        while (SDL_PollEvent(&event))
+        /* 1. Time Update */
+        uint64_t newTime = SDL_GetPerformanceCounter();
+        uint64_t frameTime = newTime - gameLoop.currentTime;
+        gameLoop.currentTime = newTime;
+        gameLoop.accumulator += frameTime;
+
+        /* Clamp accumulator to prevent spiral of death */
+        if (gameLoop.accumulator > gameLoop.fixedStepTicks * 8) gameLoop.accumulator = gameLoop.fixedStepTicks * 8;
+
+        /* 2. Simulation Step(s) */
+        while (gameLoop.accumulator >= gameLoop.fixedStepTicks)
         {
-            switch (event.type)
+            inpSimulateOneTick();
+            gameLoop.accumulator -= gameLoop.fixedStepTicks;
+
+            /* Virtual Timeout Check */
+            if (l_Mask & INP_TIME)
             {
-                case SDL_KEYDOWN:
-                    sym = event.key.keysym.sym;
-                    if ((l_Mask & INP_LEFT) && (sym == SDLK_LEFT))
-                    {
-                        action |= INP_KEYBOARD | INP_LEFT;
-                    }
-                    else if ((l_Mask & INP_RIGHT) && (sym == SDLK_RIGHT))
-                    {
-                        action |= INP_KEYBOARD | INP_RIGHT;
-                    }
-                    if ((l_Mask & INP_UP) && (sym == SDLK_UP))
-                    {
-                        action |= INP_KEYBOARD | INP_UP;
-                    }
-                    else if ((l_Mask & INP_DOWN) && (sym == SDLK_DOWN))
-                    {
-                        action |= INP_KEYBOARD | INP_DOWN;
-                    }
-                    break;
-                case SDL_KEYUP:
-                    sym = event.key.keysym.sym;
-                    if ((l_Mask & (INP_LBUTTONP | INP_LBUTTONR)) &&
-                        ((sym == SDLK_SPACE) || (sym == SDLK_RETURN) || (sym == SDLK_KP_ENTER)))
-                    {
-                        action |= INP_KEYBOARD | INP_LBUTTONP;
-                    }
-                    if (IHandler.uch_EscStatus && (l_Mask & INP_ESC) && (sym == SDLK_ESCAPE))
-                    {
-                        action |= INP_KEYBOARD | INP_ESC;
-                    }
-                    if (IHandler.uch_FunctionKeyStatus && (l_Mask & INP_FUNCTION_KEY) &&
-                        ((sym >= SDLK_F1) && (sym <= SDLK_F11)))
-                    {
-                        action |= INP_KEYBOARD | INP_FUNCTION_KEY;
-                    }
-                    switch (sym)
-                    {
-                        case SDLK_F11:
-                        {
-                            gfxScreenshotShadow();  // save shadow surface
-                        }
-                        break;
-                        case SDLK_F12:
-                        {
-                            gfxScreenshot();  // 2014-07-13 LucyG : guess what F12 does
-                        }
-                        break;
-                        case SDLK_INSERT:
-                        {
-                            Config.MusicVolume += 25;
-                            if (Config.MusicVolume > SND_MAX_VOLUME)
-                            {
-                                Config.MusicVolume = SND_MAX_VOLUME;
-                            }
-                        }
-                        break;
-                        case SDLK_DELETE:
-                        {
-                            Config.MusicVolume -= 25;
-                            if (Config.MusicVolume < 0)
-                            {
-                                Config.MusicVolume = 0;
-                            }
-                        }
-                        break;
-                        case SDLK_HOME:
-                        {
-                            Config.SfxVolume += 25;
-                            if (Config.SfxVolume > SND_MAX_VOLUME)
-                            {
-                                Config.SfxVolume = SND_MAX_VOLUME;
-                            }
-                        }
-                        break;
-                        case SDLK_END:
-                        {
-                            Config.SfxVolume -= 25;
-                            if (Config.SfxVolume < 0)
-                            {
-                                Config.SfxVolume = 0;
-                            }
-                        }
-                        break;
-                        case SDLK_PAGEUP:
-                        {
-                            Config.VoiceVolume += 25;
-                            if (Config.VoiceVolume > SND_MAX_VOLUME)
-                            {
-                                Config.VoiceVolume = SND_MAX_VOLUME;
-                            }
-                        }
-                        break;
-                        case SDLK_PAGEDOWN:
-                        {
-                            Config.VoiceVolume -= 25;
-                            if (Config.VoiceVolume < 0)
-                            {
-                                Config.VoiceVolume = 0;
-                            }
-                        }
-                        break;
-                        default:
-                            // nothing to do
-                            break;
-                    }
-                    break;
-                case SDL_MOUSEMOTION:
-                    event.motion.x = (event.motion.x - gfxScalingOffsetX) / gfxScalingFactor;
-                    event.motion.y = (event.motion.y - gfxScalingOffsetY) / gfxScalingFactor;
-                    if ((l_Mask & INP_LEFT) && (event.motion.x < IHandler.us_MouseX))
-                    {
-                        action |= INP_MOUSE | INP_LEFT;
-                    }
-                    else if ((l_Mask & INP_RIGHT) && (event.motion.x > IHandler.us_MouseX))
-                    {
-                        action |= INP_MOUSE | INP_RIGHT;
-                    }
-                    if ((l_Mask & INP_UP) && (event.motion.y < IHandler.us_MouseY))
-                    {
-                        action |= INP_MOUSE | INP_UP;
-                    }
-                    else if ((l_Mask & INP_DOWN) && (event.motion.y > IHandler.us_MouseY))
-                    {
-                        action |= INP_MOUSE | INP_DOWN;
-                    }
-                    IHandler.us_MouseX = event.motion.x;
-                    IHandler.us_MouseY = event.motion.y;
-                    break;
-                case SDL_MOUSEBUTTONDOWN:
-                    if ((l_Mask & INP_LBUTTONP) && (event.button.button == SDL_BUTTON_LEFT))
-                    {
-                        action |= INP_MOUSE | INP_LBUTTONP;
-                    }
-                    if ((l_Mask & INP_RBUTTONP) && (event.button.button == SDL_BUTTON_RIGHT))
-                    {
-                        action |= INP_MOUSE | INP_RBUTTONP;
-                    }
-                    IHandler.us_MouseX = (event.button.x - gfxScalingOffsetX) / gfxScalingFactor;
-                    IHandler.us_MouseY = (event.button.y - gfxScalingOffsetY) / gfxScalingFactor;
-                    break;
-                case SDL_MOUSEBUTTONUP:
-                    if ((l_Mask & INP_LBUTTONR) && (event.button.button == SDL_BUTTON_LEFT))
-                    {
-                        action |= INP_MOUSE | INP_LBUTTONR;
-                    }
-                    if ((l_Mask & INP_RBUTTONR) && (event.button.button == SDL_BUTTON_RIGHT))
-                    {
-                        action |= INP_MOUSE | INP_RBUTTONR;
-                    }
-                    IHandler.us_MouseX = (event.button.x - gfxScalingOffsetX) / gfxScalingFactor;
-                    IHandler.us_MouseY = (event.button.y - gfxScalingOffsetY) / gfxScalingFactor;
-                    break;
-                case SDL_MOUSEWHEEL:
-                    if (event.wheel.y >= 0)
-                    {
-                        action |= INP_MOUSEWHEEL | INP_UP;
-                    }
-                    else
-                    {
-                        action |= INP_MOUSEWHEEL | INP_DOWN;
-                    }
-                    break;
-                case SDL_JOYAXISMOTION: /* 2015-01-10 LucyG: emulate cursor keys with joystick */
-                    if (event.jaxis.axis == 0)
-                    {  // X axis
-                        if ((l_Mask & INP_LEFT) && (event.jaxis.value < -10000))
-                        {
-                            action |= INP_KEYBOARD | INP_LEFT;
-                        }
-                        else if ((l_Mask & INP_RIGHT) && (event.jaxis.value > 10000))
-                        {
-                            action |= INP_KEYBOARD | INP_RIGHT;
-                        }
-                    }
-                    else if (event.jaxis.axis == 1)
-                    {  // Y axis
-                        if ((l_Mask & INP_UP) && (event.jaxis.value < -10000))
-                        {
-                            action |= INP_KEYBOARD | INP_UP;
-                        }
-                        else if ((l_Mask & INP_DOWN) && (event.jaxis.value > 10000))
-                        {
-                            action |= INP_KEYBOARD | INP_DOWN;
-                        }
-                    }
-                    break;
-                case SDL_JOYBUTTONUP: /* 2015-01-10 LucyG: emulate RETURN/SPACE with (any) joystick button */
-                    if (l_Mask & (INP_LBUTTONP | INP_LBUTTONR))
-                    {
-                        action |= INP_KEYBOARD | INP_LBUTTONP;
-                    }
-                    break;
-                case SDL_QUIT:
-                    if (l_Mask & INP_QUIT)
-                    {
-                        action |= INP_QUIT;
-                    }
-                    break;
+                ticksElapsed++;
+                if (ticksElapsed >= ticksForTimeout)
+                {
+                    action |= INP_TIME;
+                }
             }
         }
-        inpDoPseudoMultiTasking();
-        wfd();
 
-        WaitTime = SDL_GetTicks() - timePrev;
-        if ((l_Mask & INP_TIME) && (WaitTime >= INP_TICKS_TO_MS(IHandler.ul_WaitTicks))) action |= INP_TIME;
+        /* 3. Input Pump & Check */
+        inpPumpEvents();
+
+        while (inputQueue.count > 0 && !action)
+        {
+            /* Peek or Dequeue?
+               We dequeue. If it matches mask, we return it.
+               If it doesn't match mask, it is DROPPED (legacy behavior).
+            */
+            int32_t evt = inpDequeueEvent(0); /* Val arg handled inside? No, passed 0, ignored */
+
+            /* Filter against Mask */
+            /* Logic:
+               If (evt & l_Mask) has bits SET:
+                 - Mask: INP_LBUTTONP | INP_ESC
+                 - Evt: INP_LBUTTONP
+                 - Match!
+
+               Special filtering for disabled keys?
+               IHandler.uch_EscStatus etc were checked during pump (conversion).
+               Doubly check?
+            */
+
+            if (evt & l_Mask)
+            {
+                action |= (evt & l_Mask);
+            }
+        }
+
+        /* 4. Render */
+        wfr();
+
+        /* 5. Yield/Sleep */
+        if (!action && gameLoop.accumulator < gameLoop.fixedStepTicks)
+        {
+            SDL_Delay(1);
+        }
     }
 
     return action;

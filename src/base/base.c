@@ -466,9 +466,11 @@ int tcStartGame(int argc, char **argv)
     strcpy(prgname, argv[0]);
 
     rndInit();
+    inpInitGameLoop();
 
     char *rootPath = NULL;
-    if (!(rootPath = getenv("DERCLOU_ROOTDIR"))) {
+    if (!(rootPath = getenv("DERCLOU_ROOTDIR")))
+    {
         rootPath = dirname(argv[0]);
     }
 
