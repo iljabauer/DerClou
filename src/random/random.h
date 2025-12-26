@@ -18,6 +18,7 @@
 #endif
 
 extern void rndInit(void);
+extern void rndInitWithSeed(unsigned int seed);
 
 extern uint32_t CalcRandomNr(uint32_t l_limit, uint32_t u_limit);
 extern uint32_t CalcRandomNrForGameLogic(uint32_t l_limit, uint32_t u_limit);

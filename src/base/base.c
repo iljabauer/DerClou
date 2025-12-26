@@ -465,7 +465,27 @@ int tcStartGame(int argc, char **argv)
 
     strcpy(prgname, argv[0]);
 
-    rndInit();
+    // Parse command-line arguments for seed option
+    int seedSpecified = 0;
+    unsigned int seedValue = 0;
+    for (int i = 1; i < argc; i++)
+    {
+        if (strcmp(argv[i], "-seed") == 0 && i + 1 < argc)
+        {
+            seedValue = (unsigned int)strtoul(argv[i + 1], NULL, 10);
+            seedSpecified = 1;
+            i++;  // Skip the seed value argument
+        }
+    }
+
+    if (seedSpecified)
+    {
+        rndInitWithSeed(seedValue);
+    }
+    else
+    {
+        rndInit();
+    }
     inpInitGameLoop();
 
     char *rootPath = NULL;
