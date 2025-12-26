@@ -57,6 +57,7 @@ void tcBuyCar(void)
 
         hasAll(Person_Marc_Smith,
                OLF_ALIGNED | OLF_PRIVATE_LIST | OLF_INCLUDE_NAME | OLF_INSERT_STAR | OLF_ADD_SUCC_STRING, Object_Car);
+        dbSortObjectList(&ObjectListPrivate, dbStdCompareObjects);
         bubble = ObjectListPrivate;
 
         ObjectListSuccString = NULL;
@@ -382,6 +383,7 @@ uint32_t tcChooseCar(uint32_t backgroundNr)
     Car matts_car = NULL;
 
     hasAll(Person_Matt_Stuvysunt, OLF_PRIVATE_LIST | OLF_INCLUDE_NAME | OLF_INSERT_STAR, Object_Car);
+    dbSortObjectList(&ObjectListPrivate, dbStdCompareObjects);
     bubble = ObjectListPrivate;
 
     if (!(LIST_EMPTY(bubble)))

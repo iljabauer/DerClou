@@ -292,6 +292,7 @@ uint32_t tcChooseDriver(uint32_t persID)
     uint32_t newPersID = 0;
 
     joined_byAll(Person_Matt_Stuvysunt, OLF_INCLUDE_NAME | OLF_INSERT_STAR | OLF_PRIVATE_LIST, Object_Person);
+    dbSortObjectList(&ObjectListPrivate, dbStdCompareObjects);
     list = ObjectListPrivate;
 
     if (LIST_EMPTY(list))
@@ -341,6 +342,7 @@ uint32_t tcChooseDestBuilding(uint32_t objID)
     char exp[TXT_KEY_LENGTH];
 
     hasAll(Person_Matt_Stuvysunt, OLF_INCLUDE_NAME | OLF_INSERT_STAR | OLF_PRIVATE_LIST, Object_Building);
+    dbSortObjectList(&ObjectListPrivate, dbStdCompareObjects);
     list = ObjectListPrivate;
 
     txtGetFirstLine(BUSINESS_TXT, "NO_CHOICE", exp);
@@ -371,6 +373,7 @@ uint32_t tcChooseEscapeCar(uint32_t objID)
     uint32_t newObjID = 0;
 
     hasAll(Person_Matt_Stuvysunt, OLF_INCLUDE_NAME | OLF_INSERT_STAR | OLF_PRIVATE_LIST, Object_Car);
+    dbSortObjectList(&ObjectListPrivate, dbStdCompareObjects);
     l1 = ObjectListPrivate;
 
     joined_byAll(Person_Matt_Stuvysunt, OLF_INCLUDE_NAME | OLF_PRIVATE_LIST, Object_Person);
@@ -426,6 +429,7 @@ void tcChooseGuys(void)
     Person matt = (Person)dbGetObject(Person_Matt_Stuvysunt);
 
     joinAll(Person_Matt_Stuvysunt, OLF_INCLUDE_NAME | OLF_INSERT_STAR | OLF_PRIVATE_LIST, Object_Person);
+    dbSortObjectList(&ObjectListPrivate, dbStdCompareObjects);
     list = ObjectListPrivate;
 
     dbRemObjectNode(list, Person_Matt_Stuvysunt);
@@ -481,6 +485,7 @@ void tcAddGuyToParty(void)
     ubyte choice = 0;
 
     joinAll(Person_Matt_Stuvysunt, OLF_INCLUDE_NAME | OLF_INSERT_STAR | OLF_PRIVATE_LIST, Object_Person);
+    dbSortObjectList(&ObjectListPrivate, dbStdCompareObjects);
     l1 = ObjectListPrivate;
 
     joined_byAll(Person_Matt_Stuvysunt, OLF_INCLUDE_NAME | OLF_PRIVATE_LIST, Object_Person);
@@ -530,6 +535,7 @@ void tcRemGuyFromParty(void)
     Person matt = (Person)dbGetObject(Person_Matt_Stuvysunt);
 
     joined_byAll(Person_Matt_Stuvysunt, OLF_INCLUDE_NAME | OLF_INSERT_STAR | OLF_PRIVATE_LIST, Object_Person);
+    dbSortObjectList(&ObjectListPrivate, dbStdCompareObjects);
     list = ObjectListPrivate;
 
     dbRemObjectNode(list, Person_Matt_Stuvysunt);

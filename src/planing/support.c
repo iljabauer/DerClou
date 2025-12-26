@@ -229,6 +229,7 @@ LIST *plGetObjectsList(uint32_t current, ubyte addLootBags)
     }
 
     lsSetObjectRetrievalList(oldAreaId);
+    if (list) dbSortObjectList(&list, dbStdCompareObjects);
     return list;
 }
 

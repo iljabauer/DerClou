@@ -226,6 +226,7 @@ void tcDisplayAbilities(uint32_t personNr, uint32_t displayData)
     char line[TXT_KEY_LENGTH] = {0};
 
     hasAll(personNr, OLF_PRIVATE_LIST | OLF_INCLUDE_NAME, Object_Ability);
+    dbSortObjectList(&ObjectListPrivate, dbStdCompareObjects);
     abilities = ObjectListPrivate;
 
     prSetBarPrefs(&RefreshRP, ORG_DISP_GUY_WIDTH - 5, ORG_DISP_LINE + 1, 251, 250, 249);

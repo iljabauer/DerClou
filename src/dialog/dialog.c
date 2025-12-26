@@ -395,6 +395,7 @@ uint32_t Talk(void)
     if ((locNr = GetObjNrOfLocation(GetLocation)))
     {
         hasAll(locNr, OLF_PRIVATE_LIST | OLF_INCLUDE_NAME | OLF_INSERT_STAR, Object_Person);
+        dbSortObjectList(&ObjectListPrivate, dbStdCompareObjects);
         bubble = ObjectListPrivate;
 
         if (!(LIST_EMPTY(bubble)))

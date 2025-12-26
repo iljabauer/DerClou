@@ -35,6 +35,7 @@ ubyte tcBuyTool(ubyte choice)
 
     hasAll(Person_Mary_Bolton,
            OLF_ALIGNED | OLF_PRIVATE_LIST | OLF_INCLUDE_NAME | OLF_INSERT_STAR | OLF_ADD_SUCC_STRING, Object_Tool);
+    dbSortObjectList(&ObjectListPrivate, dbStdCompareObjects);
     tools = ObjectListPrivate;
 
     ObjectListSuccString = NULL;
@@ -96,6 +97,7 @@ ubyte tcDescTool(ubyte choice)
 
     hasAll(Person_Mary_Bolton,
            OLF_ALIGNED | OLF_PRIVATE_LIST | OLF_INCLUDE_NAME | OLF_INSERT_STAR | OLF_ADD_SUCC_STRING, Object_Tool);
+    dbSortObjectList(&ObjectListPrivate, dbStdCompareObjects);
     tools = ObjectListPrivate;
 
     ObjectListWidth = 0;
@@ -145,6 +147,7 @@ ubyte tcShowTool(ubyte choice)
 
     hasAll(Person_Mary_Bolton,
            OLF_ALIGNED | OLF_PRIVATE_LIST | OLF_INCLUDE_NAME | OLF_INSERT_STAR | OLF_ADD_SUCC_STRING, Object_Tool);
+    dbSortObjectList(&ObjectListPrivate, dbStdCompareObjects);
     tools = ObjectListPrivate;
 
     ObjectListSuccString = NULL;
@@ -191,6 +194,7 @@ void tcSellTool()
     mary = (Person)dbGetObject(Person_Mary_Bolton);
 
     hasAll(Person_Matt_Stuvysunt, OLF_PRIVATE_LIST | OLF_INCLUDE_NAME | OLF_INSERT_STAR, Object_Tool);
+    dbSortObjectList(&ObjectListPrivate, dbStdCompareObjects);
     tools = ObjectListPrivate;
 
     dbRemObjectNode(tools, Tool_Hand);
@@ -246,6 +250,7 @@ void tcSellTool()
         RemoveList(tools);
 
         hasAll(Person_Matt_Stuvysunt, OLF_PRIVATE_LIST | OLF_INCLUDE_NAME | OLF_INSERT_STAR, Object_Tool);
+        dbSortObjectList(&ObjectListPrivate, dbStdCompareObjects);
         tools = ObjectListPrivate;
 
         dbRemObjectNode(tools, Tool_Hand);

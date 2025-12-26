@@ -149,6 +149,7 @@ void Information(void)
 
             case 1:
                 hasAll(Person_Matt_Stuvysunt, OLF_PRIVATE_LIST | OLF_INCLUDE_NAME | OLF_INSERT_STAR, Object_Car);
+                dbSortObjectList(&ObjectListPrivate, dbStdCompareObjects);
                 list = ObjectListPrivate;
 
                 if (!(LIST_EMPTY(list)))
@@ -173,6 +174,7 @@ void Information(void)
 
             case 2:
                 knowsAll(Person_Matt_Stuvysunt, OLF_PRIVATE_LIST | OLF_INCLUDE_NAME | OLF_INSERT_STAR, Object_Person);
+                dbSortObjectList(&ObjectListPrivate, dbStdCompareObjects);
                 list = ObjectListPrivate;
 
                 if (!(LIST_EMPTY(list)))
@@ -197,6 +199,7 @@ void Information(void)
 
             case 3:
                 hasAll(Person_Matt_Stuvysunt, OLF_PRIVATE_LIST | OLF_INCLUDE_NAME | OLF_INSERT_STAR, Object_Tool);
+                dbSortObjectList(&ObjectListPrivate, dbStdCompareObjects);
                 list = ObjectListPrivate;
 
                 if (!(LIST_EMPTY(list)))
@@ -221,6 +224,7 @@ void Information(void)
 
             case 4:
                 hasAll(Person_Matt_Stuvysunt, OLF_PRIVATE_LIST | OLF_INCLUDE_NAME | OLF_INSERT_STAR, Object_Building);
+                dbSortObjectList(&ObjectListPrivate, dbStdCompareObjects);
                 list = ObjectListPrivate;
 
                 if (!(LIST_EMPTY(list)))
@@ -290,6 +294,7 @@ void Look(uint32_t locNr)
                 if (objID)
                 {
                     hasAll(objID, OLF_PRIVATE_LIST | OLF_INCLUDE_NAME | OLF_INSERT_STAR, Object_Person);
+                    dbSortObjectList(&ObjectListPrivate, dbStdCompareObjects);
                     bubble = ObjectListPrivate;
 
                     if (!(LIST_EMPTY(bubble)))
@@ -330,6 +335,7 @@ uint32_t tcTelefon(void)
     gfxShow(175, GFX_NO_REFRESH | GFX_ONE_STEP, 0, -1, -1);
 
     knowsAll(Person_Matt_Stuvysunt, OLF_INCLUDE_NAME | OLF_INSERT_STAR, Object_Person);
+    dbSortObjectList(&ObjectList, dbStdCompareObjects);
 
     if (!(LIST_EMPTY(ObjectList)))
     {

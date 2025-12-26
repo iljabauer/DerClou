@@ -135,6 +135,7 @@ void tcDealerSays(Person dealer, ubyte textNr, int32_t perc)
     else
     {
         hasAll(Person_Matt_Stuvysunt, OLF_NORMAL, Object_Loot);
+        dbSortObjectList(&ObjectList, dbStdCompareObjects);
         perc = tcGetDealerPerc(dealer, perc);
 
         for (n = (struct ObjectNode *)LIST_HEAD(ObjectList); NODE_SUCC(n); n = (struct ObjectNode *)NODE_SUCC(n))
