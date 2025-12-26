@@ -11,6 +11,8 @@
 
 #include "SDL.h"
 #include "intro/intro.h"
+#include "random/random.h"
+#include "replay/replay.h"
 
 // cheat function
 #include "base/fullenv.c"
@@ -57,6 +59,8 @@ static void tcDone(void)
     }
 
     pcErrClose();
+
+    Replay_Close();
 }
 
 /* 2014-06-27 templer
@@ -486,6 +490,33 @@ int tcStartGame(int argc, char **argv)
     {
         rndInit();
     }
+
+    // Parse Replay Arguments
+    const char *recordFile = NULL;
+    const char *replayFile = NULL;
+    for (int i = 1; i < argc; i++)
+    {
+        if (strcmp(argv[i], "-record") == 0 && i + 1 < argc)
+        {
+            recordFile = argv[i + 1];
+            i++;
+        }
+        else if (strcmp(argv[i], "-replay") == 0 && i + 1 < argc)
+        {
+            replayFile = argv[i + 1];
+            i++;
+        }
+    }
+
+    if (replayFile)
+    {
+        Replay_Init(replayFile, REPLAY_PLAYING, seedValue);
+    }
+    else if (recordFile)
+    {
+        Replay_Init(recordFile, REPLAY_RECORDING, seedValue);
+    }
+
     inpInitGameLoop();
 
     char *rootPath = NULL;

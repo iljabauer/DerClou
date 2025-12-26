@@ -9,6 +9,8 @@
 #include "SDL.h"
 #include "inphdl/arrow1x_xpm.c"
 #include "inphdl/arrow2x_xpm.c"
+#include "random/random.h"
+#include "replay/replay.h"
 #include "sound/fx.h"
 #include "sound/newsound.h"
 
@@ -301,6 +303,7 @@ void inpOpenAllInputDevs(void)
 
 static void inpSimulateOneTick(void)
 {
+    Replay_IncrementTick();
     sndDoFading();
     animator();
 }
@@ -588,31 +591,85 @@ int32_t inpWaitFor(int32_t l_Mask)
         }
 
         /* 3. Input Pump & Check */
-        inpPumpEvents();
-
-        while (inputQueue.count > 0 && !action)
+        if (g_ReplayState == REPLAY_PLAYING)
         {
-            /* Peek or Dequeue?
-               We dequeue. If it matches mask, we return it.
-               If it doesn't match mask, it is DROPPED (legacy behavior).
-            */
-            int32_t evt = inpDequeueEvent(0); /* Val arg handled inside? No, passed 0, ignored */
+            /* PLAYBACK: Run simulation, inject recorded inputs.
+               INP_TIME is NOT computed internally - we trust the recorded action. */
 
-            /* Filter against Mask */
+            /* 3a. Consuming Time & Simulation */
+            /* We need to advance simulation until we hit a recorded event OR just keep up with wall clock?
+               Actually, for replay we must respect wall clock speed OR fast forward.
+               If we just run as fast as possible, it's a benchmark.
+               Let's respect wall clock speed for now (normal playback).
+               BUT we must NOT block on SDL_PollEvent.
+            */
+
             /* Logic:
-               If (evt & l_Mask) has bits SET:
-                 - Mask: INP_LBUTTONP | INP_ESC
-                 - Evt: INP_LBUTTONP
-                 - Match!
-
-               Special filtering for disabled keys?
-               IHandler.uch_EscStatus etc were checked during pump (conversion).
-               Doubly check?
+               We are inside inpWaitFor loop.
+               We want to process ticks as they come.
+               If a tick corresponds to a recorded input, we inject it.
             */
 
-            if (evt & l_Mask)
+            /* 1. Time Update */
+            /* (Already done at start of loop: gameLoop.accumulator updated) */
+
+            /* 2. Simulation Step(s) and Check for Input */
+            /* We need to peek/step carefully.
+               The outer loop already did simulation steps!
+               Wait, the original code structure:
+               Loop:
+                 1. Update Time -> Accumulator
+                 2. Simulate ticks while Accumulator >= FixedStep
+                 3. Pump Events
+                 4. Render
+
+               We need to hook into step 2 or 3.
+               Problem: The outer loop's simulation step (block 2) calls inpSimulateOneTick -> Replay_IncrementTick.
+               So g_SimulationTick is advancing!
+
+               We just need to check if an input is ready for the CURRENT g_SimulationTick.
+            */
+            int32_t replayAction = 0;
+            if (Replay_GetInput(g_SimulationTick, &replayAction, rndGetChecksum()))
             {
-                action |= (evt & l_Mask);
+                /* We have an action for this tick! */
+                /* Apply mask logic */
+                if (replayAction & l_Mask)
+                {
+                    action = replayAction & l_Mask;
+                }
+                else
+                {
+                    Log("REPLAY WARNING: Mask mismatch at tick %llu! Recorded=0x%X, Expected mask=0x%X",
+                        (unsigned long long)g_SimulationTick, replayAction, l_Mask);
+                    /* Return anyway to prevent infinite loop if desync happens */
+                    action = replayAction;
+                }
+            }
+
+            /* If we are playing, do we still pump events?
+               Maybe to handle Quit or window movement, but we must discard game inputs.
+               Actually inpPumpEvents queues them. We can just ignore the queue.
+               But we should probably pump to keep OS happy.
+            */
+            inpPumpEvents();
+            /* And discard anything in queue?
+               inpWaitFor loop normally checks `while (inputQueue.count > 0 && !action)`.
+               We should simple NOT check the queue if Replay is Playing.
+            */
+        }
+        else
+        {
+            /* RECORDING or NORMAL: Pump & Check Queue */
+            inpPumpEvents();
+
+            while (inputQueue.count > 0 && !action)
+            {
+                int32_t evt = inpDequeueEvent(0);
+                if (evt & l_Mask)
+                {
+                    action |= (evt & l_Mask);
+                }
             }
         }
 
@@ -624,6 +681,13 @@ int32_t inpWaitFor(int32_t l_Mask)
         {
             SDL_Delay(1);
         }
+    }
+
+    /* RECORDING HOOK */
+    if (g_ReplayState == REPLAY_RECORDING)
+    {
+        /* We record the FINAL action that satisfied the wait */
+        Replay_RecordInput(action, rndGetChecksum());
     }
 
     return action;

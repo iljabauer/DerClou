@@ -64,6 +64,7 @@ set(SOURCE_FILES
     intro/iffanim.c
     gfx/filter.c
     gfx/loadimage.c
+    replay/replay.c
     theclou.c)
 
 add_executable(DerClou ${SOURCE_FILES})
