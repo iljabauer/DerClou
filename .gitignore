@@ -7,3 +7,4 @@
 /screenshots
 *.rec
 .idea
+output_*.txt
