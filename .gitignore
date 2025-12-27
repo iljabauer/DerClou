@@ -4,3 +4,6 @@
 /.vscode/
 /gamedata/DerClou
 /gamedata/clou.log
+/screenshots
+*.rec
+.idea
