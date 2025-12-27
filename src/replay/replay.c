@@ -174,9 +174,26 @@ int Replay_GetInput(uint64_t currentTick, int32_t *outAction, uint32_t expectedC
 {
     if (g_ReplayState != REPLAY_PLAYING || !g_ReplayFile) return 0;
 
+    /* Debug Log every 60 ticks */
+    if ((currentTick % 60) == 0)
+    {
+        if (g_HasNextRecord)
+        {
+            Log("REPLAY DEBUG: Tick %llu. Next Action at Tick %llu (Action: %d)", (unsigned long long)currentTick,
+                (unsigned long long)g_NextRecord.tick, g_NextRecord.action);
+        }
+        else
+        {
+            Log("REPLAY DEBUG: Tick %llu. No next action (EOF?).", (unsigned long long)currentTick);
+        }
+    }
+
     /* Check if we have a next record and if it matches current tick */
     if (g_HasNextRecord && g_NextRecord.tick == currentTick)
     {
+        Log("REPLAY DEBUG: MATCH at Tick %llu! Executing Action %d.", (unsigned long long)currentTick,
+            g_NextRecord.action);
+
         *outAction = g_NextRecord.action;
 
         /* Drift Check */
