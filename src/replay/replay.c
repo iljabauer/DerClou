@@ -170,6 +170,35 @@ void Replay_RecordInput(int32_t action, uint32_t rngChecksum)
     // fflush(g_ReplayFile); // Maybe too slow to flush every input?
 }
 
+/* Helper to stringify input actions */
+static void getActionString(int32_t action, char *buffer)
+{
+    buffer[0] = '\0';
+    if (action == 0)
+    {
+        strcpy(buffer, "NONE");
+        return;
+    }
+
+    if (action & INP_UP) strcat(buffer, "UP ");
+    if (action & INP_DOWN) strcat(buffer, "DOWN ");
+    if (action & INP_LEFT) strcat(buffer, "LEFT ");
+    if (action & INP_RIGHT) strcat(buffer, "RIGHT ");
+    if (action & INP_ESC) strcat(buffer, "ESC ");
+    if (action & INP_LBUTTONP) strcat(buffer, "LBTN_P ");
+    if (action & INP_LBUTTONR) strcat(buffer, "LBTN_R ");
+    if (action & INP_RBUTTONP) strcat(buffer, "RBTN_P ");
+    if (action & INP_RBUTTONR) strcat(buffer, "RBTN_R ");
+    if (action & INP_NO_ESC) strcat(buffer, "NO_ESC ");
+    if (action & INP_TIME) strcat(buffer, "TIME ");
+    if (action & INP_KEYBOARD) strcat(buffer, "KEY ");
+    if (action & INP_FUNCTION_KEY) strcat(buffer, "FKEY ");
+    if (action & INP_SPACE) strcat(buffer, "SPACE ");
+    if (action & INP_MOUSE) strcat(buffer, "MOUSE ");
+    if (action & INP_MOUSEWHEEL) strcat(buffer, "WHEEL ");
+    if (action & INP_QUIT) strcat(buffer, "QUIT ");
+}
+
 int Replay_GetInput(uint64_t currentTick, int32_t *outAction, uint32_t expectedChecksum)
 {
     if (g_ReplayState != REPLAY_PLAYING || !g_ReplayFile) return 0;
@@ -179,8 +208,10 @@ int Replay_GetInput(uint64_t currentTick, int32_t *outAction, uint32_t expectedC
     {
         if (g_HasNextRecord)
         {
-            Log("REPLAY DEBUG: Tick %llu. Next Action at Tick %llu (Action: %d)", (unsigned long long)currentTick,
-                (unsigned long long)g_NextRecord.tick, g_NextRecord.action);
+            char actionStr[256];
+            getActionString(g_NextRecord.action, actionStr);
+            Log("REPLAY DEBUG: Tick %llu. Next Action at Tick %llu (Action: %s)", (unsigned long long)currentTick,
+                (unsigned long long)g_NextRecord.tick, actionStr);
         }
         else
         {
@@ -191,8 +222,9 @@ int Replay_GetInput(uint64_t currentTick, int32_t *outAction, uint32_t expectedC
     /* Check if we have a next record and if it matches current tick */
     if (g_HasNextRecord && g_NextRecord.tick == currentTick)
     {
-        Log("REPLAY DEBUG: MATCH at Tick %llu! Executing Action %d.", (unsigned long long)currentTick,
-            g_NextRecord.action);
+        char actionStr[256];
+        getActionString(g_NextRecord.action, actionStr);
+        Log("REPLAY DEBUG: MATCH at Tick %llu! Executing Action %s", (unsigned long long)currentTick, actionStr);
 
         *outAction = g_NextRecord.action;
 

@@ -17,7 +17,7 @@ static uint32_t g_my_seed = 0;
 
 void rndInit(void)
 {
-    printf("DEBUG: rndInit() called (time-based seed)\n");
+    // printf("DEBUG: rndInit() called (time-based seed)\n");
 #ifndef __COSP__
     randomize(); /* Zufallszahl über Timer initialisieren */
 #else
@@ -30,7 +30,7 @@ void rndInit(void)
 
 void rndInitWithSeed(unsigned int seed)
 {
-    printf("DEBUG: rndInitWithSeed(%u) - Setting custom RNG state\n", seed);
+    // printf("DEBUG: rndInitWithSeed(%u) - Setting custom RNG state\n", seed);
     g_my_seed = (uint32_t)seed;
     g_RngChecksum = 0;
     rndFixedSeedActive = 1;
@@ -57,8 +57,8 @@ uint32_t CalcRandomNr(uint32_t l_limit, uint32_t u_limit)
 
     g_RngChecksum ^= x;
 
-    printf("RNG: %d [%d-%d] RAW: %d Checksum: %x (FixedSeed: %d)\n", x, l_limit, u_limit, r, g_RngChecksum,
-           rndFixedSeedActive);
+    // printf("RNG: %d [%d-%d] RAW: %d Checksum: %x (FixedSeed: %d)\n", x, l_limit, u_limit, r, g_RngChecksum,
+    //        rndFixedSeedActive);
 
     return x;
 }
