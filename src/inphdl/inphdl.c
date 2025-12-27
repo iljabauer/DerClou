@@ -573,6 +573,24 @@ int32_t inpWaitFor(int32_t l_Mask)
         /* Clamp accumulator to prevent spiral of death */
         if (gameLoop.accumulator > gameLoop.fixedStepTicks * 8) gameLoop.accumulator = gameLoop.fixedStepTicks * 8;
 
+        /* REPLAY: Check Input Pre-Simulation (Current Tick) */
+        if (g_ReplayState == REPLAY_PLAYING)
+        {
+            int32_t replayAction = 0;
+            if (Replay_GetInput(g_SimulationTick, &replayAction, rndGetChecksum()))
+            {
+                if (replayAction & l_Mask)
+                    action = replayAction & l_Mask;
+                else
+                {
+                    Log("REPLAY WARNING: Mask mismatch at tick %llu! Recorded=0x%X, Expected mask=0x%X",
+                        (unsigned long long)g_SimulationTick, replayAction, l_Mask);
+                    action = replayAction;
+                }
+            }
+            if (action) break;
+        }
+
         /* 2. Simulation Step(s) */
         while (gameLoop.accumulator >= gameLoop.fixedStepTicks)
         {
@@ -588,81 +606,33 @@ int32_t inpWaitFor(int32_t l_Mask)
                     action |= INP_TIME;
                 }
             }
-        }
 
-        /* 3. Input Pump & Check */
-        if (g_ReplayState == REPLAY_PLAYING)
-        {
-            /* PLAYBACK: Run simulation, inject recorded inputs.
-               INP_TIME is NOT computed internally - we trust the recorded action. */
-
-            /* 3a. Consuming Time & Simulation */
-            /* We need to advance simulation until we hit a recorded event OR just keep up with wall clock?
-               Actually, for replay we must respect wall clock speed OR fast forward.
-               If we just run as fast as possible, it's a benchmark.
-               Let's respect wall clock speed for now (normal playback).
-               BUT we must NOT block on SDL_PollEvent.
-            */
-
-            /* Logic:
-               We are inside inpWaitFor loop.
-               We want to process ticks as they come.
-               If a tick corresponds to a recorded input, we inject it.
-            */
-
-            /* 1. Time Update */
-            /* (Already done at start of loop: gameLoop.accumulator updated) */
-
-            /* 2. Simulation Step(s) and Check for Input */
-            /* We need to peek/step carefully.
-               The outer loop already did simulation steps!
-               Wait, the original code structure:
-               Loop:
-                 1. Update Time -> Accumulator
-                 2. Simulate ticks while Accumulator >= FixedStep
-                 3. Pump Events
-                 4. Render
-
-               We need to hook into step 2 or 3.
-               Problem: The outer loop's simulation step (block 2) calls inpSimulateOneTick -> Replay_IncrementTick.
-               So g_SimulationTick is advancing!
-
-               We just need to check if an input is ready for the CURRENT g_SimulationTick.
-            */
-            int32_t replayAction = 0;
-            if (Replay_GetInput(g_SimulationTick, &replayAction, rndGetChecksum()))
+            /* REPLAY: Check Input Post-Simulation (Next Tick) */
+            /* This catches inputs that happen exactly on the tick we just advanced to */
+            if (g_ReplayState == REPLAY_PLAYING)
             {
-                /* We have an action for this tick! */
-                /* Apply mask logic */
-                if (replayAction & l_Mask)
+                int32_t replayAction = 0;
+                if (Replay_GetInput(g_SimulationTick, &replayAction, rndGetChecksum()))
                 {
-                    action = replayAction & l_Mask;
+                    if (replayAction & l_Mask)
+                        action = replayAction & l_Mask;
+                    else
+                    {
+                        Log("REPLAY WARNING: Mask mismatch at tick %llu! Recorded=0x%X, Expected mask=0x%X",
+                            (unsigned long long)g_SimulationTick, replayAction, l_Mask);
+                        action = replayAction;
+                    }
                 }
-                else
-                {
-                    Log("REPLAY WARNING: Mask mismatch at tick %llu! Recorded=0x%X, Expected mask=0x%X",
-                        (unsigned long long)g_SimulationTick, replayAction, l_Mask);
-                    /* Return anyway to prevent infinite loop if desync happens */
-                    action = replayAction;
-                }
+                if (action) break;
             }
-
-            /* If we are playing, do we still pump events?
-               Maybe to handle Quit or window movement, but we must discard game inputs.
-               Actually inpPumpEvents queues them. We can just ignore the queue.
-               But we should probably pump to keep OS happy.
-            */
-            inpPumpEvents();
-            /* And discard anything in queue?
-               inpWaitFor loop normally checks `while (inputQueue.count > 0 && !action)`.
-               We should simple NOT check the queue if Replay is Playing.
-            */
         }
-        else
-        {
-            /* RECORDING or NORMAL: Pump & Check Queue */
-            inpPumpEvents();
 
+        if (action) break;
+
+        /* 3. Input Pump & Check (Normal / Recording) */
+        if (g_ReplayState != REPLAY_PLAYING)
+        {
+            inpPumpEvents();
             while (inputQueue.count > 0 && !action)
             {
                 int32_t evt = inpDequeueEvent(0);
@@ -671,6 +641,11 @@ int32_t inpWaitFor(int32_t l_Mask)
                     action |= (evt & l_Mask);
                 }
             }
+        }
+        else
+        {
+            /* Replay Playing: Just pump OS events, ignore queue */
+            inpPumpEvents();
         }
 
         /* 4. Render */
