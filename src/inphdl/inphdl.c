@@ -580,7 +580,14 @@ int32_t inpWaitFor(int32_t l_Mask)
             if (Replay_GetInput(g_SimulationTick, &replayAction, rndGetChecksum()))
             {
                 if (replayAction & l_Mask)
+                {
                     action = replayAction & l_Mask;
+                    /* Schedule screenshot if this was a user action (not just time out) */
+                    if (action & ~INP_TIME)
+                    {
+                        Replay_CaptureScreenshot();
+                    }
+                }
                 else
                 {
                     Log("REPLAY WARNING: Mask mismatch at tick %llu! Recorded=0x%X, Expected mask=0x%X",
@@ -615,7 +622,14 @@ int32_t inpWaitFor(int32_t l_Mask)
                 if (Replay_GetInput(g_SimulationTick, &replayAction, rndGetChecksum()))
                 {
                     if (replayAction & l_Mask)
+                    {
                         action = replayAction & l_Mask;
+                        /* Schedule screenshot if this was a user action (not just time out) */
+                        if (action & ~INP_TIME)
+                        {
+                            Replay_CaptureScreenshot();
+                        }
+                    }
                     else
                     {
                         Log("REPLAY WARNING: Mask mismatch at tick %llu! Recorded=0x%X, Expected mask=0x%X",

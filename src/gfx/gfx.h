@@ -20,11 +20,12 @@ extern int gfxScalingFactor;
 
 extern void gfxScreenshot(void);
 extern void gfxScreenshotShadow(void);
+extern void gfxSaveScreenshot(const char *path);
 extern ubyte *gfxGetGfxBoardBase(void);
 extern void gfxInvalidate(void);
 extern void gfxSetDarkness(ubyte value);
 
-#define GFX_NO_MEM_HANDLE ((uword)-1)
+#define GFX_NO_MEM_HANDLE ((uword) - 1)
 
 /* defines für gfxPrint */
 #define GFX_PRINT_CENTER 1 << 0
@@ -49,7 +50,7 @@ extern void gfxSetDarkness(ubyte value);
 /* defines für gfxSetPens */
 #define GFX_SAME_PEN ((ubyte)255)
 
-#define GFX_NO_COLL_IN_XMS ((uword)-1)
+#define GFX_NO_COLL_IN_XMS ((uword) - 1)
 
 #define GFX_COLORTABLE_SIZE 768 /* 256 Farben * 3 Bytes */
 

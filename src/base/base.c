@@ -506,6 +506,11 @@ int tcStartGame(int argc, char **argv)
             replayFile = argv[i + 1];
             i++;
         }
+        else if (strcmp(argv[i], "-screenshots") == 0 && i + 1 < argc)
+        {
+            Replay_SetScreenshotDir(argv[i + 1]);
+            i++;
+        }
     }
 
     if (replayFile)

@@ -196,6 +196,14 @@ void gfxScreenshotShadow(void)
     }
 }
 
+#include "SDL_image.h"
+
+void gfxSaveScreenshot(const char *path)
+{
+    if (!SurfaceScreen) return;
+    IMG_SavePNG(SurfaceScreen, path);
+}
+
 /************************************************/
 
 void gfxSetDarkness(ubyte value)

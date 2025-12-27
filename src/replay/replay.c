@@ -243,3 +243,56 @@ int Replay_GetInput(uint64_t currentTick, int32_t *outAction, uint32_t expectedC
     /* Input not due yet or EOF */
     return 0;
 }
+
+#include <sys/stat.h>
+#include <sys/types.h>
+
+#if defined(_WIN32)
+#include <direct.h>
+#define MKDIR(p) _mkdir(p)
+#else
+#define MKDIR(p) mkdir(p, 0755)
+#endif
+
+static char g_ScreenshotDir[256] = {0};
+static int g_ScreenshotCounter = 0;
+
+static void ensureDirectoryExists(const char *path)
+{
+    struct stat st = {0};
+    if (stat(path, &st) == -1)
+    {
+        MKDIR(path);
+    }
+}
+
+void Replay_SetScreenshotDir(const char *path)
+{
+    if (path)
+    {
+        ensureDirectoryExists(path);
+        strncpy(g_ScreenshotDir, path, 255);
+        g_ScreenshotDir[255] = '\0';
+    }
+}
+
+void Replay_CaptureScreenshot(void)
+{
+    if (g_ScreenshotDir[0] == '\0') return;
+
+    char filename[512];
+    /* Helper to handle separator */
+    int len = strlen(g_ScreenshotDir);
+    const char *sep = "";
+    if (len > 0 && g_ScreenshotDir[len - 1] != '/' && g_ScreenshotDir[len - 1] != '\\')
+    {
+        sep = DIR_SEPARATOR;
+    }
+
+    g_ScreenshotCounter++;
+    sprintf(filename, "%s%sscreenshot_%04d.png", g_ScreenshotDir, sep, g_ScreenshotCounter);
+
+    /* Helper from gfx */
+    extern void gfxSaveScreenshot(const char *path);
+    gfxSaveScreenshot(filename);
+}

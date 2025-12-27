@@ -35,4 +35,7 @@ void Replay_RecordInput(int32_t action, uint32_t rngChecksum);
 /* Playback: Get next input if due at current tick. Returns 0 if no input this tick. */
 int Replay_GetInput(uint64_t currentTick, int32_t *outAction, uint32_t expectedChecksum);
 
+void Replay_SetScreenshotDir(const char *path);
+void Replay_CaptureScreenshot(void);
+
 #endif
