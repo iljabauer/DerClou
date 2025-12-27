@@ -696,6 +696,17 @@ int32_t inpWaitFor(int32_t l_Mask)
         {
             /* Replay Playing: Just pump OS events, ignore queue */
             inpPumpEvents();
+
+            /* Check for QUIT (e.g. from Signal) */
+            while (inputQueue.count > 0)
+            {
+                int32_t evt = inpDequeueEvent(0);
+                if (evt & INP_QUIT)
+                {
+                    action |= INP_QUIT;
+                    break;
+                }
+            }
         }
 
         /* 4. Render */

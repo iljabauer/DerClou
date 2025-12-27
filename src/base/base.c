@@ -7,6 +7,7 @@
 #include "base/base.h"
 
 #include <libgen.h>
+#include <signal.h>
 #include <string.h>
 
 #include "SDL.h"
@@ -87,8 +88,16 @@ static ubyte detectLanguage(void)
     }
 
     Log("couldn't detect language of the game!");
+
     NewErrorMsg(Internal_Error, __FILE__, __func__, 1);
     return 0;
+}
+
+static void SignalHandler(int signum)
+{
+    SDL_Event event;
+    event.type = SDL_QUIT;
+    SDL_PushEvent(&event);
 }
 
 static int tcInit(void)
@@ -342,6 +351,7 @@ static void loadConfig(const char *rootPath)
     Config.SfxVolume = SND_MAX_VOLUME;
     Config.VoiceVolume = SND_MAX_VOLUME;
     Config.UseJoystick = 0;
+    Config.HeadlessMode = 0;
 
     sprintf(config_file, "%s" DIR_SEPARATOR "%s", rootPath, "cosp.cfg");
     file = dskOpen(config_file, "rb", 0);
@@ -517,6 +527,17 @@ int tcStartGame(int argc, char **argv)
             Replay_SetSpeed(speed);
             i++;
         }
+        else if (strcmp(argv[i], "-headless") == 0)
+        {
+            Config.HeadlessMode = 1;
+        }
+    }
+
+    if (Config.HeadlessMode)
+    {
+        SDL_setenv("SDL_VIDEODRIVER", "dummy", 1);
+        signal(SIGINT, SignalHandler);
+        signal(SIGTERM, SignalHandler);
     }
 
     if (replayFile)

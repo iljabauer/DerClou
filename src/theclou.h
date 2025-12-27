@@ -27,6 +27,7 @@ typedef struct
     int VoiceVolume;
 
     unsigned char UseJoystick;
+    char HeadlessMode;
 } Configuration_t;
 extern Configuration_t Config; /* base.c */
 
