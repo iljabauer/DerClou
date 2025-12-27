@@ -293,6 +293,18 @@ void Replay_CaptureScreenshot(void)
     sprintf(filename, "%s%sscreenshot_%04d.png", g_ScreenshotDir, sep, g_ScreenshotCounter);
 
     /* Helper from gfx */
-    extern void gfxSaveScreenshot(const char *path);
     gfxSaveScreenshot(filename);
 }
+
+static float s_ReplaySpeed = 1.0f;
+
+void Replay_SetSpeed(float speed)
+{
+    if (speed > 0.0f)
+    {
+        s_ReplaySpeed = speed;
+        Log("REPLAY: Speed set to %.2fx", s_ReplaySpeed);
+    }
+}
+
+float Replay_GetSpeed(void) { return s_ReplaySpeed; }

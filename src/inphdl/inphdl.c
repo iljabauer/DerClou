@@ -459,11 +459,23 @@ static void inpDoPseudoMultiTasking(void)
     uint64_t newTime = SDL_GetPerformanceCounter();
     uint64_t frameTime = newTime - gameLoop.currentTime;
     gameLoop.currentTime = newTime;
+
+    if (g_ReplayState == REPLAY_PLAYING)
+    {
+        frameTime = (uint64_t)(frameTime * Replay_GetSpeed());
+    }
+
     gameLoop.accumulator += frameTime;
 
     /* Clamp */
-    if (gameLoop.accumulator > gameLoop.fixedStepTicks * 5) /* Clamp to ~5 frames */
-        gameLoop.accumulator = gameLoop.fixedStepTicks * 5;
+    uint64_t maxAccumulator = gameLoop.fixedStepTicks * 5;
+    if (g_ReplayState == REPLAY_PLAYING)
+    {
+        maxAccumulator = (uint64_t)(maxAccumulator * Replay_GetSpeed());
+    }
+
+    if (gameLoop.accumulator > maxAccumulator) /* Clamp to ~5 frames */
+        gameLoop.accumulator = maxAccumulator;
 
     while (gameLoop.accumulator >= gameLoop.fixedStepTicks)
     {
@@ -495,10 +507,22 @@ void inpDelay(int32_t l_Ticks)
         uint64_t newTime = SDL_GetPerformanceCounter();
         uint64_t frameTime = newTime - gameLoop.currentTime;
         gameLoop.currentTime = newTime;
+
+        if (g_ReplayState == REPLAY_PLAYING)
+        {
+            frameTime = (uint64_t)(frameTime * Replay_GetSpeed());
+        }
+
         gameLoop.accumulator += frameTime;
 
         /* Clamp accumulator */
-        if (gameLoop.accumulator > gameLoop.fixedStepTicks * 4) gameLoop.accumulator = gameLoop.fixedStepTicks * 4;
+        uint64_t maxAccumulator = gameLoop.fixedStepTicks * 4;
+        if (g_ReplayState == REPLAY_PLAYING)
+        {
+            maxAccumulator = (uint64_t)(maxAccumulator * Replay_GetSpeed());
+        }
+
+        if (gameLoop.accumulator > maxAccumulator) gameLoop.accumulator = maxAccumulator;
 
         while (gameLoop.accumulator >= gameLoop.fixedStepTicks)
         {
@@ -568,10 +592,22 @@ int32_t inpWaitFor(int32_t l_Mask)
         uint64_t newTime = SDL_GetPerformanceCounter();
         uint64_t frameTime = newTime - gameLoop.currentTime;
         gameLoop.currentTime = newTime;
+
+        if (g_ReplayState == REPLAY_PLAYING)
+        {
+            frameTime = (uint64_t)(frameTime * Replay_GetSpeed());
+        }
+
         gameLoop.accumulator += frameTime;
 
         /* Clamp accumulator to prevent spiral of death */
-        if (gameLoop.accumulator > gameLoop.fixedStepTicks * 8) gameLoop.accumulator = gameLoop.fixedStepTicks * 8;
+        uint64_t maxAccumulator = gameLoop.fixedStepTicks * 8;
+        if (g_ReplayState == REPLAY_PLAYING)
+        {
+            maxAccumulator = (uint64_t)(maxAccumulator * Replay_GetSpeed());
+        }
+
+        if (gameLoop.accumulator > maxAccumulator) gameLoop.accumulator = maxAccumulator;
 
         /* REPLAY: Check Input Pre-Simulation (Current Tick) */
         if (g_ReplayState == REPLAY_PLAYING)

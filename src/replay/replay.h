@@ -38,4 +38,7 @@ int Replay_GetInput(uint64_t currentTick, int32_t *outAction, uint32_t expectedC
 void Replay_SetScreenshotDir(const char *path);
 void Replay_CaptureScreenshot(void);
 
+void Replay_SetSpeed(float speed);
+float Replay_GetSpeed(void);
+
 #endif

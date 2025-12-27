@@ -511,6 +511,12 @@ int tcStartGame(int argc, char **argv)
             Replay_SetScreenshotDir(argv[i + 1]);
             i++;
         }
+        else if (strcmp(argv[i], "-replay-speed") == 0 && i + 1 < argc)
+        {
+            float speed = strtof(argv[i + 1], NULL);
+            Replay_SetSpeed(speed);
+            i++;
+        }
     }
 
     if (replayFile)
