@@ -197,11 +197,60 @@ void gfxScreenshotShadow(void)
 }
 
 #include "SDL_image.h"
+#include "SDL_thread.h"
+
+typedef struct
+{
+    SDL_Surface *surface;
+    char path[256];
+} ScreenshotData;
+
+int ScreenshotThread(void *ptr)
+{
+    ScreenshotData *data = (ScreenshotData *)ptr;
+    if (!data) return 0;
+
+    IMG_SavePNG(data->surface, data->path);
+
+    if (data->surface) SDL_FreeSurface(data->surface);
+    MemFree(data, sizeof(ScreenshotData));
+
+    return 0;
+}
 
 void gfxSaveScreenshot(const char *path)
 {
     if (!SurfaceScreen) return;
-    IMG_SavePNG(SurfaceScreen, path);
+
+    ScreenshotData *data = (ScreenshotData *)MemAlloc(sizeof(ScreenshotData));
+    if (!data) return;
+
+    /* Copy surface to ensure thread safety */
+    data->surface = SDL_ConvertSurface(SurfaceScreen, SurfaceScreen->format, 0);
+    /* Manually copy palette if it exists and hasn't been copied by ConvertSurface?
+       SDL_ConvertSurface should copy the palette for 8-bit surfaces. */
+
+    if (!data->surface)
+    {
+        MemFree(data, sizeof(ScreenshotData));
+        return;
+    }
+
+    strncpy(data->path, path, 255);
+    data->path[255] = '\0';
+
+    SDL_Thread *thread = SDL_CreateThread(ScreenshotThread, "ScreenshotThread", data);
+    if (thread)
+    {
+        SDL_DetachThread(thread);
+    }
+    else
+    {
+        Log("SCREENSHOT: Failed to create thread! Saving synchronously.");
+        IMG_SavePNG(data->surface, data->path);
+        SDL_FreeSurface(data->surface);
+        MemFree(data, sizeof(ScreenshotData));
+    }
 }
 
 /************************************************/
