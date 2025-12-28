@@ -6,6 +6,8 @@
 */
 #include "inphdl/inphdl.h"
 
+#include <stdlib.h>
+
 #include "SDL.h"
 #include "inphdl/arrow1x_xpm.c"
 #include "inphdl/arrow2x_xpm.c"
@@ -430,6 +432,7 @@ static void inpPumpEvents(void)
                 action |= INP_KEYBOARD | INP_LBUTTONP;
                 break;
             case SDL_QUIT:
+                Log("DEBUG: inpPumpEvents received SDL_QUIT");
                 action |= INP_QUIT;
                 break;
         }
@@ -686,6 +689,16 @@ int32_t inpWaitFor(int32_t l_Mask)
             while (inputQueue.count > 0 && !action)
             {
                 int32_t evt = inpDequeueEvent(0);
+                if (evt & INP_QUIT)
+                {
+                    Log("DEBUG: Non-Replay Dequeued INP_QUIT");
+                    if (Config.HeadlessMode || g_ReplayState != REPLAY_IDLE)
+                    {
+                        Log("Forced Quit (Headless/Replay)");
+                        Replay_Close();
+                        exit(0);
+                    }
+                }
                 if (evt & l_Mask)
                 {
                     action |= (evt & l_Mask);
@@ -703,6 +716,13 @@ int32_t inpWaitFor(int32_t l_Mask)
                 int32_t evt = inpDequeueEvent(0);
                 if (evt & INP_QUIT)
                 {
+                    Log("DEBUG: inpWaitFor dequeued INP_QUIT");
+                    if (Config.HeadlessMode || g_ReplayState != REPLAY_IDLE)
+                    {
+                        Log("Forced Quit (Headless/Replay)");
+                        Replay_Close();
+                        exit(0);
+                    }
                     action |= INP_QUIT;
                     break;
                 }

@@ -93,8 +93,11 @@ static ubyte detectLanguage(void)
     return 0;
 }
 
+#include <unistd.h>
 static void SignalHandler(int signum)
 {
+    const char *msg = "DEBUG: SignalHandler caught signal\n";
+    write(STDERR_FILENO, msg, 35);
     SDL_Event event;
     event.type = SDL_QUIT;
     SDL_PushEvent(&event);
@@ -527,17 +530,6 @@ int tcStartGame(int argc, char **argv)
             Replay_SetSpeed(speed);
             i++;
         }
-        else if (strcmp(argv[i], "-headless") == 0)
-        {
-            Config.HeadlessMode = 1;
-        }
-    }
-
-    if (Config.HeadlessMode)
-    {
-        SDL_setenv("SDL_VIDEODRIVER", "dummy", 1);
-        signal(SIGINT, SignalHandler);
-        signal(SIGTERM, SignalHandler);
     }
 
     if (replayFile)
@@ -594,6 +586,22 @@ int tcStartGame(int argc, char **argv)
     else if (Config.VoiceVolume > SND_MAX_VOLUME)
     {
         Config.VoiceVolume = SND_MAX_VOLUME;
+    }
+
+    // Parse headless mode AFTER loadConfig to avoid being overwritten
+    for (int i = 1; i < argc; i++)
+    {
+        if (strcmp(argv[i], "-headless") == 0)
+        {
+            Config.HeadlessMode = 1;
+        }
+    }
+
+    if (Config.HeadlessMode)
+    {
+        SDL_setenv("SDL_VIDEODRIVER", "dummy", 1);
+        signal(SIGINT, SignalHandler);
+        signal(SIGTERM, SignalHandler);
     }
 
     if ((res = tcInit()))
