@@ -6,8 +6,8 @@ This plan implements a test scene with screenshot functionality for the existing
 
 ## Tasks
 
-- [ ] 1. Create ScreenshotService utility module
-  - [ ] 1.1 Create `src-js/src/game/services/ScreenshotService.ts` with environment detection
+- [x] 1. Create ScreenshotService utility module
+  - [x] 1.1 Create `src-js/src/game/services/ScreenshotService.ts` with environment detection
     - Implement `isNwjsEnvironment()` function to detect nw.js runtime
     - Implement `getScreenshotPathFromArgs()` to parse command-line arguments
     - _Requirements: 3.1, 3.2, 4.1_
@@ -20,7 +20,7 @@ This plan implements a test scene with screenshot functionality for the existing
     - **Property 2: Command-Line Argument Parsing**
     - **Validates: Requirements 3.2**
 
-  - [ ] 1.4 Implement `saveScreenshot()` function
+  - [x] 1.4 Implement `saveScreenshot()` function
     - Handle nw.js environment: save to filesystem using path from args
     - Handle browser environment: log debug message with base64 preview
     - _Requirements: 3.3, 4.2, 4.3_
@@ -29,32 +29,32 @@ This plan implements a test scene with screenshot functionality for the existing
     - **Property 3: Base64 Preview Extraction**
     - **Validates: Requirements 4.3**
 
-- [ ] 2. Checkpoint - Ensure ScreenshotService tests pass
+- [x] 2. Checkpoint - Ensure ScreenshotService tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 3. Create ScreenshotTestScene
-  - [ ] 3.1 Create `src-js/src/game/scenes/ScreenshotTestScene.ts`
+- [x] 3. Create ScreenshotTestScene
+  - [x] 3.1 Create `src-js/src/game/scenes/ScreenshotTestScene.ts`
     - Extend Phaser.Scene with constructor setting scene key
     - Implement `create()` method with blank background
     - _Requirements: 1.1, 1.2_
 
-  - [ ] 3.2 Add screenshot button to the scene
+  - [x] 3.2 Add screenshot button to the scene
     - Create interactive text button with visual styling
     - Add pointer event handler for click
     - _Requirements: 1.3, 1.4_
 
-  - [ ] 3.3 Implement screenshot capture on button click
+  - [x] 3.3 Implement screenshot capture on button click
     - Use Phaser's `game.renderer.snapshot()` method to capture screenshot
     - Convert snapshot to base64 and call ScreenshotService.saveScreenshot()
     - _Requirements: 2.1, 2.2_
 
-- [ ] 4. Register scene with the game
-  - [ ] 4.1 Update `src-js/src/game/main.ts` to import and register ScreenshotTestScene
+- [x] 4. Register scene with the game
+  - [x] 4.1 Update `src-js/src/game/main.ts` to import and register ScreenshotTestScene
     - Add import for ScreenshotTestScene
     - Add scene to the scene array in game config
     - _Requirements: 1.1_
 
-- [ ] 5. Final checkpoint - Verify integration
+- [x] 5. Final checkpoint - Verify integration
   - Ensure all tests pass, ask the user if questions arise.
 
 ## Notes
@@ -63,3 +63,13 @@ This plan implements a test scene with screenshot functionality for the existing
 - The implementation uses TypeScript following the existing project patterns
 - Property tests should use fast-check library for property-based testing
 - nw.js APIs are accessed via the global `nw` object when available
+
+## Refinements
+
+- [x] Change screenshot path logic
+  - Treat `--screenshot-path` as a directory.
+  - Save files as `screenshot_000X.png` (auto-incrementing) inside that directory.
+- [x] Add Headless Mode Support
+  - Detect `--headless` argument in NW.js.
+  - Auto-capture screenshot and exit app if detected.
+
