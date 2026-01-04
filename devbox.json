@@ -13,7 +13,8 @@
     "darwin.apple_sdk.frameworks.AVFoundation",
     "darwin.apple_sdk.frameworks.GameController",
     "nodejs@latest",
-    "emscripten@3.1.55"
+    "emscripten@3.1.55",
+    "nodejs_23@latest"
   ],
   "shell": {
     "init_hook": [
