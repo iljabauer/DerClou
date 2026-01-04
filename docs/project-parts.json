@@ -1,0 +1,28 @@
+{
+    "repository_type": "multi-part",
+    "parts": [
+        {
+            "part_id": "core",
+            "name": "DerClou Core",
+            "type": "game",
+            "root_path": "/Users/ibauer/_ITS/DerClou",
+            "tech_stack": {
+                "language": "C",
+                "framework": "SDL2",
+                "build_system": "CMake"
+            }
+        },
+        {
+            "part_id": "web",
+            "name": "Web Client",
+            "type": "web",
+            "root_path": "/Users/ibauer/_ITS/DerClou/src-js",
+            "tech_stack": {
+                "language": "TypeScript",
+                "framework": "Phaser 3",
+                "build_system": "Vite"
+            }
+        }
+    ],
+    "integration_points": []
+}
