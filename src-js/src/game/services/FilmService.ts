@@ -1,16 +1,11 @@
 /**
- * Film/Story Service - Port of src/story/story.c
+ * Film/Story Service - Port of src/story/story.c and gp.c
  * 
  * Manages story state, scenes, and game progression.
- * This is a stub implementation - full story system to be implemented later.
  */
 
-export interface Scene {
-    eventNr: number;
-    locationNr: number;
-    sceneId: number;
-    flags: number;
-}
+import { Scene, StoryHeader, StoryFileParser } from './StoryFileParser';
+import { Database } from '../core/Database';
 
 export interface Film {
     currentLocation: number;  // akt_Ort
@@ -20,21 +15,69 @@ export interface Film {
     currentMinute: number;
     scenes: Scene[];
     enabledChoices: number;  // EnabledChoices - bitmask for enabled actions
+    startScene: number;  // StartScene
+    startOrt: number;  // StartOrt
+    startZeit: number;  // StartZeit
 }
 
 export class FilmService {
     private film: Film;
+    private db: Database;
+    private storyLoaded: boolean = false;
 
-    constructor() {
+    constructor(db: Database) {
+        this.db = db;
         this.film = {
             currentLocation: 0,
             locationNames: [],
             currentScene: 0,
             currentDay: 1,
-            currentMinute: 0,
+            currentMinute: 543,  // 09:03 (default from C code)
             scenes: [],
-            enabledChoices: 0xFFFFFFFF  // All choices enabled by default
+            enabledChoices: 0xFFFFFFFF,  // All choices enabled by default
+            startScene: 0,
+            startOrt: 0,
+            startZeit: 1
         };
+    }
+
+    /**
+     * Initialize story system by loading story file
+     * Port of InitStory() from gp.c
+     */
+    async initStory(storyFilePath: string): Promise<boolean> {
+        if (this.storyLoaded) {
+            console.log('Story already loaded');
+            return true;
+        }
+
+        console.log('Initializing story system...');
+
+        // Load story file
+        const result = await StoryFileParser.loadStoryFile(storyFilePath);
+        if (!result) {
+            console.error('Failed to load story file');
+            return false;
+        }
+
+        const { header, scenes } = result;
+
+        // Initialize film from story header
+        this.film.scenes = scenes;
+        this.film.startZeit = header.startZeit;
+        this.film.startOrt = header.startOrt;
+        this.film.startScene = header.startSzene;
+        this.film.currentDay = header.startZeit;
+        this.film.currentMinute = 543;  // 09:03
+        this.film.currentLocation = header.startOrt;
+
+        // TODO: InitLocations() - load location names from LOCATIONS.LST
+        // TODO: LinkScenes() - link scene successors
+        // TODO: PatchStory() - apply game-specific patches
+
+        this.storyLoaded = true;
+        console.log(`Story initialized: ${scenes.length} scenes loaded`);
+        return true;
     }
 
     /**
@@ -129,9 +172,26 @@ export class FilmService {
 
     /**
      * Get scene by event number
+     * Port of GetScene() from gp.c
      */
     getScene(eventNr: number): Scene | undefined {
         return this.film.scenes.find(scene => scene.eventNr === eventNr);
+    }
+
+    /**
+     * Get scene by location number
+     * Port of GetLocScene() from gp.c
+     */
+    getLocScene(locNr: number): Scene | undefined {
+        return this.film.scenes.find(scene => scene.locationNr === locNr);
+    }
+
+    /**
+     * Get current scene object
+     * Port of GetCurrentScene() from gp.c
+     */
+    getCurrentSceneObject(): Scene | undefined {
+        return this.getScene(this.film.currentScene);
     }
 
     /**
@@ -139,6 +199,13 @@ export class FilmService {
      */
     addScene(scene: Scene): void {
         this.film.scenes.push(scene);
+    }
+
+    /**
+     * Get all scenes
+     */
+    getAllScenes(): Scene[] {
+        return this.film.scenes;
     }
 
     /**
