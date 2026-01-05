@@ -2,7 +2,7 @@
 
 **Last Updated:** 2026-01-05
 
-## Current Sprint: Complete Data Loading System
+## Current Sprint: Port Text System
 
 ### High Priority 🔴
 
@@ -10,6 +10,12 @@
 - [x] Add parsers for all object types in DatFileParser.ts (18 types complete)
 - [x] Load building-specific data files (*ETA*.DAT, *ETA*.REL)
 - [x] Add Police and LSArea types
+- [ ] Port text system (src/text/)
+  - [ ] Create TextService.ts with XOR decryption
+  - [ ] Load TEXTS.LST (text file list)
+  - [ ] Load individual text files with language support
+  - [ ] Implement key-based text lookup
+  - [ ] Add text formatting support
 - [ ] Verify object counts match C version
 - [ ] Load object names from text files (OBJECTS.TXT)
 
