@@ -419,6 +419,38 @@ export class FilmService {
     }
 
     /**
+     * Get a story scene that can be triggered
+     * Port of GetStoryScene() from gp.c
+     * 
+     * @param currentScene - Current scene (to exclude from selection)
+     * @param randomFunc - Random number generator function (0-255)
+     * @returns Story scene that can be triggered, or undefined
+     */
+    getStoryScene(currentScene: Scene | undefined, randomFunc: () => number): Scene | undefined {
+        // Iterate through all scenes
+        for (const scene of this.film.scenes) {
+            // Only consider story scenes (locationNr === -1)
+            if (scene.locationNr === -1) {
+                // Don't return the current scene
+                if (currentScene && scene.eventNr === currentScene.eventNr) {
+                    continue;
+                }
+
+                // Check probability
+                const randomValue = randomFunc();
+                if (randomValue <= scene.probability) {
+                    // Check conditions
+                    if (this.checkConditions(scene)) {
+                        return scene;
+                    }
+                }
+            }
+        }
+
+        return undefined;
+    }
+
+    /**
      * Initialize film service (for backward compatibility)
      * This is a no-op now - use initStory() to load story file
      */
