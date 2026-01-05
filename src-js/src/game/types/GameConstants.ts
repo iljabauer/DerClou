@@ -11,6 +11,7 @@ export const Person_Jim_Danner = 9817;
 export const Person_Dan_Stanford = 9821;
 export const Person_John_Gludo = 9822;
 export const Person_Eric_Pooly = 9825;
+export const Person_Sabien_Pardo = 9846;
 export const Person_Pater_James = 9848;
 
 // Key Location IDs
@@ -187,8 +188,9 @@ export const OLD_MATT_PICTID = 0; // TODO: Find actual value
 export const MATT_PICTID = 7; // TODO: Verify this value
 export const FACE_GLUDO_SAILOR = 126;
 
-// Story text file
+// Story text files
 export const STORY_0_TXT = 18; // TODO: Verify this value
+export const STORY_1_TXT = 15;
 
 // Game costs
 export const tcCOSTS_FOR_HOTEL = 100; // TODO: Find actual value
