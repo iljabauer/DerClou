@@ -1,12 +1,14 @@
-# Session 5 Summary - Living/Location System Complete
+# Session 5 Summary - Living/Location System Complete + Dialog System Started
 
 **Date:** 2026-01-05
-**Duration:** ~30 minutes
-**Focus:** Complete Phase 1 - Living/Location System
+**Duration:** ~45 minutes
+**Focus:** Complete Phase 1 - Living/Location System, Start Phase 2 - Dialog System
 
 ## Accomplishments ✅
 
-### 1. Animation Template Loading
+### Phase 1: Living/Location System (Complete)
+
+#### 1. Animation Template Loading
 - Loaded animation templates from `TEMPLATE.LST`
 - Parsed CSV format: name, width, height, frameOffsetNr
 - Templates: redmax, bluemax, greenmax, bullemax
@@ -39,11 +41,39 @@
 - GameScene checks for --replay-path argument
 - Ensures replay system can start when needed
 
-### 6. Documentation
+#### 6. Documentation
 - Updated CURRENT_STATUS.md with Phase 1 completion
 - Updated TODO.md with completed tasks
 - Marked Living/Location System as complete
 - Noted replay system screenshot issue
+
+### Phase 2: Dialog System (Started)
+
+#### 1. DialogService Creation
+- Created DialogService.ts with core dialog functions
+- Ported Say() function from dialog.c
+- Implemented bubble() and think() helpers
+- Added text file ID constants (BUSINESS_TXT, TALK_0_TXT, TALK_1_TXT)
+- Added talk mode constants (BUSINESS, STANDARD)
+
+#### 2. Text System Integration
+- Added getTextLines() alias to TextService
+- Integrated with existing goKey() functionality
+- Support for text lookup by key
+- Multi-line text support
+
+#### 3. Dialog Testing
+- Created DialogTestScene for testing
+- Test Say() with text keys
+- Test Bubble() with custom text
+- Test Think() for thinking bubbles
+- Test text key lookup from BUSINESS_TXT
+
+#### 4. Stubs for Future Work
+- DynamicTalk() stub for conversations
+- Talk() stub for location-based interactions
+- Character portrait display (planned)
+- Dialog tree navigation (planned)
 
 ## Technical Details
 
@@ -75,10 +105,11 @@ srcX = offset % COLL_WIDTH
 ```
 
 ## Code Statistics
-- Files modified: 4
-- Lines added: ~400
-- Commits: 5
-- Total TypeScript: ~7000 lines
+- Files modified: 8
+- Files created: 3 (DialogService.ts, DialogTestScene.ts, SESSION_5_SUMMARY.md)
+- Lines added: ~600
+- Commits: 9
+- Total TypeScript: ~7400 lines
 
 ## Commits Made
 1. `Load animation templates and livings from data files`
@@ -86,6 +117,10 @@ srcX = offset % COLL_WIDTH
 3. `Update LivingTestScene to use Person_1 from LIVINGS.LST`
 4. `Move GameScene to first position for replay support`
 5. `Update documentation for Phase 1 completion`
+6. `Add Session 5 summary`
+7. `Add DialogService with Say() function`
+8. `Add DialogTestScene for testing dialog system`
+9. `Update documentation for Phase 2 progress`
 
 ## Issues Encountered
 
@@ -98,17 +133,26 @@ srcX = offset % COLL_WIDTH
 ## Next Steps
 
 ### Immediate (Next Session)
-1. Debug replay system screenshot generation
-2. Start Phase 2: Dialog System
-3. Port dialog.c - Core dialog system
-4. Port talkappl.c - Dialog application logic
+1. Complete DynamicTalk() implementation
+   - Person data structure integration
+   - Knowledge tracking system
+   - Dialog tree navigation
+   - Question/answer system
+2. Character portrait display
+   - Load character portraits from collections
+   - Display in dialog bubbles
+   - Portrait positioning
+3. Dialog tree system
+   - Parse dialog text with keywords
+   - Handle conversation flow
+   - Choice evaluation
 
-### Phase 2 Goals
-- Implement conversation system
-- Handle dialog trees and choices
-- Integrate with TextService and UIService
-- Support NPC interactions
-- Character portraits in dialogs
+### Phase 2 Remaining Goals
+- Full conversation system with state
+- NPC interaction system
+- Knowledge tracking (who knows whom)
+- Dialog application logic (job offers, etc.)
+- Integration with game scenes
 
 ## Lessons Learned
 
@@ -119,19 +163,31 @@ srcX = offset % COLL_WIDTH
 5. **Async Loading**: File loading requires async/await throughout the chain
 
 ## Time Breakdown
-- Reading C code: 10%
-- Implementing features: 60%
+- Reading C code: 15%
+- Implementing features: 55%
 - Testing: 10%
 - Documentation: 20%
 
+## Key Achievements
+1. ✅ Phase 1 (Living/Location) fully complete
+2. ✅ Phase 2 (Dialog) started with core infrastructure
+3. ✅ DialogService with Say() function working
+4. ✅ Text system integration complete
+5. ✅ Test scenes for both systems
+6. 🚧 Ready for full conversation implementation
+
 ## Progress Metrics
 - Phase 1: ✅ Complete (100%)
-- Phase 2: ⚠️ Not started (0%)
-- Overall port: ~18% complete (~7000/35000 lines)
+- Phase 2: 🚧 In Progress (~30%)
+- Overall port: ~21% complete (~7400/35000 lines)
 
 ## Notes
 - Living/Location system is now fully functional
 - Characters can be positioned and animated
 - Sprite sheet rendering works correctly
-- Ready to move to Dialog System
+- Dialog system foundation is in place
+- Say() function works with text files
+- UIService provides bubble display
+- Ready to implement full conversation system
 - Replay system needs attention but not blocking
+- Good progress on Phase 2 - basic dialog infrastructure complete
