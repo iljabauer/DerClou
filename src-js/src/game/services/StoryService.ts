@@ -216,6 +216,7 @@ export class StoryService {
         this.handlers.set(SCENE_4TH_BURG, () => this.tcDone4thBurglary());
         this.handlers.set(SCENE_5TH_BURG, () => this.tcDone5thBurglary());
         this.handlers.set(SCENE_6TH_BURG, () => this.tcDone6thBurglary());
+        this.handlers.set(SCENE_7TH_BURG, () => this.tcDone7thBurglary());
         // More handlers will be added as they are ported
     }
 
@@ -1503,6 +1504,32 @@ export class StoryService {
         //     this.db.livesInSet(London_London_1, Person_Phil_Ciggy);
         //     this.db.livesInSet(London_London_1, Person_Rod_Masterson);
         // }
+
+        // TODO: GetScene(SCENE_FAHNDUNG)-\u003eGeschehen = 0;
+        this.scene.sceneArgs.returnValue = this.getLocSceneEventNr(this.film.getLocation());
+    }
+
+    /**
+     * 7TH BURGLARY
+     * Port of tcDone7thBurglary from story.c
+     * 
+     * After 7th burglary - unlock locations, add Jaguar car, add person
+     */
+    private tcDone7thBurglary(): void {
+        this.scene.addTaxiLocation(41); // national
+        this.scene.addTaxiLocation(45); // bank
+
+        // TODO: if (bProfidisk) this.scene.addTaxiLocation(81); // bulstrode
+
+        // Add Jaguar to Marc Smith
+        // Note: Jaguar comes here because:
+        // 1. It's needed for Villa
+        // 2. Jaguar is never caught in Fahndung (so it can explode later)
+        // 3. Player shouldn't have Jaguar too long (since they never get caught)
+        this.db.hasSet(Person_Marc_Smith, Car_Jaguar_XK_1950);
+
+        // Add person to London
+        this.db.livesInSet(London_London_1, Person_Mohammed_Abdula);
 
         // TODO: GetScene(SCENE_FAHNDUNG)-\u003eGeschehen = 0;
         this.scene.sceneArgs.returnValue = this.getLocSceneEventNr(this.film.getLocation());
