@@ -1,6 +1,6 @@
 # Der Clou! TypeScript Port - Current Status
 
-**Last Updated:** 2026-01-05
+**Last Updated:** 2026-01-05 (Session 2)
 
 ## Overview
 
@@ -181,10 +181,11 @@ npm run dev
 
 ## Notes
 
-- 30 TypeScript files, ~4200 lines of code
+- 30 TypeScript files, ~4400 lines of code
 - 131 C source files to port
 - TCMAIN.DAT and TCBUILD.DAT are main data files
 - Building-specific files: *ETA0.DAT, *ETA1.DAT, etc.
 - Relations in .REL files (text format)
 - Text files in gamedata/TEXTS/ (XOR encrypted with 0x75)
 - Images in gamedata/PICTURES/ (IFF ILBM format, needs conversion)
+- See IMAGE_CONVERSION.md for image conversion guide
