@@ -1,6 +1,6 @@
 # Der Clou! TypeScript Port - Current Status
 
-**Last Updated:** 2026-01-05 (Session 17)
+**Last Updated:** 2026-01-05 (Session 18)
 
 ## Overview
 
@@ -221,14 +221,31 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - Collision detection (stubbed)
    - Full rendering to be implemented with burglary execution
 
-15. **Planning System** - Stub ✅
-   - PlanningService with core interface
-   - planner() - Planning interface (stubbed)
-   - player() - Burglary execution (stubbed)
-   - Plan save/load/clear (stubbed)
-   - Integration with StoryService
-   - Integration with InteractionService
-   - Full planning system to be implemented in future sessions
+15. **Planning System** - Partial ✅
+   - PlanningSystemService - Core system (COMPLETE)
+     - System/Handler/Action/Signal management
+     - Action types: GO, WAIT, SIGNAL, WAIT_SIGNAL, USE, TAKE, DROP, OPEN, CLOSE, CONTROL
+     - Handler management (create, find, set active, clear, close)
+     - Action navigation (first, last, next, prev)
+     - Signal communication between handlers
+     - Save/load functionality
+     - Timer management
+   - PlanningService - Main interface (PARTIAL)
+     - planner() - Planning interface with menu system ✅
+     - Main planning loop ✅
+     - Notebook menu (target, team, car, tools, loots) ✅
+     - Look menu (view plan, change person) ✅
+     - Action menu (walk, use, open, close, take, drop, wait, radio) ✅
+     - Save/load plan ✅
+     - Prepare/unprepare system and graphics ✅
+     - Timer and info display ✅
+     - player() - Burglary execution (stubbed)
+     - Action implementations (stubbed)
+   - PlanningTestScene for testing ✅
+   - Integration with StoryService ✅
+   - Integration with InteractionService ✅
+   - ⚠️ Action implementations need full porting
+   - ⚠️ Burglary execution needs implementation
 
 16. **Organisation System** - Complete ✅
    - OrganisationService for team/car/driver selection
@@ -272,20 +289,22 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - SceneTestScene
    - InteractionTestScene
    - OrganisationTestScene
+   - PlanningTestScene
    - GameScene, MainMenuScene, LondonScene
 
 ### What Needs Work 🚧
 
 1. **Planning System Implementation** - HIGH PRIORITY
+   - ✅ Core system (PlanningSystemService)
+   - ✅ Menu system (planner interface)
    - ✅ Team selection UI (via OrganisationService)
-   - ⚠️ Implement tool selection UI
-   - ⚠️ Implement action planning UI (walk, use, open, close, take, drop, wait, radio)
-   - ⚠️ Implement plan save/load system
-   - ⚠️ Implement plan validation
-   - ⚠️ Implement guard simulation
-   - ⚠️ Implement burglary execution (plPlayer)
-   - ⚠️ Implement time tracking
-   - ⚠️ Implement loot tracking
+   - ✅ Save/load system (basic structure)
+   - ⚠️ Action implementations (walk, use, open, close, take, drop, wait, radio)
+   - ⚠️ Landscape integration for action planning
+   - ⚠️ Guard simulation
+   - ⚠️ Burglary execution (plPlayer)
+   - ⚠️ Time tracking during execution
+   - ⚠️ Loot tracking during execution
 
 2. **Landscape System Implementation** - HIGH PRIORITY
    - ⚠️ Implement floor rendering
@@ -346,7 +365,8 @@ src-js/src/game/
 │   ├── InteractionService.ts ✅ Action menu
 │   ├── InvestigationService.ts ✅ Building observation
 │   ├── LandscapeService.ts  🚧 Building interiors (stub)
-│   ├── PlanningService.ts   🚧 Burglary planning (stub)
+│   ├── PlanningSystemService.ts ✅ Planning core (system/handler/action/signal)
+│   ├── PlanningService.ts   🚧 Burglary planning (partial)
 │   ├── OrganisationService.ts ✅ Team/car/driver selection
 │   ├── LootService.ts       ✅ Loot management
 │   ├── PresentationService.ts ✅ Object display
@@ -363,6 +383,7 @@ src-js/src/game/
     ├── SceneTestScene.ts    ✅ Scene system test
     ├── InteractionTestScene.ts ✅ Interaction test
     ├── OrganisationTestScene.ts ✅ Organisation test
+    ├── PlanningTestScene.ts ✅ Planning system test
     ├── GameScene.ts         ✅ Main scene
     ├── MainMenuScene.ts     ✅ Menu
     └── LondonScene.ts       ✅ Hub scene
@@ -370,34 +391,32 @@ src-js/src/game/
 
 ## Next Steps (Priority Order)
 
-### Immediate (Session 16 - COMPLETE ✅)
-1. ✅ Port organisation system (tcOrganisation from organisa/organisa.c)
-2. ✅ Create OrganisationService with team/car/driver selection
-3. ✅ Integrate OrganisationService with InteractionService
-4. ✅ Create OrganisationTestScene for testing
-5. ✅ Update documentation with progress
-3. ✅ Integrate InvestigationService with InteractionService
-4. ✅ Create LandscapeService stub
-5. ✅ Create PlanningService stub
-6. ✅ Integrate planning with StoryService and InteractionService
-7. ✅ Update documentation with progress
+### Immediate (Session 18 - COMPLETE ✅)
+1. ✅ Port planning system core (PlanningSystemService from system.c)
+2. ✅ Port planning menu system (planner interface from planer.c)
+3. ✅ Create PlanningTestScene for testing
+4. ✅ Update documentation with progress
 
 ### Short-term (Next 2-3 Sessions)
-1. Implement planning system UI - HIGH PRIORITY
-   - Team selection interface
-   - Tool selection interface
-   - Action planning interface
-   - Plan save/load system
+1. Implement planning action handlers - HIGH PRIORITY
+   - Walk action with landscape integration
+   - Use action (tools on objects)
+   - Open/close actions (doors, windows, safes)
+   - Take/drop actions (loot management)
+   - Wait action (time progression)
+   - Radio action (signal communication)
 2. Implement landscape rendering - HIGH PRIORITY
    - Floor rendering
    - Object rendering
    - Room navigation
    - Collision detection
+   - Scrolling
 3. Implement burglary execution - HIGH PRIORITY
    - Player movement in building
    - Tool usage
    - Alarm/guard detection
    - Loot collection
+   - Time tracking
 
 ### Medium-term
 1. Port dialog system
@@ -450,9 +469,9 @@ npm run dev
 
 ## Notes
 
-- 58 TypeScript files, ~15,505 lines of code (up from ~14,339)
+- 60 TypeScript files, ~16,723 lines of code (up from ~15,505)
 - 72 C source files to port (~35k lines)
-- Progress: ~40% complete (estimated)
+- Progress: ~45% complete (estimated)
 - TCMAIN.DAT and TCBUILD.DAT are main data files
 - Building-specific files: *ETA0.DAT, *ETA1.DAT, etc.
 - Relations in .REL files (text format)
