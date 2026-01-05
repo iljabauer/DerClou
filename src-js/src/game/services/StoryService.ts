@@ -128,7 +128,13 @@ import {
     Person_Mike_Seeger,
     Person_Mathew_Black,
     Person_Prof_Marcus_Green,
-    Person_Pere_Ubu
+    Person_Pere_Ubu,
+    Car_Pontiac_Streamliner_1949,
+    Car_Triumph_Roadstar_1949,
+    Person_Kevin_Smith,
+    Person_Al_Mel,
+    Person_Phil_Ciggy,
+    Person_Rod_Masterson
 } from '../types/GameConstants';
 import { ObjectType, Building } from '../types/GameTypes';
 import { PresentationService } from './PresentationService';
@@ -209,6 +215,7 @@ export class StoryService {
         this.handlers.set(SCENE_3RD_BURG, () => this.tcDone3rdBurglary());
         this.handlers.set(SCENE_4TH_BURG, () => this.tcDone4thBurglary());
         this.handlers.set(SCENE_5TH_BURG, () => this.tcDone5thBurglary());
+        this.handlers.set(SCENE_6TH_BURG, () => this.tcDone6thBurglary());
         // More handlers will be added as they are ported
     }
 
@@ -1466,6 +1473,35 @@ export class StoryService {
         // TODO: if (bProfidisk) {
         //     this.db.livesInSet(London_London_1, Person_Prof_Marcus_Green);
         //     this.db.livesInSet(London_London_1, Person_Pere_Ubu);
+        // }
+
+        // TODO: GetScene(SCENE_FAHNDUNG)-\u003eGeschehen = 0;
+        this.scene.sceneArgs.returnValue = this.getLocSceneEventNr(this.film.getLocation());
+    }
+
+    /**
+     * 6TH BURGLARY
+     * Port of tcDone6thBurglary from story.c
+     * 
+     * After 6th burglary - unlock locations, add cars/persons
+     */
+    private tcDone6thBurglary(): void {
+        this.scene.addTaxiLocation(43); // vict & alb
+        this.scene.addTaxiLocation(37); // brit
+
+        // TODO: if (bProfidisk) this.scene.addTaxiLocation(79); // buckingham
+
+        // Add cars to Marc Smith
+        this.db.hasSet(Person_Marc_Smith, Car_Pontiac_Streamliner_1949);
+        this.db.hasSet(Person_Marc_Smith, Car_Triumph_Roadstar_1949);
+
+        // Add persons to London
+        this.db.livesInSet(London_London_1, Person_Kevin_Smith);
+        this.db.livesInSet(London_London_1, Person_Al_Mel);
+
+        // TODO: if (bProfidisk) {
+        //     this.db.livesInSet(London_London_1, Person_Phil_Ciggy);
+        //     this.db.livesInSet(London_London_1, Person_Rod_Masterson);
         // }
 
         // TODO: GetScene(SCENE_FAHNDUNG)-\u003eGeschehen = 0;
