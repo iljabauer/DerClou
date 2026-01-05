@@ -854,6 +854,25 @@ export class StoryService {
     }
 
     /**
+     * MATT IS ARRESTED
+     * Port of tcDoneMattIsArrested from story.c
+     * 
+     * Matt is arrested and sent to prison
+     */
+    private tcDoneMattIsArrested(): void {
+        this.stopAnim();
+
+        this.gfxShow(169); // prison
+
+        this.addVTime(1439);
+
+        this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, 'IN_PRISON_OLD_0');
+        this.gfxShow(161); // police
+
+        this.scene.sceneArgs.returnValue = SCENE_POLICE;
+    }
+
+    /**
      * Helper: Play animation
      */
     private playAnim(animName: string, duration: number): void {
