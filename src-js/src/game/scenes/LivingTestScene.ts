@@ -5,17 +5,19 @@
 import { Scene } from 'phaser';
 import { LivingService, AnimAction, LivingStatus } from '../services/LivingService';
 import { ImageService } from '../services/ImageService';
+import { BackgroundService, BackgroundId } from '../services/BackgroundService';
 
 export class LivingTestScene extends Scene {
     private livingService!: LivingService;
     private imageService!: ImageService;
+    private backgroundService!: BackgroundService;
     private statusText!: Phaser.GameObjects.Text;
 
     constructor() {
         super('LivingTestScene');
     }
 
-    create() {
+    async create() {
         const style = { fontFamily: 'Arial', fontSize: '16px', color: '#ffffff' };
 
         this.add.text(10, 10, 'Living System Test Scene', { fontSize: '24px', color: '#00ff00' });
@@ -24,6 +26,9 @@ export class LivingTestScene extends Scene {
 
         // Initialize services
         this.imageService = new ImageService();
+        await this.imageService.init();
+        
+        this.backgroundService = new BackgroundService(this, this.imageService);
         this.livingService = new LivingService(this, this.imageService);
 
         // Initialize living system
@@ -59,9 +64,21 @@ export class LivingTestScene extends Scene {
             .setInteractive({ useHandCursor: true })
             .on('pointerdown', () => this.hideAll());
 
-        this.add.text(10, 150, 'Instructions:', { fontSize: '14px', color: '#ffff00' });
-        this.add.text(10, 170, 'Click buttons to test living system functionality', style);
-        this.add.text(10, 190, 'Characters are placeholder rectangles for now', style);
+        this.add.text(10, 150, 'Show London BG', {
+            backgroundColor: '#444400', padding: { x: 10, y: 5 }, ...style
+        })
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => this.showLondonBackground());
+
+        this.add.text(200, 150, 'Clear BG', {
+            backgroundColor: '#440000', padding: { x: 10, y: 5 }, ...style
+        })
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => this.clearBackground());
+
+        this.add.text(10, 200, 'Instructions:', { fontSize: '14px', color: '#ffff00' });
+        this.add.text(10, 220, 'Click buttons to test living system functionality', style);
+        this.add.text(10, 240, 'Characters are placeholder rectangles for now', style);
     }
 
     private showCharacter(): void {
@@ -96,6 +113,17 @@ export class LivingTestScene extends Scene {
     private hideAll(): void {
         this.livingService.setAllInvisible();
         this.statusText.setText('Status: All characters hidden');
+    }
+
+    private showLondonBackground(): void {
+        this.backgroundService.setCurrentBackground(BackgroundId.LONDON);
+        this.backgroundService.showMenuBackground();
+        this.statusText.setText('Status: London background shown');
+    }
+
+    private clearBackground(): void {
+        this.backgroundService.clearBackground();
+        this.statusText.setText('Status: Background cleared');
     }
 
     update() {
