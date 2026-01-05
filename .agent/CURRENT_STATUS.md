@@ -1,12 +1,12 @@
 # Der Clou! TypeScript Port - Current Status
 
-**Last Updated:** 2026-01-05 (Session 19)
+**Last Updated:** 2026-01-05 (Session 20)
 
 ## Overview
 
-Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundation with replay system, core architecture, complete data/text/image systems, story file loading, and event tracking.
+Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundation with replay system, core architecture, complete data/text/image systems, story file loading, event tracking, and landscape rendering.
 
-## Current Phase: Phase 5 - Story System Integration (Near Complete)
+## Current Phase: Phase 6 - Landscape System (In Progress)
 
 ### What Works ✅
 
@@ -212,14 +212,43 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - Integration with InteractionService
    - Building type updated with all fields from C struct
 
-14. **Landscape System** - Stub ✅
-   - LandscapeService with core interface
-   - Building interior rendering (stubbed)
-   - Room navigation (stubbed)
-   - Object state management
-   - Scroll functions (stubbed)
-   - Collision detection (stubbed)
-   - Full rendering to be implemented with burglary execution
+14. **Landscape System** - Partial ✅
+   - LandscapeService with core rendering (NEW in Session 20)
+   - Initialization and setup (init.c ported)
+     - initLandscape() - Full initialization with graphics layers
+     - initObjects() - Load and organize objects for all areas
+     - initFloorSquares() - Load floor data
+     - initActivArea() - Set up specific area for display
+     - doneLandscape() - Clean up
+   - Core rendering (landscap.c ported)
+     - buildScrollWindow() - Render floor and objects
+     - refreshObjectList() - Create sorted object list
+     - patchObjects() - Fix incorrect status bits
+     - Object type checking (wall, door, addon, standard, special)
+     - State management (old/new state tracking)
+   - Scrolling and viewport (scroll.c ported)
+     - initScrollLandscape() - Calculate scroll deltas
+     - scrollLandscape() - Perform scrolling
+     - scrollCorrectData() - Update window position
+   - Spot management (spot.c ported)
+     - Guard patrol system
+     - Waypoint-based movement (ping-pong pattern)
+     - Spot visibility and status
+     - guyInsideSpot() - Detect if person in patrol area
+   - Utility functions
+     - getRoomsOfArea() - Get rooms in area
+     - getObjectsByList() - Get objects in rectangle
+     - getLoudness() - Microphone detection
+     - calcExactSize() - Object bounding box
+     - isInside() - Rectangle intersection
+   - Phaser integration
+     - Graphics layers (floor, object, character)
+     - Floor tile rendering (placeholder)
+     - Object rendering (placeholder)
+   - LandscapeTestScene for testing
+   - ⚠️ Collision detection needs implementation
+   - ⚠️ Floor/object image loading needs implementation
+   - ⚠️ Full rendering with textures needs implementation
 
 15. **Planning System** - Partial ✅
    - PlanningSystemService - Core system (COMPLETE)
@@ -302,29 +331,35 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - InteractionTestScene
    - OrganisationTestScene
    - PlanningTestScene
+   - LandscapeTestScene (NEW in Session 20)
    - GameScene, MainMenuScene, LondonScene
 
 ### What Needs Work 🚧
 
-1. **Planning System Implementation** - HIGH PRIORITY
+1. **Landscape System Completion** - HIGH PRIORITY (NEW)
+   - ✅ Core initialization and setup
+   - ✅ Object management and sorting
+   - ✅ Scrolling and viewport
+   - ✅ Spot (guard patrol) system
+   - ⚠️ Collision detection implementation
+   - ⚠️ Floor tile image loading and rendering
+   - ⚠️ Object image loading and rendering
+   - ⚠️ Lighting/darkness rendering
+   - ⚠️ Door refresh system
+   - ⚠️ Integration with LivingService for character display
+
+2. **Planning System Implementation** - HIGH PRIORITY
    - ✅ Core system (PlanningSystemService)
    - ✅ Menu system (planner interface)
    - ✅ Team selection UI (via OrganisationService)
    - ✅ Save/load system (basic structure)
+   - ✅ Support functions (PlanningSupportService)
    - ⚠️ Action implementations (walk, use, open, close, take, drop, wait, radio)
-   - ⚠️ Landscape integration for action planning
+   - ⚠️ Landscape integration for action planning (NOW POSSIBLE)
    - ⚠️ Guard simulation
    - ⚠️ Burglary execution (plPlayer)
    - ⚠️ Time tracking during execution
    - ⚠️ Loot tracking during execution
-
-2. **Landscape System Implementation** - HIGH PRIORITY
-   - ⚠️ Implement floor rendering
-   - ⚠️ Implement object rendering
-   - ⚠️ Implement room navigation
-   - ⚠️ Implement collision detection
-   - ⚠️ Implement scrolling
-   - ⚠️ Implement lighting/darkness
 
 3. **Menu System Integration** - MEDIUM PRIORITY
    - ⚠️ Southampton scene menu (walk, wait, fish, plan, info, execute)
@@ -376,8 +411,9 @@ src-js/src/game/
 │   ├── StoryService.ts      ✅ Story handlers (43/43)
 │   ├── InteractionService.ts ✅ Action menu
 │   ├── InvestigationService.ts ✅ Building observation
-│   ├── LandscapeService.ts  🚧 Building interiors (stub)
+│   ├── LandscapeService.ts  🚧 Building interiors (partial - Session 20)
 │   ├── PlanningSystemService.ts ✅ Planning core (system/handler/action/signal)
+│   ├── PlanningSupportService.ts ✅ Planning support functions
 │   ├── PlanningService.ts   🚧 Burglary planning (partial)
 │   ├── OrganisationService.ts ✅ Team/car/driver selection
 │   ├── LootService.ts       ✅ Loot management
@@ -396,6 +432,7 @@ src-js/src/game/
     ├── InteractionTestScene.ts ✅ Interaction test
     ├── OrganisationTestScene.ts ✅ Organisation test
     ├── PlanningTestScene.ts ✅ Planning system test
+    ├── LandscapeTestScene.ts ✅ Landscape test (NEW Session 20)
     ├── GameScene.ts         ✅ Main scene
     ├── MainMenuScene.ts     ✅ Menu
     └── LondonScene.ts       ✅ Hub scene
@@ -403,28 +440,31 @@ src-js/src/game/
 
 ## Next Steps (Priority Order)
 
-### Immediate (Session 19 - IN PROGRESS 🚧)
-1. ✅ Port planning support functions (PlanningSupportService from support.c)
-2. ⚠️ Port action implementations (walk, use, open, close, take, drop, wait, radio)
-3. ⚠️ Port landscape rendering system (landscap/)
-4. ⚠️ Update documentation with progress
+### Immediate (Session 20 - COMPLETED ✅)
+1. ✅ Port landscape initialization (init.c)
+2. ✅ Port core rendering (landscap.c)
+3. ✅ Port scrolling system (scroll.c)
+4. ✅ Port spot management (spot.c)
+5. ✅ Create LandscapeTestScene
+6. ✅ Update documentation
 
 ### Short-term (Next 2-3 Sessions)
-1. Implement planning action handlers - HIGH PRIORITY
-   - Walk action with landscape integration
+1. Complete landscape rendering - HIGH PRIORITY
+   - Floor tile image loading and rendering
+   - Object image loading and rendering
+   - Collision detection implementation
+   - Lighting/darkness rendering
+   - Door refresh system
+   - Integration with LivingService
+2. Implement planning action handlers - HIGH PRIORITY
+   - Walk action with landscape integration (NOW POSSIBLE)
    - Use action (tools on objects)
    - Open/close actions (doors, windows, safes)
    - Take/drop actions (loot management)
    - Wait action (time progression)
    - Radio action (signal communication)
-2. Implement landscape rendering - HIGH PRIORITY
-   - Floor rendering
-   - Object rendering
-   - Room navigation
-   - Collision detection
-   - Scrolling
 3. Implement burglary execution - HIGH PRIORITY
-   - Player movement in building
+   - Player movement in building (landscape ready)
    - Tool usage
    - Alarm/guard detection
    - Loot collection
@@ -481,9 +521,9 @@ npm run dev
 
 ## Notes
 
-- 61 TypeScript files, ~17,045 lines of code (up from ~16,723)
+- 62 TypeScript files, ~18,742 lines of code (up from ~17,045 in Session 19)
 - 72 C source files to port (~35k lines)
-- Progress: ~45% complete (estimated)
+- Progress: ~48% complete (estimated, up from ~46%)
 - TCMAIN.DAT and TCBUILD.DAT are main data files
 - Building-specific files: *ETA0.DAT, *ETA1.DAT, etc.
 - Relations in .REL files (text format)
