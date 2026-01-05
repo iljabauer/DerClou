@@ -4,6 +4,5 @@
 /.vscode/
 /gamedata/DerClou
 /gamedata/clou.log
-*.rec
 .idea
 output_*.txt
