@@ -86,6 +86,13 @@ export class FilmService {
     }
 
     /**
+     * Set current day
+     */
+    setDay(day: number): void {
+        this.film.currentDay = day;
+    }
+
+    /**
      * Get current minute
      */
     getCurrentMinute(): number {

@@ -24,10 +24,13 @@ import {
     SCENE_FST_MEET_BRIGGS,
     SCENE_FREIFAHRT,
     SCENE_CALL_FROM_POOLY,
+    SCENE_GLUDO_SAILOR,
+    SCENE_CALL_BRIGGS,
     STORY_0_TXT,
     OLD_MATT_PICTID,
     MATT_PICTID,
     PHONE_PICTID,
+    FACE_GLUDO_SAILOR,
     Person_Matt_Stuvysunt,
     Person_Ben_Riggley,
     Person_John_Gludo,
@@ -110,6 +113,8 @@ export class StoryService {
         this.handlers.set(SCENE_FST_MEET_BRIGGS, () => this.tcDoneMeetBriggs());
         this.handlers.set(SCENE_FREIFAHRT, () => this.tcDoneFreeTicket());
         this.handlers.set(SCENE_CALL_FROM_POOLY, () => this.tcDoneCallFromPooly());
+        this.handlers.set(SCENE_GLUDO_SAILOR, () => this.tcDoneGludoAsSailor());
+        this.handlers.set(SCENE_CALL_BRIGGS, () => this.tcDoneCallFromBriggs());
         // More handlers will be added as they are ported
     }
 
@@ -576,6 +581,88 @@ export class StoryService {
         }
 
         this.scene.sceneArgs.returnValue = SCENE_HOTEL_ROOM;
+    }
+
+    /**
+     * GLUDO AS SAILOR
+     * Port of tcDoneGludoAsSailor from story.c
+     * 
+     * Matt meets John Gludo disguised as a sailor
+     */
+    private tcDoneGludoAsSailor(): void {
+        // Matt now knows Gludo
+        this.db.knowsSet(Person_Matt_Stuvysunt, Person_John_Gludo);
+
+        // Play Gludo's theme music (stub)
+        // sndPlaySound("gludo.bk", 0);
+
+        this.dialog.say(STORY_0_TXT, 0, FACE_GLUDO_SAILOR, 'SAILOR_GLUDO_0');
+        this.dialog.say(STORY_0_TXT, 0, MATT_PICTID, 'SAILOR_MATT_0');
+        this.dialog.say(STORY_0_TXT, 0, FACE_GLUDO_SAILOR, 'SAILOR_GLUDO_1');
+
+        if (this.dialog.say(STORY_0_TXT, 0, MATT_PICTID, 'SAILOR_MATT_1')) {
+            // Matt refuses - goes back to Holland Street
+            this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, 'SAILOR_OLD_MATT_0');
+
+            // Play street music (stub)
+            // sndPlaySound("street1.bk", 0);
+            
+            this.scene.sceneArgs.returnValue = SCENE_HOLLAND_STR;
+        } else {
+            // Matt accepts - goes to prison
+            this.dialog.say(STORY_0_TXT, 0, FACE_GLUDO_SAILOR, 'SAILOR_GLUDO_2');
+            this.stopAnim();
+
+            this.tcDonePrison();
+        }
+    }
+
+    /**
+     * CALL FROM BRIGGS
+     * Port of tcDoneCallFromBriggs from story.c
+     * 
+     * Herbert Briggs calls Matt
+     */
+    private tcDoneCallFromBriggs(): void {
+        // Time passes
+        this.asTimeGoesBy(this.film.getMinute() + 130);
+
+        // Phone rings
+        this.somebodyIsCalling();
+
+        this.dialog.say(STORY_0_TXT, 0, PHONE_PICTID, 'A_CALL_FOR_YOU');
+        this.dialog.say(STORY_0_TXT, 0, PHONE_PICTID, 'BRIGGS_CALL');
+
+        this.scene.sceneArgs.returnValue = SCENE_HOTEL_ROOM;
+    }
+
+    /**
+     * PRISON
+     * Port of tcDonePrison from story.c
+     * 
+     * Matt goes to prison - game over
+     */
+    private tcDonePrison(): void {
+        // Set date to 13.01.1972
+        this.film.setDay(719792);
+
+        // Play end music (stub)
+        // sndPlaySound("end.bk", 0);
+        
+        this.mattGoesTo(7);
+
+        this.gfxShow(169);
+        this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, 'THE_END_PRISON');
+        this.stopAnim();
+
+        this.mattGoesTo(60);
+        // inpDelay(190);
+        this.dialog.say(STORY_0_TXT, 0, 155, 'THE_END_MONASTERY');
+
+        this.stopAnim();
+        this.gfxChangeColors();
+
+        this.scene.sceneArgs.returnValue = SCENE_NEW_GAME;
     }
 
     /**
