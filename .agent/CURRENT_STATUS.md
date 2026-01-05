@@ -24,11 +24,18 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - Basic renderer
    - Game engine integration
 
-3. **Data Loading** (Partial)
+3. **Data Loading** - Complete ✅
    - BinaryReader with endianness support
-   - DatFileParser (Person, Player, Car, Building, Tool)
+   - DatFileParser with ALL object types:
+     - Person, Player, Car, Building, Tool
+     - Loot, Evidence, Environment
+     - Location, Ability, Item, London
+     - CompleteLoot, LSLock, LSObject, LSRoom
+     - Police, LSArea
    - RelFileParser (text-based relations)
    - DataLoader service
+   - Loads TCMAIN.DAT, TCBUILD.DAT
+   - Loads all building-specific files (*ETA*.DAT)
    - DataLoaderTestScene for testing
 
 4. **Test Scenes**
@@ -38,22 +45,20 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
 
 ### What Needs Work 🚧
 
-1. **Complete Data Loading**
-   - Add parsers for remaining object types (Loot, Evidence, Environment, LSArea, LSObject, Ability, LSLock, LSPower, LSAlarm, Lso, CompleteLoot, Scene, Timer, Item, Location, London, Police, LSRoom)
+1. **Text System**
    - Load object names from text files (OBJECTS.TXT)
    - Verify data integrity against C version
-   - Load all building-specific .DAT/.REL files
 
-2. **Text System**
-   - Load text files from gamedata/TEXTS/
-   - Multi-language support
-   - Text rendering with formatting
-
-3. **Graphics System**
+2. **Graphics System**
    - Load images from gamedata/PICTURES/
    - Convert to web-compatible formats
    - Sprite management
    - Background rendering
+
+3. **Text System**
+   - Load text files from gamedata/TEXTS/
+   - Multi-language support
+   - Text rendering with formatting
 
 4. **Dialog System**
    - Conversation trees
@@ -85,9 +90,9 @@ src-js/src/game/
 │   ├── Random.ts            ✅ Deterministic RNG
 │   ├── ScreenshotService.ts ✅ Screenshots
 │   ├── BinaryReader.ts      ✅ Binary file reading
-│   ├── DatFileParser.ts     🚧 Partial (5 of ~20 types)
+│   ├── DatFileParser.ts     ✅ All 18 object types
 │   ├── RelFileParser.ts     ✅ Relation parsing
-│   └── DataLoader.ts        🚧 Partial (TCMAIN/TCBUILD only)
+│   └── DataLoader.ts        ✅ All data files
 └── scenes/
     ├── ReplayTestScene.ts   ✅ Replay testing
     ├── DataLoaderTestScene.ts ✅ Data loading test
@@ -100,10 +105,10 @@ src-js/src/game/
 
 ### Immediate (This Session)
 1. ✅ Organize documentation in .agent/
-2. Test current data loading implementation
-3. Add parsers for remaining object types
-4. Load building-specific data files
-5. Verify loaded data matches C version
+2. ✅ Test current data loading implementation
+3. ✅ Add parsers for remaining object types (all 18 types complete)
+4. ✅ Load building-specific data files (all *ETA*.DAT files)
+5. ⚠️ Verify loaded data matches C version (needs manual testing)
 
 ### Short-term (Next Few Sessions)
 1. Complete data loading system

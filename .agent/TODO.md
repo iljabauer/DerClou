@@ -7,22 +7,11 @@
 ### High Priority 🔴
 
 - [x] Test current data loading with TCMAIN.DAT and TCBUILD.DAT
-- [x] Add parsers for remaining object types in DatFileParser.ts:
-  - [x] Loot
-  - [x] Evidence
-  - [x] Environment
-  - [x] LSObject
-  - [x] Ability
-  - [x] LSLock
-  - [x] CompleteLoot
-  - [x] Item
-  - [x] Location
-  - [x] London
-  - [x] LSRoom
-- [ ] Load building-specific data files (*ETA0.DAT, *ETA1.DAT, etc.)
+- [x] Add parsers for all object types in DatFileParser.ts (18 types complete)
+- [x] Load building-specific data files (*ETA*.DAT, *ETA*.REL)
+- [x] Add Police and LSArea types
 - [ ] Verify object counts match C version
-- [ ] Load object names from text files
-- [ ] Add Building type parser (currently missing)
+- [ ] Load object names from text files (OBJECTS.TXT)
 
 ### Medium Priority 🟡
 
@@ -50,6 +39,7 @@
 
 ## Completed ✅
 
+### Core Systems
 - [x] Move documentation to .agent/
 - [x] Create current status document
 - [x] Create TODO tracking
@@ -60,13 +50,20 @@
 - [x] Implement SceneManager
 - [x] Create basic Renderer
 - [x] Integrate GameEngine
-- [x] Create BinaryReader
-- [x] Create DatFileParser with all object types
-- [x] Create RelFileParser
+
+### Data Loading (Complete)
+- [x] Create BinaryReader with endianness support
+- [x] Create DatFileParser with all 18 object types:
+  - Person, Player, Car, Building, Tool
+  - Loot, Evidence, Environment
+  - Location, Ability, Item, London
+  - CompleteLoot, LSLock, LSObject, LSRoom
+  - Police, LSArea
+- [x] Create RelFileParser for text-based relations
 - [x] Create DataLoader service
-- [x] Create DataLoaderTestScene
-- [x] Add all object type interfaces (Location, Ability, Item, London, CompleteLoot, LSLock, LSObject, LSRoom)
-- [x] Implement parsers for all object types
+- [x] Load TCMAIN.DAT and TCBUILD.DAT
+- [x] Load all building-specific files (*ETA*.DAT, *ETA*.REL)
+- [x] Create DataLoaderTestScene for testing
 
 ## Blocked ⛔
 
