@@ -12,6 +12,7 @@ import { SceneService } from './SceneService';
 import { DialogService } from './DialogService';
 import { FilmService } from './FilmService';
 import { InvestigationService } from './InvestigationService';
+import { PlanningService } from './PlanningService';
 import {
     GO, WAIT, BUSINESS_TALK, LOOK, INVESTIGATE, PLAN, CALL_TAXI, MAKE_CALL, INFO,
     MENU_TXT, THECLOU_TXT, BUSINESS_TXT,
@@ -54,6 +55,7 @@ export class InteractionService {
     private dialog: DialogService;
     private film: FilmService;
     private investigation: InvestigationService;
+    private planning: PlanningService | null = null;
 
     constructor(
         scene: Phaser.Scene,
@@ -73,6 +75,13 @@ export class InteractionService {
         this.dialog = dialog;
         this.film = film;
         this.investigation = investigation;
+    }
+
+    /**
+     * Set planning service (optional dependency)
+     */
+    setPlanningService(planning: PlanningService): void {
+        this.planning = planning;
     }
 
     /**
@@ -441,12 +450,23 @@ export class InteractionService {
      * Handle PLAN action
      */
     private async handlePlan(): Promise<number> {
-        // TODO: Implement planning system
-        // - Check if player has buildings (hasAll with Object_Building)
-        // - Check if player has cars (hasAll with Object_Car)
-        // - Call tcOrganisation() to select building and team
-        // - Call tcBurglary() to execute the burglary
-        console.log('PLAN action - not yet fully implemented');
+        if (!this.planning) {
+            await this.ui.showBubble(
+                ['Planning system not available.'],
+                'think',
+                0
+            );
+            return 0;
+        }
+
+        // TODO: Implement building selection
+        // For now, show a message
+        await this.ui.showBubble(
+            ['Select a building to plan a burglary.', 'This feature is not yet fully implemented.'],
+            'think',
+            0
+        );
+
         return 0;
     }
 
