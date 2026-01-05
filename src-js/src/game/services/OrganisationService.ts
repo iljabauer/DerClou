@@ -13,7 +13,7 @@ import { UIService } from './UIService';
 import { DialogService } from './DialogService';
 import { PlanningService } from './PlanningService';
 import { FilmService } from './FilmService';
-import { GameConstants } from '../core/GameConstants';
+import { GameConstants } from '../types/GameConstants';
 
 export interface OrganisationState {
     buildingId: number;
