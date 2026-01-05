@@ -24,14 +24,14 @@ const config: Types.Core.GameConfig = {
         autoCenter: Scale.CENTER_BOTH
     },
     scene: [
+        GameScene,
+        ReplayTestScene,
         LivingTestScene,
         PresentationTestScene,
         ImageTestScene,
         UITestScene,
         TextTestScene,
         DataLoaderTestScene,
-        GameScene,
-        ReplayTestScene,
         ScreenshotTestScene,
         TestGameScene,
         MainGame
