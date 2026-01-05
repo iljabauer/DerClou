@@ -6,7 +6,7 @@
 
 Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundation with replay system, core architecture, and complete data/text/image systems.
 
-## Current Phase: Dialog System Complete - Moving to Phase 3
+## Current Phase: Analyzing Phase 3 Requirements
 
 ### What Works ✅
 
@@ -107,11 +107,18 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - ⚠️ Visual regression testing blocked
    - ⚠️ Need to debug NW.js screenshot capture
 
-2. **Location System** (src/present/) - NEXT PRIORITY
-   - ⚠️ GetLocation() - Get current location
-   - ⚠️ hasAll() - Get all persons at location
-   - ⚠️ PersonWorksHere() - Check if person works at location
-   - ⚠️ Required for Talk() function completion
+2. **Scene/Story System** (src/scenes/, src/story/) - COMPLEX
+   - ⚠️ Requires Film system (story state)
+   - ⚠️ Requires Location system (GetLocation, GetObjNrOfLocation)
+   - ⚠️ Requires Present system (object display)
+   - ⚠️ Requires Relation queries (hasAll, knowsAll, livesIn)
+   - See SCENE_SYSTEM_ANALYSIS.md for details
+
+3. **Next Steps** - BUILD FOUNDATION FIRST
+   - Add relation query methods to Database
+   - Create basic Film/Story state management
+   - Port simpler, isolated systems
+   - Return to scene system when foundation is ready
 
 3. **Data Verification**
    - Load object names from text files (OBJECTS.TXT)
