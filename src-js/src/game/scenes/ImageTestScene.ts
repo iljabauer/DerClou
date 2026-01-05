@@ -50,7 +50,7 @@ export class ImageTestScene extends Scene {
 
         try {
             // Load file from gamedata/PICTURES/
-            const path = `../gamedata/PICTURES/${filename}`;
+            const path = `gamedata/PICTURES/${filename}`;
             const response = await fetch(path);
             
             if (!response.ok) {
