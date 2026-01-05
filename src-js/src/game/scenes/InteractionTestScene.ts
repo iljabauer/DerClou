@@ -70,8 +70,14 @@ export class InteractionTestScene extends Phaser.Scene {
         await this.image.loadCollectionList();
         console.log('Images loaded successfully');
 
-        // Initialize film service
-        this.film.initialize();
+        // Load story file
+        console.log('Loading story file...');
+        const storyLoaded = await this.film.initStory('../gamedata/DATA/TCSTORY.PC');
+        if (storyLoaded) {
+            console.log('Story file loaded successfully');
+        } else {
+            console.warn('Failed to load story file - using stub data');
+        }
 
         // Set up test environment
         const env = this.db.getObject(Environment_TheClou) as any;

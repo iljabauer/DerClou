@@ -231,6 +231,14 @@ export class FilmService {
     }
 
     /**
+     * Initialize film service (for backward compatibility)
+     * This is a no-op now - use initStory() to load story file
+     */
+    initialize(): void {
+        console.log('FilmService.initialize() called - use initStory() to load story file');
+    }
+
+    /**
      * Reset film state
      */
     reset(): void {
@@ -239,11 +247,13 @@ export class FilmService {
             locationNames: [],
             currentScene: 0,
             currentDay: 1,
-            currentMinute: 0,
-            scenes: []
+            currentMinute: 543,
+            scenes: [],
+            enabledChoices: 0xFFFFFFFF,
+            startScene: 0,
+            startOrt: 0,
+            startZeit: 1
         };
+        this.storyLoaded = false;
     }
 }
-
-// Singleton instance
-export const filmService = new FilmService();
