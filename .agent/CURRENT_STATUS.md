@@ -110,7 +110,7 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - Scene constants (SCENE_*)
    - Player money management
    - Environment state management
-   - Story handlers ported (16 of 43):
+   - Story handlers ported (32 of 43 - 74%):
      - tcDoneArrival (game opening)
      - tcDoneHotelReception (hotel room)
      - tcDoneCredits (receive money)
@@ -127,8 +127,24 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
      - tcDoneVisitingSabien (Matt visits Sabien)
      - tcDoneADream (Matt has a dream)
      - tcDoneMissedDate (Matt missed date)
+     - tcDoneAfterMeetingBriggs (reflection)
+     - tcDoneDealerIsAfraid (dealer scene)
+     - tcDoneRaidInWalrus (police raid)
+     - tcDoneMattIsArrested (arrest scene)
+     - tcDoneGludoBurnsOffice (evidence burning)
+     - tcDoneDartJager (prison encounter)
+     - tcDoneSabienCall (phone call)
+     - tcDoneMeetingAgain (reunion)
+     - tcDoneAgent (money offer)
+     - tcDoneGoAndFetchJaguar (car fetch)
+     - tcDoneThinkOfSabien (thinking)
+     - tcDoneSouthhamptonWithoutSabien (Southampton)
+     - tcDoneSouthhamptonSabienUnknown (Southampton alt)
+     - tcDoneTerror (car explosion)
+     - tcDoneConfessingSabien (confession scene)
+     - tcDone8thBurglary (8th burglary)
    - Helper methods: time progression, location changes, graphics/animation stubs
-   - ⚠️ 27 more story handlers needed (burglary handlers are complex)
+   - ⚠️ 11 more story handlers needed (mostly burglary handlers)
    - ⚠️ Environment needs database integration
 
 12. **Test Scenes**
