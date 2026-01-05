@@ -88,6 +88,11 @@ export class LivingService {
     private scene: Scene;
     private imageService: ImageService;
     private sc: SpriteControl | null = null;
+    private spriteSheetLoaded: boolean = false;
+
+    // Constants from living_p.h
+    private static readonly COLL_WIDTH = 308;  // Width of sprite sheet
+    private static readonly COLL_ID = 137;     // Collection ID for ALLMAXI
 
     constructor(scene: Scene, imageService: ImageService) {
         this.scene = scene;
@@ -125,8 +130,47 @@ export class LivingService {
         };
 
         await this.loadTemplates();
+        await this.loadSpriteSheet();
         await this.loadLivings();
         this.setPlayMode(PlayMode.NORMAL);
+    }
+
+    /**
+     * Load the ALLMAXI sprite sheet
+     */
+    private async loadSpriteSheet(): Promise<void> {
+        if (this.spriteSheetLoaded) return;
+
+        try {
+            // Load the ALLMAXI collection
+            const loaded = await this.imageService.loadCollection(LivingService.COLL_ID);
+            if (!loaded) {
+                console.error('Failed to load ALLMAXI sprite sheet');
+                return;
+            }
+
+            const coll = this.imageService.getCollection(LivingService.COLL_ID);
+            if (!coll || !coll.image) {
+                console.error('ALLMAXI collection not available');
+                return;
+            }
+
+            // Create Phaser texture from the sprite sheet
+            const texture = this.scene.textures.createCanvas('allmaxi', coll.image.width, coll.image.height);
+            if (!texture) {
+                console.error('Failed to create texture');
+                return;
+            }
+
+            const ctx = texture.getContext();
+            ctx.drawImage(coll.image, 0, 0);
+            texture.refresh();
+
+            this.spriteSheetLoaded = true;
+            console.log(`Loaded ALLMAXI sprite sheet: ${coll.image.width}x${coll.image.height}`);
+        } catch (error) {
+            console.error('Failed to load sprite sheet:', error);
+        }
     }
 
     /**
@@ -396,9 +440,31 @@ export class LivingService {
      * Show a living
      */
     private show(living: Living): void {
-        if (living.sprite) {
-            living.sprite.setVisible(true);
+        if (!living.sprite || !this.sc) return;
+
+        const tlt = living.originTemplate;
+        let action = living.action;
+        let frameNr = living.currFrameNr;
+
+        // Handle ANM_STAND special case (no stand animation was drawn)
+        if (living.action === AnimAction.STAND) {
+            action = living.viewDirection;
+            frameNr = 4;
         }
+
+        // Calculate frame number in sprite sheet
+        let totalFrameNr = action * this.sc.frameCount + frameNr;
+        totalFrameNr = totalFrameNr + tlt.frameOffsetNr;
+
+        // Calculate source position in sprite sheet
+        const offset = totalFrameNr * tlt.width;
+        const srcY = Math.floor(offset / LivingService.COLL_WIDTH) * tlt.height;
+        const srcX = offset % LivingService.COLL_WIDTH;
+
+        // Set the crop rectangle to show only this frame
+        living.sprite.setCrop(srcX, srcY, tlt.width, tlt.height);
+        living.sprite.setPosition(living.xPos, living.yPos);
+        living.sprite.setVisible(true);
     }
 
     /**
@@ -502,17 +568,16 @@ export class LivingService {
             status: LivingStatus.DISABLED
         };
 
-        // Create Phaser sprite
-        // TODO: Load actual sprite texture
-        // For now, create a placeholder rectangle
-        const graphics = this.scene.add.graphics();
-        graphics.fillStyle(0xff0000, 1);
-        graphics.fillRect(0, 0, xSize, ySize);
-        graphics.generateTexture(`living_${name}`, xSize, ySize);
-        graphics.destroy();
-
-        living.sprite = this.scene.add.sprite(0, 0, `living_${name}`);
-        living.sprite.setVisible(false);
+        // Create Phaser sprite from the ALLMAXI sprite sheet
+        if (this.spriteSheetLoaded) {
+            living.sprite = this.scene.add.sprite(0, 0, 'allmaxi');
+            living.sprite.setVisible(false);
+            
+            // Set the display size to match the template
+            living.sprite.setDisplaySize(template.width, template.height);
+        } else {
+            console.warn(`Sprite sheet not loaded for ${name}`);
+        }
 
         this.sc.livings.set(name, living);
     }
