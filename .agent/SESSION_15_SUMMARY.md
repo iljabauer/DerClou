@@ -1,11 +1,11 @@
-# Session 15 Summary - Investigation System
+# Session 15 Summary - Investigation, Landscape, and Planning Systems
 
 **Date:** 2026-01-05
-**Focus:** Port investigation system from invest.c
+**Focus:** Port investigation system, create landscape and planning stubs
 
 ## Accomplishments
 
-### Investigation System Implemented ✅
+### Part 1: Investigation System Implemented ✅
 
 Ported the complete investigation system from invest.c:
 
@@ -60,13 +60,54 @@ Updated Building interface with all fields from C struct:
 - Added GameState for time tracking
 - Updated constructor with all dependencies
 
+### Part 2: Landscape System Stub Created ✅
+
+Created LandscapeService with core interface:
+
+**LandscapeService.ts** - Stub implementation
+- `initLandscape()` - Initialize building interior
+- `doneLandscape()` - Clean up
+- `initActivArea()` - Set active area
+- `setVisibleWindow()` - Set viewport
+- `setActivLiving()` - Set active character
+- `setObjectState()` / `getObjectState()` - Object state management
+- `setScrollSpeed()` / `setCollMode()` / `setDarkness()` - Settings
+- `initScrollLandscape()` / `doScroll()` - Scrolling (stubbed)
+
+**Key Features:**
+- Provides interface for building interior rendering
+- State management for area, viewport, character
+- Object state tracking
+- Full rendering to be implemented later
+
+### Part 3: Planning System Stub Created ✅
+
+Created PlanningService with core interface:
+
+**PlanningService.ts** - Stub implementation
+- `planner(buildingId)` - Planning interface (stubbed)
+- `player(buildingId)` - Burglary execution (stubbed)
+- `loadPlan()` / `savePlan()` / `clearPlan()` - Plan management (stubbed)
+- State management for team, tools, car, plan
+
+**Integration:**
+- Added to StoryService
+- Story handlers call planner() and player()
+- Added to InteractionService
+- PLAN action shows planning interface
+
+**Key Features:**
+- Provides interface for burglary planning
+- Returns success/failure codes
+- Full planning system to be implemented later
+
 ### Code Statistics
 
-- **Commits:** 5
-- **Files Created:** 1 (InvestigationService.ts)
-- **Files Modified:** 5 (GameTypes.ts, DatFileParser.ts, InteractionService.ts, InteractionTestScene.ts, CURRENT_STATUS.md)
-- **Lines Added:** ~293 lines (InvestigationService)
-- **Total TypeScript:** 50 files, ~12,520 lines
+- **Commits:** 9
+- **Files Created:** 3 (InvestigationService.ts, LandscapeService.ts, PlanningService.ts)
+- **Files Modified:** 7 (GameTypes.ts, DatFileParser.ts, InteractionService.ts, InteractionTestScene.ts, StoryService.ts, CURRENT_STATUS.md, SESSION_15_SUMMARY.md)
+- **Lines Added:** ~866 lines (InvestigationService: 293, LandscapeService: 345, PlanningService: 228)
+- **Total TypeScript:** 52 files, ~13,093 lines
 
 ## Technical Notes
 
@@ -129,16 +170,34 @@ Still need to implement:
 - UI integration: ✅ Complete
 - Sound/graphics: ⚠️ Stubbed (not critical)
 
-**Overall Port:** ~36% complete (estimated)
+**Landscape System:** Interface complete, rendering stubbed 🚧
+- Interface: ✅ Complete
+- State management: ✅ Complete
+- Object state: ✅ Complete
+- Floor rendering: ⚠️ Stubbed
+- Object rendering: ⚠️ Stubbed
+- Collision detection: ⚠️ Stubbed
+- Scrolling: ⚠️ Stubbed
+
+**Planning System:** Interface complete, implementation stubbed 🚧
+- Interface: ✅ Complete
+- Integration: ✅ Complete
+- Team selection: ⚠️ Stubbed
+- Tool selection: ⚠️ Stubbed
+- Action planning: ⚠️ Stubbed
+- Plan save/load: ⚠️ Stubbed
+- Burglary execution: ⚠️ Stubbed
+
+**Overall Port:** ~37% complete (estimated)
 - Core systems: ✅ Complete
 - Data/Text/Image: ✅ Complete
 - UI/Dialog/Living: ✅ Complete
 - Story/Scene: ✅ Complete
 - Interaction: ✅ Complete (all 9 actions functional)
 - Investigation: ✅ Complete
-- Planning: ⚠️ Not started (large system, ~7000 lines)
-- Landscape: ⚠️ Not started (large system, ~2700 lines)
-- Burglary execution: ⚠️ Not started (medium system)
+- Landscape: 🚧 Interface complete, rendering stubbed
+- Planning: 🚧 Interface complete, implementation stubbed
+- Burglary execution: ⚠️ Not started
 
 ## Next Steps
 
@@ -186,7 +245,10 @@ Still need to implement:
 src-js/src/game/types/GameTypes.ts                  (modified, +10 fields)
 src-js/src/game/services/DatFileParser.ts           (modified, +10 fields)
 src-js/src/game/services/InvestigationService.ts    (created, +293 lines)
-src-js/src/game/services/InteractionService.ts      (modified, +5 lines)
+src-js/src/game/services/LandscapeService.ts        (created, +345 lines)
+src-js/src/game/services/PlanningService.ts         (created, +228 lines)
+src-js/src/game/services/InteractionService.ts      (modified, +31 lines)
+src-js/src/game/services/StoryService.ts            (modified, +42 lines)
 src-js/src/game/scenes/InteractionTestScene.ts      (modified, +5 lines)
 .agent/CURRENT_STATUS.md                             (modified)
 .agent/SESSION_15_SUMMARY.md                         (this file)
@@ -198,14 +260,37 @@ src-js/src/game/scenes/InteractionTestScene.ts      (modified, +5 lines)
 2. Create InvestigationService with core investigation logic
 3. Integrate InvestigationService with InteractionService
 4. Fix import path in InvestigationService
-5. Update CURRENT_STATUS.md with Session 15 progress
+5. Create LandscapeService stub implementation
+6. Create PlanningService stub implementation
+7. Integrate PlanningService with StoryService
+8. Update InteractionService PLAN action to use PlanningService
+9. Update documentation with Session 15 progress
 
 ## Conclusion
 
-Session 15 successfully implemented the investigation system, completing another major gameplay feature. The INVESTIGATE action is now fully functional, allowing players to observe buildings and gather intelligence.
+Session 15 accomplished three major milestones:
 
-The investigation system is relatively small (293 lines) but important for gameplay. It demonstrates the time-based event system and knowledge tracking that will be used in other parts of the game.
+1. **Investigation System** - Fully implemented (293 lines)
+   - Complete building observation mechanics
+   - Time-based event system
+   - Knowledge and suspicion tracking
 
-The next major challenge is the landscape system, which is needed to display building interiors during burglaries. This is a large system (~2700 lines) that will require multiple sessions to port completely.
+2. **Landscape System** - Interface created (345 lines)
+   - Provides complete interface for building interiors
+   - State management implemented
+   - Rendering to be implemented when needed
 
-The project has grown from ~12,227 lines to ~12,520 lines of TypeScript code, representing approximately 36% of the total C codebase ported.
+3. **Planning System** - Interface created (228 lines)
+   - Provides complete interface for burglary planning
+   - Integration with story and interaction systems
+   - Implementation to be completed when needed
+
+**Strategy:** Following the 80/20 rule, we created stub implementations for the large systems (landscape and planning) that provide the interface but defer the complex implementation. This allows the game to continue running without crashing when these systems are called, while focusing effort on completing smaller, more critical systems first.
+
+The landscape system (~2700 lines in C) and planning system (~7000 lines in C) are very large and complex. By creating stubs, we can:
+- Continue porting other systems
+- Test integration points
+- Implement the full systems when we have more time
+- Avoid blocking progress on these large systems
+
+The project has grown from ~12,227 lines to ~13,093 lines of TypeScript code, representing approximately 37% of the total C codebase ported.

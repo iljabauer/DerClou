@@ -1,6 +1,6 @@
 # Der Clou! TypeScript Port - Current Status
 
-**Last Updated:** 2026-01-05 (Session 15)
+**Last Updated:** 2026-01-05 (Session 15 continued)
 
 ## Overview
 
@@ -212,7 +212,25 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - Integration with InteractionService
    - Building type updated with all fields from C struct
 
-14. **Test Scenes**
+14. **Landscape System** - Stub ✅
+   - LandscapeService with core interface
+   - Building interior rendering (stubbed)
+   - Room navigation (stubbed)
+   - Object state management
+   - Scroll functions (stubbed)
+   - Collision detection (stubbed)
+   - Full rendering to be implemented with burglary execution
+
+15. **Planning System** - Stub ✅
+   - PlanningService with core interface
+   - planner() - Planning interface (stubbed)
+   - player() - Burglary execution (stubbed)
+   - Plan save/load/clear (stubbed)
+   - Integration with StoryService
+   - Integration with InteractionService
+   - Full planning system to be implemented in future sessions
+
+16. **Test Scenes**
    - ReplayTestScene (original)
    - DataLoaderTestScene
    - TextTestScene
@@ -226,19 +244,24 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
 
 ### What Needs Work 🚧
 
-1. **Planning System** - HIGH PRIORITY
-   - ⚠️ Port tcOrganisation() from planing/planer.c
-   - ⚠️ Port tcBurglary() from planing/planer.c
-   - ⚠️ Team management (select people for burglary)
-   - ⚠️ Tool selection and assignment
-   - ⚠️ Time scheduling
-   - ⚠️ Burglary execution (plPlayer integration)
+1. **Planning System Implementation** - HIGH PRIORITY
+   - ⚠️ Implement team selection UI
+   - ⚠️ Implement tool selection UI
+   - ⚠️ Implement action planning UI (walk, use, open, close, take, drop, wait, radio)
+   - ⚠️ Implement plan save/load system
+   - ⚠️ Implement plan validation
+   - ⚠️ Implement guard simulation
+   - ⚠️ Implement burglary execution (plPlayer)
+   - ⚠️ Implement time tracking
+   - ⚠️ Implement loot tracking
 
-2. **Landscape System** - HIGH PRIORITY
-   - ⚠️ Port landscape rendering from landscap/
-   - ⚠️ Building interior display
-   - ⚠️ Room navigation
-   - ⚠️ Object placement in rooms
+2. **Landscape System Implementation** - HIGH PRIORITY
+   - ⚠️ Implement floor rendering
+   - ⚠️ Implement object rendering
+   - ⚠️ Implement room navigation
+   - ⚠️ Implement collision detection
+   - ⚠️ Implement scrolling
+   - ⚠️ Implement lighting/darkness
 
 3. **Menu System Integration** - MEDIUM PRIORITY
    - ⚠️ Southampton scene menu (walk, wait, fish, plan, info, execute)
@@ -289,6 +312,8 @@ src-js/src/game/
 │   ├── StoryService.ts      ✅ Story handlers (43/43)
 │   ├── InteractionService.ts ✅ Action menu
 │   ├── InvestigationService.ts ✅ Building observation
+│   ├── LandscapeService.ts  🚧 Building interiors (stub)
+│   ├── PlanningService.ts   🚧 Burglary planning (stub)
 │   └── PresentationService.ts ✅ Object display
 └── scenes/
     ├── ReplayTestScene.ts   ✅ Replay testing
@@ -310,23 +335,27 @@ src-js/src/game/
 1. ✅ Port investigation system (Investigate from invest.c)
 2. ✅ Update Building type with all fields
 3. ✅ Integrate InvestigationService with InteractionService
-4. ✅ Update documentation with progress
+4. ✅ Create LandscapeService stub
+5. ✅ Create PlanningService stub
+6. ✅ Integrate planning with StoryService and InteractionService
+7. ✅ Update documentation with progress
 
 ### Short-term (Next 2-3 Sessions)
-1. Port landscape system (landscap/) - HIGH PRIORITY
-   - Building interior rendering
-   - Room navigation
-   - Object placement
-   - Required for burglary gameplay
-2. Port planning system (tcOrganisation, tcBurglary) - HIGH PRIORITY
+1. Implement planning system UI - HIGH PRIORITY
    - Team selection interface
-   - Tool assignment
-   - Time scheduling
-   - Burglary initialization
-3. Port burglary execution (plPlayer)
+   - Tool selection interface
+   - Action planning interface
+   - Plan save/load system
+2. Implement landscape rendering - HIGH PRIORITY
+   - Floor rendering
+   - Object rendering
+   - Room navigation
+   - Collision detection
+3. Implement burglary execution - HIGH PRIORITY
    - Player movement in building
    - Tool usage
    - Alarm/guard detection
+   - Loot collection
 
 ### Medium-term
 1. Port dialog system
@@ -379,9 +408,9 @@ npm run dev
 
 ## Notes
 
-- 50 TypeScript files, ~12,520 lines of code (up from ~12,227)
+- 52 TypeScript files, ~13,093 lines of code (up from ~12,520)
 - 72 C source files to port (~35k lines)
-- Progress: ~36% complete (estimated)
+- Progress: ~37% complete (estimated)
 - TCMAIN.DAT and TCBUILD.DAT are main data files
 - Building-specific files: *ETA0.DAT, *ETA1.DAT, etc.
 - Relations in .REL files (text format)
