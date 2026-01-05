@@ -1,6 +1,6 @@
 # Der Clou! TypeScript Port - Current Status
 
-**Last Updated:** 2026-01-05 (Session 15 continued)
+**Last Updated:** 2026-01-05 (Session 16)
 
 ## Overview
 
@@ -230,7 +230,20 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - Integration with InteractionService
    - Full planning system to be implemented in future sessions
 
-16. **Test Scenes**
+16. **Organisation System** - Complete ✅
+   - OrganisationService for team/car/driver selection
+   - Port of src/organisa/organisa.c
+   - tcOrganisation() - Main organisation menu
+   - Team member selection (add/remove)
+   - Car selection with capacity checking
+   - Driver selection with ability checking
+   - Building selection
+   - Integration with InteractionService (PLAN action)
+   - OrganisationTestScene for testing
+   - ⚠️ Display functions not yet implemented (graphics)
+   - ⚠️ Tool distribution not yet implemented
+
+17. **Test Scenes**
    - ReplayTestScene (original)
    - DataLoaderTestScene
    - TextTestScene
@@ -240,12 +253,13 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - DialogTestScene
    - SceneTestScene
    - InteractionTestScene
+   - OrganisationTestScene
    - GameScene, MainMenuScene, LondonScene
 
 ### What Needs Work 🚧
 
 1. **Planning System Implementation** - HIGH PRIORITY
-   - ⚠️ Implement team selection UI
+   - ✅ Team selection UI (via OrganisationService)
    - ⚠️ Implement tool selection UI
    - ⚠️ Implement action planning UI (walk, use, open, close, take, drop, wait, radio)
    - ⚠️ Implement plan save/load system
@@ -314,6 +328,7 @@ src-js/src/game/
 │   ├── InvestigationService.ts ✅ Building observation
 │   ├── LandscapeService.ts  🚧 Building interiors (stub)
 │   ├── PlanningService.ts   🚧 Burglary planning (stub)
+│   ├── OrganisationService.ts ✅ Team/car/driver selection
 │   └── PresentationService.ts ✅ Object display
 └── scenes/
     ├── ReplayTestScene.ts   ✅ Replay testing
@@ -324,6 +339,7 @@ src-js/src/game/
     ├── DialogTestScene.ts   ✅ Dialog system test
     ├── SceneTestScene.ts    ✅ Scene system test
     ├── InteractionTestScene.ts ✅ Interaction test
+    ├── OrganisationTestScene.ts ✅ Organisation test
     ├── GameScene.ts         ✅ Main scene
     ├── MainMenuScene.ts     ✅ Menu
     └── LondonScene.ts       ✅ Hub scene
@@ -331,9 +347,12 @@ src-js/src/game/
 
 ## Next Steps (Priority Order)
 
-### Immediate (Session 15 - COMPLETE ✅)
-1. ✅ Port investigation system (Investigate from invest.c)
-2. ✅ Update Building type with all fields
+### Immediate (Session 16 - COMPLETE ✅)
+1. ✅ Port organisation system (tcOrganisation from organisa/organisa.c)
+2. ✅ Create OrganisationService with team/car/driver selection
+3. ✅ Integrate OrganisationService with InteractionService
+4. ✅ Create OrganisationTestScene for testing
+5. ✅ Update documentation with progress
 3. ✅ Integrate InvestigationService with InteractionService
 4. ✅ Create LandscapeService stub
 5. ✅ Create PlanningService stub
@@ -408,7 +427,7 @@ npm run dev
 
 ## Notes
 
-- 52 TypeScript files, ~13,093 lines of code (up from ~12,520)
+- 54 TypeScript files, ~14,025 lines of code (up from ~13,093)
 - 72 C source files to port (~35k lines)
 - Progress: ~37% complete (estimated)
 - TCMAIN.DAT and TCBUILD.DAT are main data files
