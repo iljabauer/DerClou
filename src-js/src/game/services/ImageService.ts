@@ -2,16 +2,10 @@
  * Image Service - Port of src/gfx/gfx.c (partial)
  * 
  * Handles loading and managing images/collections.
- * Original game uses IFF ILBM format, which needs conversion for web.
- * 
- * TODO: Convert images offline using:
- * 1. C version with SDL_image (can load ILBM)
- * 2. Python with Pillow (pip install pillow)
- * 3. Online ILBM converter
- * 4. Or implement ILBM decoder in JavaScript
- * 
- * For now, this service expects PNG versions in gamedata/PICTURES_PNG/
+ * Uses ILBM decoder to load original Amiga IFF images directly.
  */
+
+import { decodeILBM, ilbmToRGBA } from './ILBMDecoder';
 
 export interface Collection {
     id: number;
@@ -21,7 +15,7 @@ export interface Collection {
     colorStart: number;
     colorEnd: number;
     fromDisk: number;
-    image?: HTMLImageElement | null;
+    image?: HTMLCanvasElement | null;
     loaded: boolean;
 }
 
@@ -42,7 +36,7 @@ export class ImageService {
     private dataPath: string;
     private texturesPath: string;
 
-    constructor(dataPath: string = '../gamedata/TEXTS', texturesPath: string = '../gamedata/PICTURES_PNG') {
+    constructor(dataPath: string = 'gamedata/TEXTS', texturesPath: string = 'gamedata/PICTURES') {
         this.dataPath = dataPath;
         this.texturesPath = texturesPath;
     }
@@ -97,13 +91,7 @@ export class ImageService {
     }
 
     /**
-     * Load a specific collection image
-     * 
-     * NOTE: Original game uses IFF ILBM format. For web, we need either:
-     * 1. Convert images offline to PNG/WebP
-     * 2. Implement ILBM decoder in JavaScript
-     * 
-     * For now, this attempts to load PNG versions if they exist.
+     * Load a specific collection image using ILBM decoder
      */
     async loadCollection(collId: number): Promise<boolean> {
         const coll = this.collections.get(collId);
@@ -117,26 +105,47 @@ export class ImageService {
         }
 
         try {
-            // Load PNG version (images must be converted from ILBM first)
-            // Original filename may have extension, remove it
+            // Load ILBM file from gamedata/PICTURES/
             const baseName = coll.filename.replace(/\.(ani|obj|car|fnt)$/i, '');
-            const pngPath = `${this.texturesPath}/${baseName.toUpperCase()}.png`;
+            const ilbmPath = `${this.texturesPath}/${baseName.toUpperCase()}`;
             
-            return new Promise((resolve) => {
-                const img = new Image();
-                img.onload = () => {
-                    coll.image = img;
-                    coll.loaded = true;
-                    console.log(`Loaded collection ${collId}: ${coll.filename}`);
-                    resolve(true);
-                };
-                img.onerror = () => {
-                    console.warn(`Failed to load ${pngPath} - image needs conversion from ILBM format`);
-                    console.warn(`Run image conversion tool to convert gamedata/PICTURES/* to PNG`);
-                    resolve(false);
-                };
-                img.src = pngPath;
-            });
+            const response = await fetch(ilbmPath);
+            if (!response.ok) {
+                console.warn(`Failed to load ${ilbmPath}: ${response.statusText}`);
+                return false;
+            }
+
+            const arrayBuffer = await response.arrayBuffer();
+            const buffer = new Uint8Array(arrayBuffer);
+
+            // Decode ILBM
+            const ilbm = decodeILBM(buffer);
+            if (!ilbm) {
+                console.error(`Failed to decode ILBM: ${ilbmPath}`);
+                return false;
+            }
+
+            // Convert to RGBA
+            const rgba = ilbmToRGBA(ilbm);
+
+            // Create canvas and draw image
+            const canvas = document.createElement('canvas');
+            canvas.width = ilbm.width;
+            canvas.height = ilbm.height;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) {
+                console.error('Failed to get canvas context');
+                return false;
+            }
+
+            const imageData = ctx.createImageData(ilbm.width, ilbm.height);
+            imageData.data.set(rgba);
+            ctx.putImageData(imageData, 0, 0);
+
+            coll.image = canvas;
+            coll.loaded = true;
+            console.log(`Loaded collection ${collId}: ${coll.filename} (${ilbm.width}x${ilbm.height})`);
+            return true;
         } catch (error) {
             console.error(`Failed to load collection ${collId}:`, error);
             return false;
