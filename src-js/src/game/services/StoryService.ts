@@ -917,6 +917,61 @@ export class StoryService {
     }
 
     /**
+     * DART JAGER
+     * Port of tcDoneDartJager from story.c
+     * 
+     * Matt encounters Lucas Grull (dart hunter) in prison
+     */
+    private tcDoneDartJager(): void {
+        const Grull = this.db.getObject(Person_Lucas_Grull) as any;
+        const Env = this.db.getObject(Environment_TheClou) as any;
+
+        if (!Env.MattHasIdentityCard) {
+            this.stopAnim();
+
+            this.gfxShow(169); // prison
+
+            this.db.knowsSet(Person_Matt_Stuvysunt, Person_Lucas_Grull);
+
+            this.dialog.say(STORY_0_TXT, 0, Grull.PictID, 'DART_GRULL_0');
+            const choice = this.dialog.say(STORY_0_TXT, 0, MATT_PICTID, 'DART_MATT_1');
+
+            if (choice === 0) {
+                this.dialog.say(STORY_0_TXT, 0, Grull.PictID, 'DART_GRULL_1');
+
+                // TODO: sndPlayFX("darth.voc");
+
+                this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, 'DART_JAEGER_0');
+
+                this.gfxChangeColors(0, 'fade_out');
+                this.gfxShow(221); // monastery
+
+                // TODO: sndPlayFX("darth.voc");
+
+                this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, 'DART_JAEGER_1');
+
+                // TODO: sndPlaySound("end.bk", 0);
+                this.mattGoesTo(60);
+                this.dialog.say(STORY_0_TXT, 0, 155, 'THE_END_MONASTERY'); // holy matt
+
+                this.stopAnim();
+                this.gfxChangeColors(3, 'fade_out');
+
+                this.scene.sceneArgs.returnValue = SCENE_NEW_GAME;
+            } else {
+                this.dialog.say(STORY_0_TXT, 0, Grull.PictID, 'DART_GRULL_2');
+                this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, 'DART_OLD_MATT_0');
+
+                this.gfxShow(161); // police
+
+                this.scene.sceneArgs.returnValue = SCENE_POLICE;
+            }
+        } else {
+            this.scene.sceneArgs.returnValue = SCENE_POLICE;
+        }
+    }
+
+    /**
      * Helper: Play animation
      */
     private playAnim(animName: string, duration: number): void {
