@@ -459,11 +459,225 @@ export class PlanningService {
     }
 
     /**
-     * Use action
+     * Use action - use tools on objects or use stairs/windows
      */
     private async actionUse(): Promise<void> {
-        // TODO: Implement use action
-        await this.ui.showBubble(['Use action not yet implemented'], 'think', 0);
+        if (!this.state) return;
+        
+        // Get objects in reach
+        const actionList = this.support.getObjectsList(this.currentPerson, false);
+        
+        if (this.currentPerson < this.state.team.length) {
+            // Burglar - can use tools on objects
+            
+            // Add guards to action list
+            for (let i = this.state.team.length; i < this.state.personNames.length; i++) {
+                this.support.insertGuard(actionList, this.currentPerson, i);
+            }
+            
+            // Get available tools
+            const tools = this.db.getRelatedObjects(
+                this.state.team[this.currentPerson],
+                'has',
+                'Tool'
+            );
+            
+            if (tools.length === 0) {
+                this.showMessage('USE_1', true);
+                return;
+            }
+            
+            if (actionList.length === 0) {
+                this.showMessage('NO_OBJECTS', true);
+                return;
+            }
+            
+            // Show object selection
+            this.showMessage('USE_3', true);
+            const objectChoice = await this.ui.showMenu(
+                actionList.map(obj => this.db.getObjectName(obj)),
+                'Select Object'
+            );
+            
+            if (objectChoice < 0 || objectChoice >= actionList.length) return;
+            
+            const objectId = actionList[objectChoice];
+            const lsObject = this.db.getObject(objectId);
+            
+            // Check if it's stairs
+            if (this.support.isStair(objectId)) {
+                // Use stairs to change area
+                const newAreaId = this.db.getRelation(objectId, 'StairConnects', objectId);
+                
+                if (newAreaId) {
+                    const action = this.planningSystem.initAction(
+                        ActionType.USE,
+                        objectId,
+                        this.landscape.getActivAreaID(),
+                        8 * 60 // PLANING_TIME_USE_STAIRS * PLANING_CORRECT_TIME
+                    );
+                    
+                    if (action) {
+                        this.planChanged = true;
+                        
+                        // Move person to new area
+                        const personName = this.state.personNames[this.currentPerson];
+                        this.living.livesInArea(personName, newAreaId);
+                        
+                        // Reinitialize area
+                        this.landscape.doneActivArea(newAreaId);
+                        await this.landscape.initActivArea(
+                            newAreaId,
+                            this.living.getXPos(personName),
+                            this.living.getYPos(personName),
+                            personName
+                        );
+                        
+                        this.living.refreshAll();
+                        
+                        await this.sync(false, this.planningSystem.getMaxTimer(), 8 * 60, true);
+                    } else {
+                        await this.say('PLANING_END', this.currentPerson);
+                    }
+                }
+                return;
+            }
+            
+            // Check if it's a guard
+            if (this.db.isObjectType(objectId, 'Police')) {
+                // Fight guard
+                const person = this.db.getObject(this.state.team[this.currentPerson]);
+                if (this.db.hasRelation(this.state.team[this.currentPerson], 'has', 'Ability_Kampf')) {
+                    // Show fight tool selection
+                    const fightTools = ['Hand', 'Foot'];
+                    if (tools.some(t => this.db.getObjectName(t) === 'Chloroform')) {
+                        fightTools.push('Chloroform');
+                    }
+                    
+                    this.showMessage('USE_4', true);
+                    const toolChoice = await this.ui.showMenu(fightTools, 'Select Tool');
+                    
+                    if (toolChoice >= 0 && toolChoice < fightTools.length) {
+                        // TODO: Calculate time based on tool and guard
+                        const time = 5 * 60; // PLANING_TIME_FIGHT * PLANING_CORRECT_TIME
+                        
+                        const action = this.planningSystem.initAction(
+                            ActionType.USE,
+                            objectId,
+                            toolChoice,
+                            time
+                        );
+                        
+                        if (action) {
+                            this.planChanged = true;
+                            // Mark guard as knocked out
+                            // TODO: Update guard state
+                            await this.support.work(this.currentPerson);
+                            await this.sync(false, this.planningSystem.getMaxTimer(), time, true);
+                            this.living.refreshAll();
+                        } else {
+                            await this.say('PLANING_END', this.currentPerson);
+                        }
+                    }
+                } else {
+                    this.showMessage('WRONG_ABILITY', true);
+                }
+                return;
+            }
+            
+            // Regular object - use tool on it
+            const objectState = this.landscape.getObjectState(objectId);
+            
+            // Check if object is locked
+            if (!this.support.ignoreLock(objectId) && !(objectState & (1 << 2))) { // Const_tcLOCK_UNLOCK_BIT
+                // Show tool selection
+                this.showMessage('USE_2', true);
+                
+                const toolChoice = await this.ui.showMenu(
+                    tools.map(t => this.db.getObjectName(t)),
+                    'Select Tool'
+                );
+                
+                if (toolChoice >= 0 && toolChoice < tools.length) {
+                    const toolId = tools[toolChoice];
+                    
+                    // Check abilities
+                    // TODO: Implement plCheckAbilities
+                    
+                    // Check required tools
+                    // TODO: Implement plCheckRequiredTools
+                    
+                    // Calculate time
+                    // TODO: Use tcGuyUsesTool
+                    const time = 60 * 60; // Placeholder
+                    
+                    const action = this.planningSystem.initAction(
+                        ActionType.USE,
+                        objectId,
+                        toolId,
+                        time
+                    );
+                    
+                    if (action) {
+                        this.planChanged = true;
+                        await this.support.work(this.currentPerson);
+                        await this.sync(false, this.planningSystem.getMaxTimer(), time, true);
+                        
+                        // Unlock object
+                        if (!this.support.ignoreLock(objectId)) {
+                            this.landscape.setObjectState(objectId, 1 << 2, 1); // Const_tcLOCK_UNLOCK_BIT
+                            
+                            // Check if tool also opens
+                            const tool = this.db.getObject(toolId);
+                            // TODO: Check tool effect
+                            // if (tool.Effect & Const_tcTOOL_OPENS) {
+                            //     this.landscape.setObjectState(objectId, 1 << 0, 1); // Const_tcOPEN_CLOSE_BIT
+                            //     this.support.correctOpened(lsObject, true);
+                            // }
+                        }
+                        
+                        this.landscape.refresh(objectId);
+                        this.living.refreshAll();
+                    } else {
+                        await this.say('PLANING_END', this.currentPerson);
+                    }
+                }
+            } else {
+                this.showMessage('UNLOCK_UNLOCKED', true);
+            }
+        } else {
+            // Guard - can control objects
+            if (actionList.length === 0) {
+                this.showMessage('NO_OBJECTS', true);
+                return;
+            }
+            
+            this.showMessage('CONTROL', true);
+            const objectChoice = await this.ui.showMenu(
+                actionList.map(obj => this.db.getObjectName(obj)),
+                'Select Object'
+            );
+            
+            if (objectChoice >= 0 && objectChoice < actionList.length) {
+                const objectId = actionList[objectChoice];
+                
+                const action = this.planningSystem.initAction(
+                    ActionType.CONTROL,
+                    objectId,
+                    0,
+                    5 * 60 // PLANING_TIME_CONTROL * PLANING_CORRECT_TIME
+                );
+                
+                if (action) {
+                    this.planChanged = true;
+                    await this.sync(false, this.planningSystem.getMaxTimer(), 5 * 60, true);
+                    this.landscape.refresh(objectId);
+                    this.living.refreshAll();
+                } else {
+                    await this.say('PLANING_END', this.currentPerson);
+                }
+            }
+        }
     }
 
     /**
