@@ -10,7 +10,19 @@ import { Database } from '../core/Database';
 import { UIService } from './UIService';
 import { TextService } from './TextService';
 import { LandscapeService, LS_SCROLL_LEFT, LS_SCROLL_RIGHT, LS_SCROLL_UP, LS_SCROLL_DOWN } from './LandscapeService';
-import { PlanningSystemService, ActionType } from './PlanningSystemService';
+import { 
+    PlanningSystemService, 
+    ACTION_GO, 
+    ACTION_WAIT, 
+    ACTION_SIGNAL, 
+    ACTION_WAIT_SIGNAL, 
+    ACTION_USE, 
+    ACTION_TAKE, 
+    ACTION_DROP, 
+    ACTION_OPEN, 
+    ACTION_CLOSE, 
+    ACTION_CONTROL 
+} from './PlanningSystemService';
 import { PlanningSupportService } from './PlanningSupportService';
 import { LivingService } from './LivingService';
 import { Building } from '../types/GameTypes';
@@ -395,9 +407,9 @@ export class PlanningService {
                     const currentAction = this.planningSystem.getCurrentAction();
                     
                     // Create or update GO action
-                    if (!currentAction || currentAction.type !== ActionType.GO) {
+                    if (!currentAction || currentAction.type !== ACTION_GO) {
                         const newAction = this.planningSystem.initAction(
-                            ActionType.GO,
+                            ACTION_GO,
                             direction,
                             0,
                             0
@@ -419,7 +431,7 @@ export class PlanningService {
                         } else {
                             // Direction changed, create new action
                             const newAction = this.planningSystem.initAction(
-                                ActionType.GO,
+                                ACTION_GO,
                                 direction,
                                 0,
                                 1
@@ -511,7 +523,7 @@ export class PlanningService {
                 
                 if (newAreaId) {
                     const action = this.planningSystem.initAction(
-                        ActionType.USE,
+                        ACTION_USE,
                         objectId,
                         this.landscape.getActivAreaID(),
                         8 * 60 // PLANING_TIME_USE_STAIRS * PLANING_CORRECT_TIME
@@ -562,7 +574,7 @@ export class PlanningService {
                         const time = 5 * 60; // PLANING_TIME_FIGHT * PLANING_CORRECT_TIME
                         
                         const action = this.planningSystem.initAction(
-                            ActionType.USE,
+                            ACTION_USE,
                             objectId,
                             toolChoice,
                             time
@@ -612,7 +624,7 @@ export class PlanningService {
                     const time = 60 * 60; // Placeholder
                     
                     const action = this.planningSystem.initAction(
-                        ActionType.USE,
+                        ACTION_USE,
                         objectId,
                         toolId,
                         time
@@ -662,7 +674,7 @@ export class PlanningService {
                 const objectId = actionList[objectChoice];
                 
                 const action = this.planningSystem.initAction(
-                    ActionType.CONTROL,
+                    ACTION_CONTROL,
                     objectId,
                     0,
                     5 * 60 // PLANING_TIME_CONTROL * PLANING_CORRECT_TIME
@@ -684,21 +696,21 @@ export class PlanningService {
      * Open action - open doors, windows, safes, etc.
      */
     private async actionOpen(): Promise<void> {
-        await this.actionOpenClose(ActionType.OPEN);
+        await this.actionOpenClose(ACTION_OPEN);
     }
 
     /**
      * Close action - close doors, windows, safes, etc.
      */
     private async actionClose(): Promise<void> {
-        await this.actionOpenClose(ActionType.CLOSE);
+        await this.actionOpenClose(ACTION_CLOSE);
     }
 
     /**
      * Open/Close action implementation
      * Port of plActionOpenClose() from planer.c
      */
-    private async actionOpenClose(actionType: ActionType): Promise<void> {
+    private async actionOpenClose(actionType: number): Promise<void> {
         if (!this.state) return;
         
         // Get objects in reach
@@ -710,7 +722,7 @@ export class PlanningService {
         }
         
         // Show message
-        if (actionType === ActionType.OPEN) {
+        if (actionType === ACTION_OPEN) {
             this.showMessage('OPEN', true);
         } else {
             this.showMessage('CLOSE', true);
@@ -719,7 +731,7 @@ export class PlanningService {
         // Show object selection
         const objectChoice = await this.ui.showMenu(
             actionList.map(obj => this.db.getObjectName(obj)),
-            actionType === ActionType.OPEN ? 'Open' : 'Close'
+            actionType === ACTION_OPEN ? 'Open' : 'Close'
         );
         
         if (objectChoice < 0 || objectChoice >= actionList.length) return;
@@ -744,10 +756,10 @@ export class PlanningService {
         // Check current state
         const isOpen = (objectState & (1 << 0)) !== 0; // Const_tcOPEN_CLOSE_BIT
         
-        if ((actionType === ActionType.OPEN && isOpen) || 
-            (actionType === ActionType.CLOSE && !isOpen)) {
+        if ((actionType === ACTION_OPEN && isOpen) || 
+            (actionType === ACTION_CLOSE && !isOpen)) {
             // Already in desired state
-            if (actionType === ActionType.OPEN) {
+            if (actionType === ACTION_OPEN) {
                 this.showMessage('OPEN_OPENED', true);
             } else {
                 this.showMessage('CLOSE_CLOSED', true);
@@ -779,12 +791,12 @@ export class PlanningService {
             this.landscape.setObjectState(
                 objectId,
                 1 << 0, // Const_tcOPEN_CLOSE_BIT
-                actionType === ActionType.OPEN ? 1 : 0
+                actionType === ACTION_OPEN ? 1 : 0
             );
             
             // Correct opened state
             const lsObject = this.db.getObject(objectId);
-            if (actionType === ActionType.OPEN) {
+            if (actionType === ACTION_OPEN) {
                 this.support.correctOpened(lsObject, true);
             } else {
                 this.support.correctOpened(lsObject, false);
@@ -891,7 +903,7 @@ export class PlanningService {
         
         // Create take action
         const action = this.planningSystem.initAction(
-            ActionType.TAKE,
+            ACTION_TAKE,
             selectedLoot.containerId,
             selectedLoot.lootId,
             3 * 60 // PLANING_TIME_TAKE * PLANING_CORRECT_TIME
@@ -980,7 +992,7 @@ export class PlanningService {
         
         // Create drop action
         const action = this.planningSystem.initAction(
-            ActionType.DROP,
+            ACTION_DROP,
             lootBagId,
             lootId,
             3 * 60 // PLANING_TIME_DROP * PLANING_CORRECT_TIME
@@ -1065,7 +1077,7 @@ export class PlanningService {
                 
                 if (waitTime > 0) {
                     const action = this.planningSystem.initAction(
-                        ActionType.WAIT,
+                        ACTION_WAIT,
                         0,
                         0,
                         waitTime * 60 // PLANING_CORRECT_TIME
@@ -1118,7 +1130,7 @@ export class PlanningService {
                     
                     if (targetPerson >= 0) {
                         const action = this.planningSystem.initAction(
-                            ActionType.WAIT_SIGNAL,
+                            ACTION_WAIT_SIGNAL,
                             targetPerson,
                             0,
                             60 // PLANING_CORRECT_TIME
@@ -1187,7 +1199,7 @@ export class PlanningService {
         
         if (targetPerson >= 0) {
             const action = this.planningSystem.initAction(
-                ActionType.SIGNAL,
+                ACTION_SIGNAL,
                 targetPerson,
                 0,
                 5 * 60 // PLANING_TIME_RADIO * PLANING_CORRECT_TIME
