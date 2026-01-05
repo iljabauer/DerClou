@@ -6,6 +6,7 @@ import { ScreenshotService } from '../services/ScreenshotService';
 import { GameScene } from '../services/StoryService';
 
 declare const nw: any;
+declare const process: any;
 
 enum SceneState {
     MAIN_MENU = 0,

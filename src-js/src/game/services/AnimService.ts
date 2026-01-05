@@ -2,6 +2,7 @@
 import { Services } from './Services';
 
 declare const nw: any;
+declare const process: any;
 
 interface PictEntry {
     pictId: number;
@@ -24,7 +25,6 @@ interface CollEntry {
 export class AnimService {
     private picts: Map<number, PictEntry> = new Map();
     private colls: Map<number, CollEntry> = new Map();
-    private animText: Map<string, string[]> = new Map();
     private hasLoaded: boolean = false;
 
     async loadData() {
@@ -52,11 +52,6 @@ export class AnimService {
 
         // Load COLL.LST
         this.loadCollList(fs.readFileSync(path.join(textsDir, 'COLL.LST'), 'latin1'));
-
-        // Load ANIM.TXT (via TextService, assuming it's loaded)
-        // Wait, TextService loads specific files.
-        // I need to ask TextService for "ANIM".
-        // In StoryScene, I should ensure TextService loads "ANIM".
     }
 
     private loadPictList(content: string) {
@@ -110,16 +105,6 @@ export class AnimService {
             console.warn(`No ANIM text for ${key}`);
             return null;
         }
-
-        // Parse CSV line (first line usually)
-        // Format: Mode, Rate, PicId, AnimCollId, ...
-        // Index 2 is PicId (1-based index in docs "PIC_1_ID_POS = 3")
-        // Wait, enum starts at 1.
-        // POS 3 means 3rd value.
-        // Let's check sysanim.c enum.
-        // PIC_MODE_POS = 1
-        // PIC_P_SEC_POS = 2
-        // PIC_1_ID_POS = 3
 
         const line = animData[0];
         const parts = line.split(',').map(s => s.trim());

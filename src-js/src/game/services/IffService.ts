@@ -2,6 +2,7 @@
 import { Scene } from 'phaser';
 
 declare const nw: any;
+declare const Buffer: any;
 
 export interface IffImage {
     width: number;
@@ -24,7 +25,7 @@ export class IffService {
         return this.parseIff(buffer);
     }
 
-    private parseIff(buffer: Buffer): IffImage | null {
+    private parseIff(buffer: any): IffImage | null {
         let offset = 0;
 
         // Read FORM
@@ -82,7 +83,7 @@ export class IffService {
         return { width, height, palette, pixels };
     }
 
-    private decompress(data: Buffer, compression: number, width: number, height: number, planes: number): Uint8Array {
+    private decompress(data: any, compression: number, width: number, height: number, planes: number): Uint8Array {
         // Row size in bytes per plane (rounded up to word?)
         // Standard ILBM rows are padded to 16 bits (2 bytes).
         const rowBytes = Math.ceil(width / 16) * 2;
@@ -132,12 +133,6 @@ export class IffService {
                 const bitMask = 0x80 >> (x & 7); // 7 - (x%8)
 
                 for (let p = 0; p < planes; p++) {
-                    // Plane P data for this row starts at:
-                    // y * (planes * rowBytes) + p * rowBytes
-                    // Standard ILBM is usually: R0 P0, R0 P1, ... R0 Pn, R1 P0...
-                    // Wait, standard is "scanline based".
-                    // For each scanline: Plane 0 data, Plane 1 data...
-
                     const planeRowOffset = y * planes * rowBytes + p * rowBytes;
                     const byteVal = planeData[planeRowOffset + byteOffset];
 
@@ -172,10 +167,6 @@ export class IffService {
         }
 
         const imageData = new ImageData(buffer, iff.width, iff.height);
-
-        // Phaser Texture
-        scene.textures.addGLTexture(key, scene.textures.createCanvas(key, iff.width, iff.height));
-        // Wait, addGLTexture is for WebGL texture. createCanvas creates a CanvasTexture.
 
         const texture = scene.textures.createCanvas(key, iff.width, iff.height);
         if (texture) {
