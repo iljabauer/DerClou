@@ -166,21 +166,21 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - InteractionService for main action menu
    - Port of StdDone() and StdHandle() from gp_app.c
    - Action menu with 9 actions:
-     - GO: Navigate to other locations
-     - WAIT: Wait and advance time
-     - BUSINESS_TALK: Talk to people
-     - LOOK: Examine location
-     - INVESTIGATE: Special investigation
-     - PLAN: Plan burglaries
-     - CALL_TAXI: Call a taxi
-     - MAKE_CALL: Make phone calls
-     - INFO: View information menu
+     - GO: Navigate to other locations ✅ (implemented with stub successors)
+     - WAIT: Wait and advance time ✅ (implemented via SceneService)
+     - BUSINESS_TALK: Talk to people ✅ (implemented via DialogService)
+     - LOOK: Examine location ✅ (implemented via SceneService)
+     - INVESTIGATE: Special investigation (stubbed)
+     - PLAN: Plan burglaries (stubbed)
+     - CALL_TAXI: Call a taxi (stubbed)
+     - MAKE_CALL: Make phone calls (stubbed)
+     - INFO: View information menu ✅ (implemented via SceneService)
    - Integration with UIService, SceneService, DialogService
    - InteractionTestScene for testing
-   - ⚠️ Most actions are stubbed and need full implementation
-   - ⚠️ GO needs location navigation integration
-   - ⚠️ BUSINESS_TALK needs Talk() implementation
-   - ⚠️ PLAN needs planning system integration
+   - SceneService.go() made async with proper menu integration
+   - DialogService.talk() implemented with person selection
+   - ⚠️ GO needs scene successor system integration
+   - ⚠️ INVESTIGATE, PLAN, CALL_TAXI, MAKE_CALL need implementation
 
 13. **Test Scenes**
    - ReplayTestScene (original)
@@ -209,8 +209,9 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - ⚠️ Menu navigation and input handling
 
 3. **Action Implementation** - IN PROGRESS
-   - ⚠️ GO action needs full implementation
-   - ⚠️ BUSINESS_TALK needs Talk() function
+   - ✅ GO action implemented (needs scene successor integration)
+   - ✅ BUSINESS_TALK implemented via Talk() function
+   - ✅ LOOK, WAIT, INFO implemented via SceneService
    - ⚠️ INVESTIGATE needs implementation
    - ⚠️ MAKE_CALL needs phone system (tcTelefon)
    - ⚠️ CALL_TAXI needs taxi scene integration
