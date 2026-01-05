@@ -435,14 +435,22 @@ export class DialogService {
      * Initiate conversation with a person at current location
      * Port of Talk() from dialog.c
      * 
-     * This requires:
-     * - Location system
-     * - Person list at location
-     * - Selection menu
+     * Requires location system to be implemented:
+     * - GetLocation() - Get current location
+     * - hasAll() - Get all persons at location
+     * - PersonWorksHere() - Check if person works at location
+     * 
+     * @returns Event number (0 for now)
      */
     async talk(): Promise<number> {
-        // TODO: Implement full talk system
-        console.log('Talk: Not yet implemented');
+        // TODO: Implement when location system is ready
+        // 1. Get current location
+        // 2. Get list of persons at location
+        // 3. Show selection bubble
+        // 4. Call DynamicTalk with selected person
+        // 5. Use BUSINESS mode if person works here, STANDARD otherwise
+        
+        console.log('Talk: Requires location system - not yet implemented');
         return 0;
     }
 }
