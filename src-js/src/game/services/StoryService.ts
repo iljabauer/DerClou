@@ -873,6 +873,50 @@ export class StoryService {
     }
 
     /**
+     * GLUDO BURNS OFFICE
+     * Port of tcDoneGludoBurnsOffice from story.c
+     * 
+     * Gludo burns evidence in his office
+     */
+    private tcDoneGludoBurnsOffice(): void {
+        const Gludo = this.db.getObject(Person_John_Gludo) as any;
+
+        this.stopAnim();
+
+        this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, '5TH_OLD_1');
+        this.dialog.say(STORY_0_TXT, 0, MATT_PICTID, '5TH_MATT_0');
+        this.dialog.say(STORY_0_TXT, 0, Gludo.PictID, '5TH_GLUDO_0');
+
+        this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, '5TH_OLD_2');
+        this.dialog.say(STORY_0_TXT, 0, Gludo.PictID, '5TH_GLUDO_1');
+        this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, '5TH_OLD_3');
+
+        this.dialog.say(STORY_0_TXT, 0, Gludo.PictID, '5TH_GLUDO_2');
+
+        this.gfxShow(162); // glasses overlay
+        // TODO: sndPlayFX("brille.voc");
+
+        this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, '5TH_OLD_4');
+        this.dialog.say(STORY_0_TXT, 0, Gludo.PictID, '5TH_GLUDO_3');
+        this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, '5TH_OLD_5');
+
+        this.dialog.say(STORY_0_TXT, 0, MATT_PICTID, '5TH_MATT_1');
+        this.dialog.say(STORY_0_TXT, 0, Gludo.PictID, '5TH_GLUDO_4');
+        this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, '5TH_OLD_6');
+
+        // TODO: sndPlayFX("streich.voc");
+
+        this.gfxShow(153); // fire
+
+        this.dialog.say(STORY_0_TXT, 0, Gludo.PictID, '5TH_GLUDO_5');
+        this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, '5TH_OLD_7');
+
+        this.gfxChangeColors(5, 'fade_out');
+
+        this.scene.sceneArgs.returnValue = SCENE_WATLING;
+    }
+
+    /**
      * Helper: Play animation
      */
     private playAnim(animName: string, duration: number): void {
