@@ -2,27 +2,26 @@
 
 **Last Updated:** 2026-01-05 (Session 5)
 
-## Current Sprint: Phase 2 - Dialog System
+## Current Sprint: Phase 3 - Scene/Story System
 
-### High Priority 🔴 (Phase 2: Dialog System - Continued)
+### High Priority 🔴 (Phase 3: Scene/Story System)
 
-- [ ] Complete DynamicTalk() implementation
-  - [ ] Person data structure integration
-  - [ ] Knowledge tracking system
-  - [ ] Dialog tree navigation
-  - [ ] Question/answer system
-  - [ ] Talk bits handling
+- [ ] Port scene system (src/scenes/)
+  - [ ] Go() - Location navigation
+  - [ ] Information() - Info menu
+  - [ ] Look() - Examine objects
+  - [ ] Wait() - Time progression
 
-- [ ] Character portrait display
-  - [ ] Load character portraits
-  - [ ] Display in dialog bubbles
-  - [ ] Portrait positioning
+- [ ] Port story system (src/story/)
+  - [ ] Story scene handlers
+  - [ ] Event triggers
+  - [ ] Story state management
 
-- [ ] Dialog tree system
-  - [ ] Parse dialog text with keywords
-  - [ ] Handle conversation flow
-  - [ ] Choice evaluation
-  - [ ] State management
+- [ ] Port location system (src/present/)
+  - [ ] GetLocation() - Get current location
+  - [ ] hasAll() - Get all persons at location
+  - [ ] PersonWorksHere() - Check if person works at location
+  - [ ] Complete Talk() function
 
 ### Medium Priority 🟡 (Replay System Fix)
 
@@ -97,17 +96,20 @@
 - [x] Character positioning and visibility
 - [x] Animation state management
 
-### Phase 2: Dialog System (In Progress)
+### Phase 2: Dialog System (Complete)
 - [x] Port Say() function from dialog.c
 - [x] Create DialogService.ts
 - [x] Add text file ID constants (BUSINESS_TXT, TALK_0_TXT, TALK_1_TXT)
 - [x] Implement bubble() and think() helpers
 - [x] Add getTextLines() to TextService
 - [x] Create DialogTestScene for testing
-- [ ] Complete DynamicTalk() implementation
-- [ ] Character portrait display
-- [ ] Dialog tree navigation
-- [ ] Knowledge tracking system
+- [x] Complete DynamicTalk() implementation
+- [x] Port ParseTalkText() for keyword extraction
+- [x] Port PrepareQuestions() for question generation
+- [x] Knowledge tracking system (knows/knowsSet)
+- [x] Dialog tree navigation
+- [x] Standard question handlers
+- [x] Add DynamicTalk test to DialogTestScene
 
 ## Blocked ⛔
 

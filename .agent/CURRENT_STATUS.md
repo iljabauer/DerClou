@@ -6,7 +6,7 @@
 
 Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundation with replay system, core architecture, and complete data/text/image systems.
 
-## Current Phase: Dialog System (Phase 2)
+## Current Phase: Dialog System Complete - Moving to Phase 3
 
 ### What Works ✅
 
@@ -75,15 +75,20 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - Frame-based animation with proper cropping
    - LivingTestScene for testing
 
-8. **Dialog System** - In Progress 🚧
+8. **Dialog System** - Complete ✅
    - DialogService for conversations
    - Say() function for dialog display
    - Bubble() and Think() helpers
    - Text file integration (BUSINESS_TXT, TALK_0_TXT, TALK_1_TXT)
+   - DynamicTalk() with full conversation system
+   - ParseTalkText() for keyword extraction
+   - PrepareQuestions() for question generation
+   - Knowledge tracking (knows/knowsSet)
+   - Dialog tree navigation
+   - Standard question handlers (job, prison, ability)
    - DialogTestScene for testing
-   - ⚠️ DynamicTalk() needs full implementation
-   - ⚠️ Dialog tree navigation
-   - ⚠️ Character portrait display
+   - ⚠️ Talk() requires location system
+   - ⚠️ Character portrait display (future)
 
 9. **Test Scenes**
    - ReplayTestScene (original)
@@ -102,15 +107,11 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - ⚠️ Visual regression testing blocked
    - ⚠️ Need to debug NW.js screenshot capture
 
-2. **Dialog System** (src/dialog/) - IN PROGRESS
-   - ✅ Basic Say() function
-   - ✅ Bubble() and Think() helpers
-   - ✅ Text file integration
-   - ⚠️ DynamicTalk() full implementation
-   - ⚠️ Conversation trees and dialog navigation
-   - ⚠️ NPC interaction system
-   - ⚠️ Character portrait display
-   - ⚠️ Knowledge tracking system
+2. **Location System** (src/present/) - NEXT PRIORITY
+   - ⚠️ GetLocation() - Get current location
+   - ⚠️ hasAll() - Get all persons at location
+   - ⚠️ PersonWorksHere() - Check if person works at location
+   - ⚠️ Required for Talk() function completion
 
 3. **Data Verification**
    - Load object names from text files (OBJECTS.TXT)
