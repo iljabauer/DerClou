@@ -46,12 +46,13 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - Parameter substitution (sprintf-like)
    - TextTestScene for testing
 
-5. **Image System** - Partial ✅
+5. **Image System** - Complete ✅
    - ImageService structure
    - Collection list loading (COLL.LST)
-   - PNG image loading (for converted images)
+   - ILBM decoder (ILBMDecoder.ts)
+   - Direct loading of Amiga IFF ILBM images
    - Canvas drawing support
-   - ⚠️ Need ILBM format support or image conversion
+   - ImageTestScene for testing
 
 6. **UI System** - Complete ✅
    - UIService with menu and bubble support
@@ -64,17 +65,20 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
 
 4. **Test Scenes**
    - ReplayTestScene (original)
-   - DataLoaderTestScene (new)
+   - DataLoaderTestScene
+   - TextTestScene
+   - UITestScene
+   - ImageTestScene (new)
    - GameScene, MainMenuScene, LondonScene
 
 ### What Needs Work 🚧
 
-1. **Graphics System**
-   - ⚠️ Convert IFF ILBM images to PNG/WebP format (CRITICAL)
-   - ⚠️ Or implement ILBM decoder in JavaScript
-   - Sprite management
+1. **Presentation Layer** (src/present/)
+   - Menu display and interaction
+   - Bubble/dialog display
+   - Character portraits
    - Background rendering
-   - Integration with Phaser
+   - Integration with game scenes
 
 2. **Dialog System**
    - Conversation trees
@@ -198,12 +202,12 @@ npm run dev
 
 ## Notes
 
-- 33 TypeScript files, ~5200 lines of code
+- 35 TypeScript files, ~5700 lines of code
 - 131 C source files to port
 - TCMAIN.DAT and TCBUILD.DAT are main data files
 - Building-specific files: *ETA0.DAT, *ETA1.DAT, etc.
 - Relations in .REL files (text format)
 - Text files in gamedata/TEXTS/ (XOR encrypted with 0x75)
-- Images in gamedata/PICTURES/ (IFF ILBM format, needs conversion)
-- See IMAGE_CONVERSION.md for image conversion guide
+- Images in gamedata/PICTURES/ (IFF ILBM format, loaded directly)
+- ILBM decoder successfully ported from C
 - UI system ready for integration with game scenes
