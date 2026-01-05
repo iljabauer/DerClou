@@ -6,12 +6,25 @@ export interface ScreenshotResult {
 
 declare const nw: any;
 
+let _screenshotPath: string | null = null;
+let _headlessMode: boolean = false;
+
 export const ScreenshotService = {
+    init(path: string, headless: boolean): void {
+        _screenshotPath = path;
+        _headlessMode = headless;
+    },
+
     isNwjsEnvironment(): boolean {
         return typeof nw !== 'undefined';
     },
 
     getScreenshotPathFromArgs(): string | null {
+        // Use cached value if available
+        if (_screenshotPath) {
+            return _screenshotPath;
+        }
+
         if (!this.isNwjsEnvironment()) {
             return null;
         }
@@ -29,6 +42,11 @@ export const ScreenshotService = {
     },
 
     isHeadlessMode(): boolean {
+        // Use cached value if available
+        if (_headlessMode) {
+            return true;
+        }
+
         if (!this.isNwjsEnvironment()) {
             return false;
         }

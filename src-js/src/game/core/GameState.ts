@@ -54,6 +54,12 @@ export class GameState {
         };
     }
 
+    setTime(day: number, hour: number, minute: number): void {
+        this.state.currentDay = day;
+        this.state.currentHour = hour;
+        this.state.currentMinute = minute;
+    }
+
     advanceTime(minutes: number): void {
         this.state.currentMinute += minutes;
         while (this.state.currentMinute >= 60) {
