@@ -25,6 +25,7 @@ export const London_London_1 = 1;
 export const Building_Kiosk = 509000;
 
 // Key Car IDs
+export const Car_Jaguar_XK_1950 = 10;
 export const Car_Fiat_Topolino_1940 = 15;
 
 // Key Loot IDs
