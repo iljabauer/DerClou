@@ -12,6 +12,7 @@ export const Person_Jim_Danner = 9817;
 export const Person_Helen_Parker = 9820;
 export const Person_Dan_Stanford = 9821;
 export const Person_John_Gludo = 9822;
+export const Person_Miles_Chickenwing = 9823;
 export const Person_Eric_Pooly = 9825;
 export const Person_Lucas_Grull = 9831;
 export const Person_Sabien_Pardo = 9846;
@@ -20,6 +21,7 @@ export const Person_Pater_James = 9848;
 
 // Key Location IDs
 export const London_London_1 = 1;
+export const Location_Nirvana = 151;
 
 // Key Building IDs
 export const Building_Kiosk = 509000;
@@ -30,6 +32,7 @@ export const Car_Fiat_Topolino_1940 = 15;
 
 // Key Loot IDs
 export const Loot_Ring_des_Abtes = 9634;
+export const Loot_Koffer = 9635;
 
 // Text file IDs (from theclou.h)
 export const THECLOU_TXT = 0;
@@ -53,6 +56,9 @@ export const NO_PARAMETER = 0;
 export const OLF_PRIVATE_LIST = 1;
 export const OLF_INCLUDE_NAME = 2;
 export const OLF_INSERT_STAR = 4;
+
+// Relation IDs
+export const Relation_taxi = 16;
 
 // Menu/UI constants
 export const TXT_MENU_TIMEOUT = 254;
