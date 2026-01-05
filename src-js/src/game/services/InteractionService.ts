@@ -202,12 +202,30 @@ export class InteractionService {
      * Handle GO action
      */
     private async handleGo(): Promise<number> {
-        // TODO: Get current scene's standard successors
-        // TODO: Call sceneService.go() with successors
+        // TODO: Get current scene's standard successors from Film/Scene system
+        // For now, create a stub list of locations
+        const successors = [
+            { eventNr: 1, name: 'Hotel Room' },
+            { eventNr: 8, name: 'Taxi' },
+            { eventNr: 143, name: 'The Walrus' }
+        ];
+
+        // Call sceneService.go() with successors
+        const nextScene = await this.sceneService.go(successors);
+
+        if (nextScene === 0) {
+            // User cancelled
+            return 0;
+        }
+
         // TODO: Check location opening hours
+        // TODO: Get location object and check OpenFromMinute/OpenToMinute
+        // TODO: If closed, show "No_Entry" message and return 0
+
         // TODO: Stop animation if moving
-        console.log('GO action - not yet fully implemented');
-        return 0;
+        // TODO: Call StopAnim()
+
+        return nextScene;
     }
 
     /**

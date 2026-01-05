@@ -120,7 +120,7 @@ export class SceneService {
      * @param successors List of available locations (TCEventNode[])
      * @returns Event number of selected location
      */
-    go(successors: TCEventNode[]): number {
+    async go(successors: TCEventNode[]): Promise<number> {
         // If only one location, return it directly
         if (successors.length === 1) {
             return successors[0].eventNr;
@@ -130,12 +130,16 @@ export class SceneService {
         const line = this.text.getFirstLine(THECLOU_TXT, 'Gehen');
         
         // Create menu items from successors
-        const menuItems = successors.map(node => node.name);
+        const menuItems = successors.map((node, index) => ({
+            text: node.name,
+            enabled: true,
+            data: node.eventNr
+        }));
         
         // Show menu and get choice
-        const choice = this.ui.showMenu(menuItems, {
-            title: line,
-            allowEscape: true
+        const choice = await this.ui.showMenu({
+            items: menuItems,
+            activeIndex: 0
         });
 
         // If user cancelled, return 0
