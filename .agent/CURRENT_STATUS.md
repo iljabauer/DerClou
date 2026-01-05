@@ -1,12 +1,12 @@
 # Der Clou! TypeScript Port - Current Status
 
-**Last Updated:** 2026-01-05 (Session 12)
+**Last Updated:** 2026-01-05 (Session 13)
 
 ## Overview
 
-Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundation with replay system, core architecture, and complete data/text/image systems.
+Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundation with replay system, core architecture, complete data/text/image systems, and story file loading.
 
-## Current Phase: Phase 4 - Interaction System (Near Complete)
+## Current Phase: Phase 5 - Story System Integration (In Progress)
 
 ### What Works ✅
 
@@ -162,11 +162,11 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - ⚠️ Southampton and Kaserne menu systems need full UI integration
    - ⚠️ Tower burglary initialization and execution need implementation
 
-12. **Interaction System** - Near Complete ✅
+12. **Interaction System** - Complete ✅
    - InteractionService for main action menu
    - Port of StdDone() and StdHandle() from gp_app.c
    - Action menu with 9 actions:
-     - GO: Navigate to other locations ✅ (implemented with location opening hours check)
+     - GO: Navigate to other locations ✅ (uses real scene successors)
      - WAIT: Wait and advance time ✅ (implemented via SceneService)
      - BUSINESS_TALK: Talk to people ✅ (implemented via DialogService)
      - LOOK: Examine location ✅ (implemented via SceneService)
@@ -182,9 +182,24 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - tcPersonIsHere() implemented for person detection
    - tcTelefon() implemented for phone calls
    - Location opening hours checking
-   - ⚠️ GO needs full scene successor system (requires story file loading)
+   - Scene successor system integrated ✅
    - ⚠️ INVESTIGATE needs full implementation (complex observation system)
    - ⚠️ PLAN needs planning system (tcOrganisation, tcBurglary)
+
+13. **Story File System** - Functional ✅
+   - StoryFileParser for loading TCStory.pc
+   - Binary story file format fully implemented
+   - StoryHeader parsing (story name, counts, start conditions)
+   - Scene loading with all properties
+   - Scene conditions (location, events, forbidden events)
+   - Standard successors for navigation
+   - FilmService integration
+   - Scene lookup by event number or location
+   - GO action uses real scene successors
+   - ⚠️ InitLocations() needs implementation (load location names)
+   - ⚠️ LinkScenes() needs implementation
+   - ⚠️ PatchStory() needs implementation (game-specific patches)
+   - ⚠️ Event tracking system needs implementation
 
 13. **Test Scenes**
    - ReplayTestScene (original)
