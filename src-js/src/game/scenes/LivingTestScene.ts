@@ -82,14 +82,14 @@ export class LivingTestScene extends Scene {
     }
 
     private showCharacter(): void {
-        // Set character in active area
-        this.livingService.livesInArea('Matt', 1);
+        // Set character in active area (use Person_1 from LIVINGS.LST)
+        this.livingService.livesInArea('Person_1', 1);
         
         // Position character
-        this.livingService.setPos('Matt', 400, 300);
+        this.livingService.setPos('Person_1', 400, 300);
         
         // Enable character
-        this.livingService.turn('Matt', LivingStatus.ENABLED);
+        this.livingService.turn('Person_1', LivingStatus.ENABLED);
         
         // Refresh display
         this.livingService.refreshAll();
@@ -99,13 +99,13 @@ export class LivingTestScene extends Scene {
 
     private moveCharacter(): void {
         // Animate character moving right
-        this.livingService.animate('Matt', AnimAction.MOVE_RIGHT, 2, 0);
+        this.livingService.animate('Person_1', AnimAction.MOVE_RIGHT, 2, 0);
         
         // Do animation with movement
         this.livingService.doAnims(true, true);
         
-        const x = this.livingService.getXPos('Matt');
-        const y = this.livingService.getYPos('Matt');
+        const x = this.livingService.getXPos('Person_1');
+        const y = this.livingService.getYPos('Person_1');
         
         this.statusText.setText(`Status: Character moving, pos: (${x}, ${y})`);
     }
