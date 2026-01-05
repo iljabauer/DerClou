@@ -1,12 +1,12 @@
 # Der Clou! TypeScript Port - Current Status
 
-**Last Updated:** 2026-01-05 (Session 20)
+**Last Updated:** 2026-01-05 (Session 21)
 
 ## Overview
 
-Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundation with replay system, core architecture, complete data/text/image systems, story file loading, event tracking, and landscape rendering.
+Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundation with replay system, core architecture, complete data/text/image systems, story file loading, event tracking, and landscape rendering with textures.
 
-## Current Phase: Phase 6 - Landscape System (In Progress)
+## Current Phase: Phase 6 - Landscape System (Complete) / Phase 7 - Planning Actions (Next)
 
 ### What Works ✅
 
@@ -212,8 +212,8 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - Integration with InteractionService
    - Building type updated with all fields from C struct
 
-14. **Landscape System** - Partial ✅
-   - LandscapeService with core rendering (NEW in Session 20)
+14. **Landscape System** - Complete ✅ (NEW in Session 21)
+   - LandscapeService with full rendering
    - Initialization and setup (init.c ported)
      - initLandscape() - Full initialization with graphics layers
      - initObjects() - Load and organize objects for all areas
@@ -241,14 +241,21 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
      - getLoudness() - Microphone detection
      - calcExactSize() - Object bounding box
      - isInside() - Rectangle intersection
+   - Image loading and rendering ✅
+     - loadAreaCollections() - Load 16x16, 32x32, 48x48, floor collections
+     - createTextureFromCanvas() - Create Phaser textures
+     - blitFloor() - Render floor tiles with actual textures
+     - showOneObject() - Render objects with actual sprites
+     - Proper sprite cropping from collections
+     - Object positioning using destX/destY
+     - Object sorting by offsetFact and destY
    - Phaser integration
      - Graphics layers (floor, object, character)
-     - Floor tile rendering (placeholder)
-     - Object rendering (placeholder)
+     - Floor tile rendering with textures ✅
+     - Object rendering with sprites ✅
    - LandscapeTestScene for testing
-   - ⚠️ Collision detection needs implementation
-   - ⚠️ Floor/object image loading needs implementation
-   - ⚠️ Full rendering with textures needs implementation
+   - ⚠️ Collision detection needs implementation (complex, deferred)
+   - ⚠️ Lighting/darkness rendering needs implementation
 
 15. **Planning System** - Partial ✅
    - PlanningSystemService - Core system (COMPLETE)
@@ -336,14 +343,14 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
 
 ### What Needs Work 🚧
 
-1. **Landscape System Completion** - HIGH PRIORITY (NEW)
+1. **Landscape System Polish** - MEDIUM PRIORITY
    - ✅ Core initialization and setup
    - ✅ Object management and sorting
    - ✅ Scrolling and viewport
    - ✅ Spot (guard patrol) system
-   - ⚠️ Collision detection implementation
-   - ⚠️ Floor tile image loading and rendering
-   - ⚠️ Object image loading and rendering
+   - ✅ Floor tile image loading and rendering
+   - ✅ Object image loading and rendering
+   - ⚠️ Collision detection implementation (complex, deferred)
    - ⚠️ Lighting/darkness rendering
    - ⚠️ Door refresh system
    - ⚠️ Integration with LivingService for character display
@@ -521,9 +528,9 @@ npm run dev
 
 ## Notes
 
-- 62 TypeScript files, ~18,742 lines of code (up from ~17,045 in Session 19)
+- 62 TypeScript files, ~18,900 lines of code (up from ~18,742 in Session 20)
 - 72 C source files to port (~35k lines)
-- Progress: ~48% complete (estimated, up from ~46%)
+- Progress: ~50% complete (estimated, up from ~48%)
 - TCMAIN.DAT and TCBUILD.DAT are main data files
 - Building-specific files: *ETA0.DAT, *ETA1.DAT, etc.
 - Relations in .REL files (text format)
