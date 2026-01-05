@@ -6,6 +6,13 @@
 
 import { Scene, StoryHeader, StoryFileParser } from './StoryFileParser';
 import { Database } from '../core/Database';
+import { 
+    SCENE_KASERNE_INSIDE, 
+    SCENE_KASERNE_OUTSIDE, 
+    SCENE_STATION,
+    SCENE_PROFI_26,
+    WAIT 
+} from '../types/GameConstants';
 
 export interface Film {
     currentLocation: number;  // akt_Ort
@@ -74,8 +81,10 @@ export class FilmService {
         // Load location names
         await this.initLocations();
 
+        // Apply story patches
+        this.patchStory();
+
         // TODO: LinkScenes() - link scene successors
-        // TODO: PatchStory() - apply game-specific patches
 
         this.storyLoaded = true;
         console.log(`Story initialized: ${scenes.length} scenes loaded`);
@@ -102,6 +111,67 @@ export class FilmService {
         } catch (error) {
             console.error('Error loading location names:', error);
         }
+    }
+
+    /**
+     * Apply game-specific patches to story scenes
+     * Port of PatchStory() from gp.c
+     */
+    private patchStory(): void {
+        // Note: In C code, this only runs if NOT in demo mode (!(GamePlayMode & GP_DEMO))
+        // For now, we'll always apply these patches
+        
+        // Patch scene 26214400 (4th Burglary) - set location to 3 (Hotel room)
+        const scene4thBurg = this.getScene(26214400);
+        if (scene4thBurg) {
+            scene4thBurg.locationNr = 3;
+        }
+
+        // Patch scene 26738688 (Arrest) - set location to 7 (Police station)
+        const sceneArrest = this.getScene(26738688);
+        if (sceneArrest) {
+            sceneArrest.locationNr = 7;
+        }
+
+        // Patch Kaserne scenes
+        const kaserneOutside = this.getScene(SCENE_KASERNE_OUTSIDE);
+        if (kaserneOutside) {
+            kaserneOutside.moeglichkeiten = 15;  // Possibilities bitmask
+            kaserneOutside.locationNr = 66;
+            kaserneOutside.dauer = 17;  // Duration
+        }
+
+        const kaserneInside = this.getScene(SCENE_KASERNE_INSIDE);
+        if (kaserneInside) {
+            kaserneInside.moeglichkeiten = 265;  // Possibilities bitmask
+            kaserneInside.locationNr = 65;
+            kaserneInside.dauer = 57;  // Duration
+        }
+
+        // Patch station scene - add WAIT action
+        const station = this.getScene(SCENE_STATION);
+        if (station) {
+            station.moeglichkeiten |= WAIT;
+        }
+
+        // TODO: Check for Profidisk and patch SCENE_PROFI_26 if needed
+        // if (bProfidisk) GetScene(SCENE_PROFI_26)->LocationNr = 75;
+
+        // Add successors for Kaserne locations
+        const locScene65 = this.getLocScene(65);
+        if (locScene65) {
+            locScene65.stdSucc = [SCENE_KASERNE_OUTSIDE];
+        }
+
+        const locScene66 = this.getLocScene(66);
+        if (locScene66) {
+            locScene66.stdSucc = [SCENE_KASERNE_INSIDE];
+        }
+
+        // Set start scene to station
+        this.film.startScene = SCENE_STATION;
+
+        console.log('Story patches applied');
     }
 
     /**
