@@ -22,6 +22,7 @@ import {
     SCENE_FAT_MANS,
     SCENE_NEW_GAME,
     SCENE_FST_MEET_BRIGGS,
+    SCENE_FREIFAHRT,
     STORY_0_TXT,
     OLD_MATT_PICTID,
     MATT_PICTID,
@@ -31,6 +32,7 @@ import {
     Person_Jim_Danner,
     Person_Herbert_Briggs,
     Person_Pater_James,
+    Person_Dan_Stanford,
     Building_Kiosk,
     Car_Fiat_Topolino_1940,
     Loot_Ring_des_Abtes,
@@ -103,6 +105,7 @@ export class StoryService {
         this.handlers.set(SCENE_ARRIVAL, () => this.tcDoneArrival());
         this.handlers.set(SCENE_HOTEL_ROOM, () => this.tcDoneHotelReception());
         this.handlers.set(SCENE_FST_MEET_BRIGGS, () => this.tcDoneMeetBriggs());
+        this.handlers.set(SCENE_FREIFAHRT, () => this.tcDoneFreeTicket());
         // More handlers will be added as they are ported
     }
 
@@ -518,6 +521,36 @@ export class StoryService {
 
         // TODO: Check bProfidisk flag
         // if (bProfidisk) this.scene.addTaxiLocation(68); // baker street
+    }
+
+    /**
+     * FREE TICKET
+     * Port of tcDoneFreeTicket from story.c
+     * 
+     * Matt meets Dan Stanford and gets a free ticket
+     */
+    private tcDoneFreeTicket(): void {
+        const dan = this.db.getObject(Person_Dan_Stanford);
+
+        // Matt now knows Dan
+        this.db.knowsSet(Person_Matt_Stuvysunt, Person_Dan_Stanford);
+
+        this.dialog.say(STORY_0_TXT, 0, 7, 'AEHHH');
+        this.dialog.say(STORY_0_TXT, 0, 0, 'FREE_TICKET'); // dan.PictID
+
+        // Return to taxi scene (location 8)
+        this.scene.sceneArgs.returnValue = this.getLocSceneEventNr(8);
+    }
+
+    /**
+     * Helper: Get scene event number for a location
+     */
+    private getLocSceneEventNr(locNr: number): number {
+        // Port of GetLocScene(locNr)->EventNr
+        // For now, return a stub value
+        // TODO: Implement proper scene lookup from film data
+        console.log(`GetLocScene(${locNr})`);
+        return 0;
     }
 
     /**
