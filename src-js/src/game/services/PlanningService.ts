@@ -82,6 +82,107 @@ export const BURGLARY_ARRESTED = -1;
 export const PLANING_NR_PERSONS = 4;
 export const PLANING_NR_GUARDS = 4;
 export const PLANING_NR_LOOTS = 256;
+export const PLANING_CORRECT_TIME = 3;
+
+// Burglary execution constants
+export const PLANING_EXHAUST_MAX = 240;
+export const PLANING_MOOD_MIN = 40;
+export const PLANING_LOUDNESS_STD = 5;
+export const PLANING_LOUDNESS_RADIO = 25;
+export const PLANING_LOUDNESS_OPEN_CLOSE = 14;
+
+// Pseudo actions
+export const ACTION_EXHAUST = 1000;
+
+// Escape bits (FAHN_*)
+export const FAHN_ALARM = 1 << 0;
+export const FAHN_QUIET_ALARM = 1 << 1;
+export const FAHN_SURROUNDED = 1 << 2;
+export const FAHN_ESCAPE = 1 << 3;
+export const FAHN_ALARM_TIMECLOCK = 1 << 4;
+export const FAHN_ALARM_LOUDN = 1 << 5;
+export const FAHN_ALARM_PATRO = 1 << 6;
+export const FAHN_ALARM_TIMER = 1 << 7;
+export const FAHN_ALARM_GUARD = 1 << 8;
+export const FAHN_ALARM_MICRO = 1 << 9;
+export const FAHN_ALARM_RADIO = 1 << 10;
+export const FAHN_ALARM_ALARM = 1 << 11;
+
+// Burglary result codes
+export const BURGLARY_SUCCESS = 0;
+export const BURGLARY_FAILURE = 1;
+export const BURGLARY_ESCAPE = 2;
+export const BURGLARY_SURROUNDED = 3;
+
+/**
+ * Search structure - tracks burglary execution state
+ * Port of struct Search from evidence.h
+ */
+interface SearchData {
+    guyXPos: number[];  // [4] - Last position in case of escape
+    guyYPos: number[];  // [4]
+    
+    exhaust: number[];  // [4] - Exhaustion level
+    
+    walkTime: number[];  // [4] - Time spent walking
+    waitTime: number[];  // [4] - Time spent waiting
+    workTime: number[];  // [4] - Time spent working
+    killTime: number[];  // [4] - Time spent fighting guards
+    
+    deriTime: number;  // Deviation from plan
+    
+    timeOfBurglary: number;  // Time when burglary started
+    timeOfAlarm: number;  // Time when alarm triggered
+    
+    buildingId: number;  // Building being burgled
+    lastAreaId: number;  // Area at time of escape
+    
+    escapeBits: number;  // Escape/alarm flags
+    
+    callValue: number;  // Value of radio calls
+    callCount: number;  // Number of radio calls
+    
+    warningCount: number;  // Number of warnings
+    spotTouchCount: number[];  // [4] - Times touched patrol spots
+    
+    kaserneOk: boolean;  // Whether Kaserne was successful
+}
+
+/**
+ * Player data structure - tracks execution state
+ * Port of PD structure from player.c
+ */
+interface PlayerData {
+    action: any | null;  // Current action being executed
+    
+    handlerEnded: number[];  // [4] - Handler completion status
+    guardKO: number[];  // [4] - Guard knockout status
+    currLoudness: number[];  // [4] - Current loudness per person
+    unableToWork: number[];  // [4] - Unable to work flags
+    
+    maxTimer: number;  // Maximum timer value
+    timer: number;  // Current timer
+    realTime: number;  // Real time (timer / PLANING_CORRECT_TIME)
+    
+    ende: boolean;  // Execution ended
+    badPlaning: boolean;  // Bad planning detected
+    mood: number;  // Team mood
+    patrolCount: number;  // Patrol encounter count
+    
+    bldId: number;  // Building ID
+    bldObj: Building | null;  // Building object
+    
+    changeCount: number;  // Object change count
+    totalCount: number;  // Total object count
+    
+    alarmTimer: number;  // Alarm timer
+    
+    actionTime: number;  // Action trigger time
+    actionFunc: ((objId: number, time: number) => boolean) | null;  // Action function
+    
+    isItDark: boolean;  // Is it dark?
+    sndState: boolean;  // Sound state
+}
 
 interface PlanningState {
     buildingId: number;
@@ -109,6 +210,10 @@ export class PlanningService {
     private currentPerson: number = 0;
     private planChanged: boolean = false;
     private animCounter: number = 0;
+    
+    // Burglary execution state
+    private search: SearchData | null = null;
+    private playerData: PlayerData | null = null;
 
     constructor(
         db: Database,
