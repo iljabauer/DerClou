@@ -1183,7 +1183,7 @@ export class LandscapeService {
             const srcX = (offsetFact % perRow) * item.size;
             
             // Create sprite from texture
-            const sprite = this.scene.add.sprite(lso.xPos, lso.yPos, texture);
+            const sprite = this.scene.add.sprite(lso.destX, lso.destY, texture);
             sprite.setOrigin(0, 0);
             
             // Crop to show only this object
@@ -1193,8 +1193,8 @@ export class LandscapeService {
         } else {
             // Fallback: draw a placeholder rectangle
             const rect = this.scene.add.rectangle(
-                lso.xPos,
-                lso.yPos,
+                lso.destX,
+                lso.destY,
                 item.size,
                 item.size,
                 0xFF0000
