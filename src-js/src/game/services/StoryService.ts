@@ -1001,6 +1001,27 @@ export class StoryService {
     }
 
     /**
+     * AGENT
+     * Port of tcDoneAgent from story.c
+     * 
+     * Agent calls with money offer
+     */
+    private tcDoneAgent(): void {
+        this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST_14_OLD_0');
+
+        this.somebodyIsCalling();
+
+        this.dialog.say(STORY_1_TXT, 0, PHONE_PICTID, 'ST_14_AGENT_0');
+        this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST_14_OLD_1');
+
+        // Note: GamePlayMode check for GP_MORE_MONEY cheat
+        // For now, just use standard amount
+        this.addPlayerMoney(15000);
+
+        this.scene.sceneArgs.returnValue = SCENE_HOTEL_ROOM;
+    }
+
+    /**
      * Helper: Play animation
      */
     private playAnim(animName: string, duration: number): void {
