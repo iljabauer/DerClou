@@ -80,7 +80,18 @@ import {
     Tool_Strickleiter,
     Tool_Schloszstecher,
     Tool_Winkelschleifer,
-    Tool_Schutzanzug
+    Tool_Schutzanzug,
+    Car_Pontiac_Streamliner_1944,
+    Car_Standard_Vanguard_1953,
+    Car_Rover_75_1950,
+    Car_Bentley_Continental_Typ_R_1952,
+    Tool_Funkgeraet,
+    Tool_Glasschneider,
+    Tool_Bohrwinde,
+    Tool_Elektroset,
+    Person_Margrete_Briggs,
+    Person_Paul_O_Conner,
+    Person_Tony_Allen
 } from '../types/GameConstants';
 import { ObjectType, Building } from '../types/GameTypes';
 import { PresentationService } from './PresentationService';
@@ -157,6 +168,7 @@ export class StoryService {
         this.handlers.set(SCENE_MISSED_DATE_0, () => this.tcDoneMissedDate());
         this.handlers.set(SCENE_MISSED_DATE_1, () => this.tcDoneMissedDate());
         this.handlers.set(SCENE_1ST_BURG, () => this.tcDone1stBurglary());
+        this.handlers.set(SCENE_2ND_BURG, () => this.tcDone2ndBurglary());
         // More handlers will be added as they are ported
     }
 
@@ -1238,6 +1250,43 @@ export class StoryService {
         // }
 
         this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, 'LOBHUDEL');
+
+        // TODO: GetScene(SCENE_FAHNDUNG)-\u003eGeschehen = 0;
+        this.scene.sceneArgs.returnValue = this.getLocSceneEventNr(this.film.getLocation());
+    }
+
+    /**
+     * 2ND BURGLARY
+     * Port of tcDone2ndBurglary from story.c
+     * 
+     * After 2nd burglary - unlock locations, add cars/tools/persons
+     */
+    private tcDone2ndBurglary(): void {
+        this.scene.addTaxiLocation(14); // jewels
+
+        // TODO: if (bProfidisk) this.scene.addTaxiLocation(72); // abbey
+
+        this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, 'FAHNDUNG');
+
+        // Add cars to Marc Smith
+        this.db.hasSet(Person_Marc_Smith, Car_Pontiac_Streamliner_1944);
+        this.db.hasSet(Person_Marc_Smith, Car_Standard_Vanguard_1953);
+
+        // TODO: if (bProfidisk) {
+        //     this.db.hasSet(Person_Marc_Smith, Car_Rover_75_1950);
+        //     this.db.hasSet(Person_Marc_Smith, Car_Bentley_Continental_Typ_R_1952);
+        // }
+
+        // Add tools to Mary Bolton
+        this.db.hasSet(Person_Mary_Bolton, Tool_Funkgeraet);
+        this.db.hasSet(Person_Mary_Bolton, Tool_Glasschneider);
+        this.db.hasSet(Person_Mary_Bolton, Tool_Bohrwinde);
+        this.db.hasSet(Person_Mary_Bolton, Tool_Elektroset);
+
+        // Add persons to London
+        this.db.livesInSet(London_London_1, Person_Margrete_Briggs);
+        this.db.livesInSet(London_London_1, Person_Paul_O_Conner);
+        this.db.livesInSet(London_London_1, Person_Tony_Allen);
 
         // TODO: GetScene(SCENE_FAHNDUNG)-\u003eGeschehen = 0;
         this.scene.sceneArgs.returnValue = this.getLocSceneEventNr(this.film.getLocation());
