@@ -232,11 +232,8 @@ export class InteractionService {
      * Handle BUSINESS_TALK action
      */
     private async handleTalk(): Promise<number> {
-        // TODO: Call Talk() function
-        // This should show a list of people at the current location
-        // and allow the player to talk to them
-        console.log('BUSINESS_TALK action - not yet fully implemented');
-        return 0;
+        const currentLocation = this.film.getLocation();
+        return await this.dialog.talk(currentLocation);
     }
 
     /**

@@ -442,15 +442,81 @@ export class DialogService {
      * 
      * @returns Event number (0 for now)
      */
-    async talk(): Promise<number> {
-        // TODO: Implement when location system is ready
-        // 1. Get current location
-        // 2. Get list of persons at location
-        // 3. Show selection bubble
-        // 4. Call DynamicTalk with selected person
-        // 5. Use BUSINESS mode if person works here, STANDARD otherwise
+    async talk(currentLocation: number): Promise<number> {
+        // Get location object ID
+        const locationId = this.getObjNrOfLocation(currentLocation);
         
-        console.log('Talk: Requires location system - not yet implemented');
+        if (!locationId) {
+            console.warn('Talk: No location object found');
+            return 0;
+        }
+
+        // Get all persons at this location
+        const persons = this.db.hasAll(locationId, 0x01 | 0x02 | 0x04, 'Person');
+        
+        if (persons.length === 0) {
+            // Nobody here
+            await this.say(BUSINESS_TXT, 0, MATT_PICTID, 'NOBODY HERE');
+            return 0;
+        }
+
+        // Sort persons by name
+        persons.sort((a, b) => {
+            const nameA = (a as any).Name || '';
+            const nameB = (b as any).Name || '';
+            return nameA.localeCompare(nameB);
+        });
+
+        // Create bubble menu with person names
+        const helloFriends = this.textService.getFirstLine(BUSINESS_TXT, 'NO_CHOICE');
+        const personNames = persons.map(p => (p as any).Name || 'Unknown');
+        personNames.push(helloFriends); // Add "enough" option
+
+        // Show selection bubble
+        const choice = await this.uiService.showBubble({
+            lines: personNames,
+            activeIndex: 0,
+            bubbleType: 'speak'
+        });
+
+        // Check if user cancelled or selected "enough"
+        if (choice === 255 || choice >= persons.length) {
+            return 0;
+        }
+
+        // Get selected person
+        const selectedPerson = persons[choice];
+        const personId = (selectedPerson as any).objId || 0;
+
+        // Check if person works here
+        const worksHere = this.personWorksHere(personId, locationId);
+
+        // Start conversation
+        if (worksHere) {
+            await this.dynamicTalk(9801, personId, DLG_TALKMODE_BUSINESS); // Matt's ID
+        } else {
+            await this.dynamicTalk(9801, personId, DLG_TALKMODE_STANDARD);
+        }
+
         return 0;
+    }
+
+    /**
+     * Get object number of location
+     * Helper function to get location object ID from location number
+     */
+    private getObjNrOfLocation(locationNr: number): number {
+        // TODO: Implement proper location lookup
+        // For now, return a stub value
+        return locationNr;
+    }
+
+    /**
+     * Check if person works at location
+     * Port of PersonWorksHere() from dialog.c
+     */
+    private personWorksHere(personId: number, locationId: number): boolean {
+        // Check if person has "works_in" relation to location
+        return this.db.hasRelation(personId, locationId, RelationType.WorksIn);
     }
 }
