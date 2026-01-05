@@ -101,11 +101,38 @@ export interface Tool extends GameObject {
     effect: number;
 }
 
+export interface Loot extends GameObject {
+    type: ObjectType.Loot;
+    lootType: number;
+    lootName: number;
+    volume: number;
+    weight: number;
+    pictId: number;
+}
+
+export interface Evidence extends GameObject {
+    type: ObjectType.Evidence;
+    pers: number;
+    recognition: number;
+    walkTrail: number;
+    waitTrail: number;
+    workTrail: number;
+    killTrail: number;
+    callTrail: number;
+    paperTrail: number;
+    fotoTrail: number;
+}
+
 export interface Environment extends GameObject {
     type: ObjectType.Environment;
-    day: number;
-    hour: number;
-    minute: number;
+    mattHasHotelRoom: number;
+    mattHasIdentityCard: number;
+    withOrWithoutYou: number;
+    mattIsInLove: number;
+    southhamptonHappened: number;
+    present: number;
+    firstTimeInSouth: number;
+    postzugDone: number;
 }
 
 export interface Scene extends GameObject {
