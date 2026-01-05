@@ -1022,6 +1022,30 @@ export class StoryService {
     }
 
     /**
+     * GO AND FETCH JAGUAR
+     * Port of tcDoneGoAndFetchJaguar from story.c
+     * 
+     * Matt is told to fetch the Jaguar
+     */
+    private tcDoneGoAndFetchJaguar(): void {
+        this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST_16_OLD_0');
+
+        this.scene.sceneArgs.returnValue = SCENE_HOLLAND_STR;
+    }
+
+    /**
+     * THINK OF SABIEN
+     * Port of tcDoneThinkOfSabien from story.c
+     * 
+     * Matt thinks of Sabien
+     */
+    private tcDoneThinkOfSabien(): void {
+        this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST_16_OLD_1');
+
+        this.scene.sceneArgs.returnValue = SCENE_HOLLAND_STR;
+    }
+
+    /**
      * Helper: Play animation
      */
     private playAnim(animName: string, duration: number): void {
