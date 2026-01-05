@@ -162,6 +162,16 @@ export const OLF_INSERT_STAR = 4;
 // Relation IDs
 export const Relation_taxi = 16;
 
+// Location IDs (from tcdata.h - hardcoded values)
+export const Location_Cars_Vans_Office = 100;
+export const Location_Fat_Mans_Pub = 99;
+export const Location_Holland_Street = 95;
+export const Location_Policestation = 102;
+export const Location_Hotel = 142;
+export const Location_Hotel_Room = 98;
+export const Location_Walrus = 143;
+export const Location_Nirvana = 151;
+
 // Action/Choice flags (from gp.h)
 export const GO = 1 << 0;
 export const WAIT = 1 << 1;
