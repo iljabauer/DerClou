@@ -53,6 +53,15 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - Canvas drawing support
    - ⚠️ Need ILBM format support or image conversion
 
+6. **UI System** - Complete ✅
+   - UIService with menu and bubble support
+   - Keyboard navigation (arrow keys, Enter, Escape)
+   - Mouse navigation (hover, click)
+   - Selection highlighting
+   - Timeout support
+   - Disabled item handling
+   - UITestScene for testing
+
 4. **Test Scenes**
    - ReplayTestScene (original)
    - DataLoaderTestScene (new)
@@ -61,13 +70,19 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
 ### What Needs Work 🚧
 
 1. **Graphics System**
-   - ⚠️ Convert IFF ILBM images to PNG/WebP format
+   - ⚠️ Convert IFF ILBM images to PNG/WebP format (CRITICAL)
    - ⚠️ Or implement ILBM decoder in JavaScript
    - Sprite management
    - Background rendering
    - Integration with Phaser
 
-2. **Data Verification**
+2. **Dialog System**
+   - Conversation trees
+   - NPC interactions
+   - Dynamic text insertion
+   - Integration with UI and Text systems
+
+3. **Data Verification**
    - Load object names from text files (OBJECTS.TXT)
    - Verify data integrity against C version
 
@@ -105,11 +120,13 @@ src-js/src/game/
 │   ├── RelFileParser.ts     ✅ Relation parsing
 │   ├── DataLoader.ts        ✅ All data files
 │   ├── TextService.ts       ✅ Text loading & lookup
-│   └── ImageService.ts      ⚠️ Image loading (needs ILBM)
+│   ├── ImageService.ts      ⚠️ Image loading (needs ILBM)
+│   └── UIService.ts         ✅ Menus & bubbles
 └── scenes/
     ├── ReplayTestScene.ts   ✅ Replay testing
     ├── DataLoaderTestScene.ts ✅ Data loading test
     ├── TextTestScene.ts     ✅ Text system test
+    ├── UITestScene.ts       ✅ UI system test
     ├── GameScene.ts         ✅ Main scene
     ├── MainMenuScene.ts     ✅ Menu
     └── LondonScene.ts       ✅ Hub scene
@@ -181,7 +198,7 @@ npm run dev
 
 ## Notes
 
-- 30 TypeScript files, ~4400 lines of code
+- 33 TypeScript files, ~5200 lines of code
 - 131 C source files to port
 - TCMAIN.DAT and TCBUILD.DAT are main data files
 - Building-specific files: *ETA0.DAT, *ETA1.DAT, etc.
@@ -189,3 +206,4 @@ npm run dev
 - Text files in gamedata/TEXTS/ (XOR encrypted with 0x75)
 - Images in gamedata/PICTURES/ (IFF ILBM format, needs conversion)
 - See IMAGE_CONVERSION.md for image conversion guide
+- UI system ready for integration with game scenes
