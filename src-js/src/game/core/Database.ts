@@ -52,6 +52,23 @@ export class Database {
         );
     }
 
+    /**
+     * Remove all relations of a specific type
+     * Port of RemRelation() from C
+     */
+    removeAllRelationsOfType(type: RelationType): void {
+        this.relations = this.relations.filter(rel => rel.type !== type);
+    }
+
+    /**
+     * Add a relation type (placeholder for C's AddRelation)
+     * In the C code, this initializes a relation type
+     */
+    addRelationType(type: RelationType): void {
+        // In TypeScript, relation types are just numbers
+        // This is a no-op but kept for API compatibility
+    }
+
     clear(): void {
         this.objects.clear();
         this.relations = [];
