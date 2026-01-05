@@ -1,6 +1,6 @@
 # Der Clou! TypeScript Port - Current Status
 
-**Last Updated:** 2026-01-05 (Session 16)
+**Last Updated:** 2026-01-05 (Session 16 continued)
 
 ## Overview
 
@@ -243,7 +243,17 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - ⚠️ Display functions not yet implemented (graphics)
    - ⚠️ Tool distribution not yet implemented
 
-17. **Test Scenes**
+17. **Loot System** - Complete ✅
+   - LootService for loot management
+   - Port of tcMakeLootList from src/scenes/dealer.c
+   - Loot collection and tracking
+   - Value calculation by category
+   - Weight and volume tracking
+   - Loot transfer between containers
+   - CompleteLoot type fixed (added vase, totalWeight, totalVolume)
+   - Summary formatting
+
+18. **Test Scenes**
    - ReplayTestScene (original)
    - DataLoaderTestScene
    - TextTestScene
@@ -329,6 +339,7 @@ src-js/src/game/
 │   ├── LandscapeService.ts  🚧 Building interiors (stub)
 │   ├── PlanningService.ts   🚧 Burglary planning (stub)
 │   ├── OrganisationService.ts ✅ Team/car/driver selection
+│   ├── LootService.ts       ✅ Loot management
 │   └── PresentationService.ts ✅ Object display
 └── scenes/
     ├── ReplayTestScene.ts   ✅ Replay testing
@@ -427,7 +438,7 @@ npm run dev
 
 ## Notes
 
-- 54 TypeScript files, ~14,025 lines of code (up from ~13,093)
+- 55 TypeScript files, ~14,339 lines of code (up from ~13,093)
 - 72 C source files to port (~35k lines)
 - Progress: ~37% complete (estimated)
 - TCMAIN.DAT and TCBUILD.DAT are main data files
