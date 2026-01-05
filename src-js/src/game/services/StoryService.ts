@@ -11,6 +11,7 @@ import { FilmService } from './FilmService';
 import { TextService } from './TextService';
 import { DialogService } from './DialogService';
 import { SceneService } from './SceneService';
+import { PlanningService } from './PlanningService';
 import { 
     SCENE_ARRIVAL,
     SCENE_STATION,
@@ -170,6 +171,7 @@ export class StoryService {
     private dialog: DialogService;
     private scene: SceneService;
     private presentation: PresentationService | null = null;
+    private planning: PlanningService | null = null;
     
     // Story handlers map
     private handlers: Map<number, StoryHandler> = new Map();
@@ -203,6 +205,13 @@ export class StoryService {
      */
     setPresentationService(presentation: PresentationService): void {
         this.presentation = presentation;
+    }
+
+    /**
+     * Set planning service (optional dependency)
+     */
+    setPlanningService(planning: PlanningService): void {
+        this.planning = planning;
     }
 
     /**
@@ -1627,15 +1636,21 @@ export class StoryService {
         // Stub: Go directly to Tower burglary
         this.tcInitTowerBurglary();
         
-        // TODO: Menu options:
+        // TODO: Implement full menu system
+        // Menu options:
         // 1. Walk (spazieren) - add time
         // 2. Wait (warten) - add time
         // 3. Fish (fischen) - add time
-        // 4. Plan (planen) - call plPlaner(Building_Tower_of_London)
+        // 4. Plan (planen) - call planner
         // 5. Information - call Information()
         // 6. Execute burglary - call tcDoTowerBurglary()
 
-        // For now, return to Tower outside
+        // For now, just show planning option
+        if (this.planning) {
+            await this.planning.planner(Building_Tower_of_London);
+        }
+
+        // Return to Tower outside
         this.addVTime(this.calcRandomNr(560, 830));
         this.scene.sceneArgs.returnValue = SCENE_TOWER_OUT;
 
@@ -1669,13 +1684,17 @@ export class StoryService {
      * Helper: Execute Tower of London burglary
      * Port of tcDoTowerBurglary from story.c
      */
-    private tcDoTowerBurglary(): boolean {
-        // TODO: Implement Tower burglary execution
-        // - Call plPlayer(Building_Tower_of_London)
-        // - Check if successful
-        // - Show appropriate dialog
-        console.log('Execute Tower burglary - not yet implemented');
-        return false;
+    private async tcDoTowerBurglary(): Promise<boolean> {
+        if (!this.planning) {
+            console.error('Planning service not available');
+            return false;
+        }
+
+        // Execute the burglary
+        const result = await this.planning.player(Building_Tower_of_London, 0, null);
+        
+        // Check if successful (result > 0 means success)
+        return result > 0;
     }
 
     /**
@@ -1722,21 +1741,26 @@ export class StoryService {
         // Organisation.DriverID = Person_Marc_Smith;
         // Organisation.GuyCount = 4;
 
-        // TODO: Implement menu loop
-        // For now, just stub the scene
-        console.log('Kaserne scene - menu system not yet implemented');
-
-        // TODO: Menu options:
+        // TODO: Implement full menu system
+        // Menu options:
         // 0. Go inside (SetLocation(65), DoneInsideHouse(), tcMattGoesTo(66))
         // 1. Information - call Information()
-        // 2. Plan - call plPlaner(Building_Starford_Kaserne)
-        // 3. Execute burglary - call plPlayer(Building_Starford_Kaserne)
+        // 2. Plan - call planner
+        // 3. Execute burglary - call player
+
+        // For now, show planning and execute burglary
+        let burglarySuccess = false;
+        
+        if (this.planning) {
+            await this.planning.planner(Building_Starford_Kaserne);
+            const result = await this.planning.player(Building_Starford_Kaserne, 0, null);
+            burglarySuccess = result > 0;
+        }
 
         // Stub: Show ending dialog
         this.stopAnim();
 
         // Check if burglary was successful
-        const burglarySuccess = false; // TODO: Get from plPlayer result
         const kaserneOk = false; // TODO: Get from Search.KaserneOk
 
         if (burglarySuccess) {
