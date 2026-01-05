@@ -3,6 +3,7 @@ import { ReplayTestScene } from './scenes/ReplayTestScene';
 import { ScreenshotTestScene } from './scenes/ScreenshotTestScene';
 import { TestGameScene } from './scenes/TestGameScene';
 import { DataLoaderTestScene } from './scenes/DataLoaderTestScene';
+import { TextTestScene } from './scenes/TextTestScene';
 import { Game as MainGame } from './scenes/Game';
 import { AUTO, Game, Scale, Types } from 'phaser';
 
@@ -19,6 +20,7 @@ const config: Types.Core.GameConfig = {
         autoCenter: Scale.CENTER_BOTH
     },
     scene: [
+        TextTestScene,
         DataLoaderTestScene,
         GameScene,
         ReplayTestScene,
