@@ -168,6 +168,8 @@ export interface Item extends GameObject {
     vExactYOffset: number;
     vExactWidth: number;
     vExactHeight: number;
+    size: number; // 16, 32, or 48
+    colorNr: number;
 }
 
 export interface London extends GameObject {

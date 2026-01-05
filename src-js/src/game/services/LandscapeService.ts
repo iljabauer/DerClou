@@ -158,6 +158,18 @@ export class LandscapeService {
     private floorLayer: Phaser.GameObjects.Container | null = null;
     private objectLayer: Phaser.GameObjects.Container | null = null;
     private characterLayer: Phaser.GameObjects.Container | null = null;
+    
+    // Collection canvases (loaded from ImageService)
+    private coll16Canvas: HTMLCanvasElement | null = null;
+    private coll32Canvas: HTMLCanvasElement | null = null;
+    private coll48Canvas: HTMLCanvasElement | null = null;
+    private floorCanvas: HTMLCanvasElement | null = null;
+    
+    // Phaser textures created from collections
+    private coll16Texture: string | null = null;
+    private coll32Texture: string | null = null;
+    private coll48Texture: string | null = null;
+    private floorTexture: string | null = null;
 
     constructor(db: Database, scene: Phaser.Scene, imageService: ImageService) {
         this.db = db;
@@ -237,8 +249,10 @@ export class LandscapeService {
         // Initialize floor squares
         this.initFloorSquares();
         
-        // Initialize active area
-        this.initActivArea(startAreaId, -1, -1, null);
+        // Initialize active area (async, but we don't await here - it will complete in background)
+        this.initActivArea(startAreaId, -1, -1, null).catch(err => {
+            console.error('Failed to initialize active area:', err);
+        });
 
         console.log(`[LandscapeService] Landscape initialized for area ${startAreaId}`);
     }
@@ -412,7 +426,7 @@ export class LandscapeService {
      * - Sets relations
      * - Builds scroll window (renders the area)
      */
-    initActivArea(areaId: number, x: number = -1, y: number = -1, livingName: string | null = null): void {
+    async initActivArea(areaId: number, x: number = -1, y: number = -1, livingName: string | null = null): Promise<void> {
         if (!this.state) {
             console.error('Landscape not initialized');
             return;
@@ -448,12 +462,77 @@ export class LandscapeService {
         // Set current floor squares
         this.setCurrFloorSquares(areaId);
         
-        // TODO: Copy collision data to XMS (not needed in Phaser)
+        // Load collections for this area
+        await this.loadAreaCollections(area);
         
         // Build scroll window (render the area)
         this.buildScrollWindow();
 
         console.log(`[LandscapeService] Active area set to ${areaId}`);
+    }
+    
+    /**
+     * Load collections for an area
+     * Port of gfxCopyCollToXMS calls from init.c
+     */
+    private async loadAreaCollections(area: LSArea): Promise<void> {
+        console.log(`[LandscapeService] Loading collections for area ${area.id}`);
+        
+        // Load 16x16 object collection
+        if (area.coll16Id) {
+            await this.imageService.loadCollection(area.coll16Id);
+            const coll16 = this.imageService.getCollection(area.coll16Id);
+            if (coll16 && coll16.image) {
+                this.coll16Canvas = coll16.image;
+                this.coll16Texture = this.createTextureFromCanvas(coll16.image, `coll16_${area.id}`);
+            }
+        }
+        
+        // Load 32x32 object collection
+        if (area.coll32Id) {
+            await this.imageService.loadCollection(area.coll32Id);
+            const coll32 = this.imageService.getCollection(area.coll32Id);
+            if (coll32 && coll32.image) {
+                this.coll32Canvas = coll32.image;
+                this.coll32Texture = this.createTextureFromCanvas(coll32.image, `coll32_${area.id}`);
+            }
+        }
+        
+        // Load 48x48 object collection
+        if (area.coll48Id) {
+            await this.imageService.loadCollection(area.coll48Id);
+            const coll48 = this.imageService.getCollection(area.coll48Id);
+            if (coll48 && coll48.image) {
+                this.coll48Canvas = coll48.image;
+                this.coll48Texture = this.createTextureFromCanvas(coll48.image, `coll48_${area.id}`);
+            }
+        }
+        
+        // Load floor collection
+        if (area.floorCollId) {
+            await this.imageService.loadCollection(area.floorCollId);
+            const floorColl = this.imageService.getCollection(area.floorCollId);
+            if (floorColl && floorColl.image) {
+                this.floorCanvas = floorColl.image;
+                this.floorTexture = this.createTextureFromCanvas(floorColl.image, `floor_${area.id}`);
+            }
+        }
+        
+        console.log(`[LandscapeService] Collections loaded: 16=${this.coll16Texture}, 32=${this.coll32Texture}, 48=${this.coll48Texture}, floor=${this.floorTexture}`);
+    }
+    
+    /**
+     * Create Phaser texture from canvas
+     */
+    private createTextureFromCanvas(canvas: HTMLCanvasElement, key: string): string {
+        // Remove existing texture if it exists
+        if (this.scene.textures.exists(key)) {
+            this.scene.textures.remove(key);
+        }
+        
+        // Create new texture from canvas
+        this.scene.textures.addCanvas(key, canvas);
+        return key;
     }
 
     /**
@@ -1009,19 +1088,35 @@ export class LandscapeService {
         if (!this.floorLayer || !this.currFloor) return;
         
         const floor = this.currFloor[floorIndex];
-        const floorType = floor.floorType & 0x1F; // Lower 5 bits
+        const floorType = floor.floorType & 0x0F; // Lower 4 bits (0-15)
         
-        // TODO: Load floor tile image and draw it
-        // For now, draw a placeholder
-        const rect = this.scene.add.rectangle(
-            destX,
-            destY,
-            LS_FLOOR_X_SIZE,
-            LS_FLOOR_Y_SIZE,
-            0x808080
-        );
-        rect.setOrigin(0, 0);
-        this.floorLayer.add(rect);
+        // If we have a floor texture, use it
+        if (this.floorTexture && this.floorCanvas) {
+            // Calculate source position in the floor collection
+            // Floor tiles are arranged horizontally in the collection
+            const srcX = floorType * LS_FLOOR_X_SIZE;
+            const srcY = 0;
+            
+            // Create a sprite from the floor texture
+            const sprite = this.scene.add.sprite(destX, destY, this.floorTexture);
+            sprite.setOrigin(0, 0);
+            
+            // Crop to show only the specific floor tile
+            sprite.setCrop(srcX, srcY, LS_FLOOR_X_SIZE, LS_FLOOR_Y_SIZE);
+            
+            this.floorLayer.add(sprite);
+        } else {
+            // Fallback: draw a placeholder rectangle
+            const rect = this.scene.add.rectangle(
+                destX,
+                destY,
+                LS_FLOOR_X_SIZE,
+                LS_FLOOR_Y_SIZE,
+                0x808080
+            );
+            rect.setOrigin(0, 0);
+            this.floorLayer.add(rect);
+        }
     }
     
     /**
@@ -1057,17 +1152,56 @@ export class LandscapeService {
             return;
         }
         
-        // TODO: Load object image and draw it
-        // For now, draw a placeholder rectangle
-        const rect = this.scene.add.rectangle(
-            lso.xPos,
-            lso.yPos,
-            16,
-            16,
-            0xFF0000
-        );
-        rect.setOrigin(0, 0);
-        this.objectLayer.add(rect);
+        // Get the item for this object
+        const item = this.db.getObject(lso.type) as any; // Item type
+        if (!item || !item.size) {
+            console.warn(`Item not found or has no size for object ${lso.id}`);
+            return;
+        }
+        
+        // Calculate offset in collection
+        // offsetFact is the base offset, plus lower 2 bits of status for animation
+        const offsetFact = item.offsetFact + (lso.status & 3);
+        
+        // Get the appropriate texture based on size
+        let texture: string | null = null;
+        let srcWidth = 288; // Default width for 16x16 and 48x48 collections
+        
+        if (item.size === 16 && this.coll16Texture) {
+            texture = this.coll16Texture;
+        } else if (item.size === 32 && this.coll32Texture) {
+            texture = this.coll32Texture;
+            srcWidth = 320; // 32x32 collection is 320 pixels wide
+        } else if (item.size === 48 && this.coll48Texture) {
+            texture = this.coll48Texture;
+        }
+        
+        if (texture) {
+            // Calculate source position in collection
+            const perRow = Math.floor(srcWidth / item.size);
+            const srcY = Math.floor(offsetFact / perRow) * item.size;
+            const srcX = (offsetFact % perRow) * item.size;
+            
+            // Create sprite from texture
+            const sprite = this.scene.add.sprite(lso.xPos, lso.yPos, texture);
+            sprite.setOrigin(0, 0);
+            
+            // Crop to show only this object
+            sprite.setCrop(srcX, srcY, item.size, item.size);
+            
+            this.objectLayer.add(sprite);
+        } else {
+            // Fallback: draw a placeholder rectangle
+            const rect = this.scene.add.rectangle(
+                lso.xPos,
+                lso.yPos,
+                item.size,
+                item.size,
+                0xFF0000
+            );
+            rect.setOrigin(0, 0);
+            this.objectLayer.add(rect);
+        }
     }
     
     /**

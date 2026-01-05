@@ -4,7 +4,7 @@
  */
 
 import Phaser from 'phaser';
-import { Database } from '../core/Database';
+import { db } from '../core/Database';
 import { DataLoader } from '../services/DataLoader';
 import { ImageService } from '../services/ImageService';
 import { LandscapeService, LS_COLL_PLAN } from '../services/LandscapeService';
@@ -12,7 +12,6 @@ import { LivingService } from '../services/LivingService';
 import { Building } from '../types/GameTypes';
 
 export class LandscapeTestScene extends Phaser.Scene {
-    private db!: Database;
     private dataLoader!: DataLoader;
     private imageService!: ImageService;
     private landscapeService!: LandscapeService;
@@ -27,11 +26,10 @@ export class LandscapeTestScene extends Phaser.Scene {
         console.log('[LandscapeTestScene] Starting landscape test...');
 
         // Initialize services
-        this.db = new Database();
-        this.dataLoader = new DataLoader(this.db);
-        this.imageService = new ImageService(this);
-        this.landscapeService = new LandscapeService(this.db, this, this.imageService);
-        this.livingService = new LivingService(this.db, this, this.imageService);
+        this.dataLoader = new DataLoader({ dataPath: 'gamedata/DATA' });
+        this.imageService = new ImageService();
+        this.landscapeService = new LandscapeService(db, this, this.imageService);
+        this.livingService = new LivingService(this, this.imageService);
         
         // Link services
         this.landscapeService.setLivingService(this.livingService);
@@ -51,20 +49,16 @@ export class LandscapeTestScene extends Phaser.Scene {
 
     private async loadAndTest(): Promise<void> {
         try {
-            // Load main data
-            this.updateStatus('Loading TCMAIN.DAT...');
-            await this.dataLoader.loadMainData();
+            // Load all data
+            this.updateStatus('Loading game data...');
+            await this.dataLoader.loadAll();
 
-            // Load building data
-            this.updateStatus('Loading TCBUILD.DAT...');
-            await this.dataLoader.loadBuildingData();
-
-            // Load image collections
+            // Initialize image service
             this.updateStatus('Loading image collections...');
-            await this.imageService.loadCollectionList();
+            await this.imageService.init();
 
             // Find a building to test with
-            const buildings = this.db.getAllObjects().filter(obj => obj.type === 3); // ObjectType.Building
+            const buildings = db.getAllObjects().filter(obj => obj.type === 3); // ObjectType.Building
             if (buildings.length === 0) {
                 this.updateStatus('ERROR: No buildings found!');
                 return;

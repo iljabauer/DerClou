@@ -401,6 +401,8 @@ export class DatFileParser {
         const vExactYOffset = this.reader.readUInt16();
         const vExactWidth = this.reader.readUInt16();
         const vExactHeight = this.reader.readUInt16();
+        const size = this.reader.readUInt8();
+        const colorNr = this.reader.readUInt8();
 
         return {
             id: header.nr,
@@ -416,6 +418,8 @@ export class DatFileParser {
             vExactYOffset,
             vExactWidth,
             vExactHeight,
+            size,
+            colorNr,
         };
     }
 
