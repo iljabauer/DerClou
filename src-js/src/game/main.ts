@@ -11,6 +11,7 @@ import { LivingTestScene } from './scenes/LivingTestScene';
 import { DialogTestScene } from './scenes/DialogTestScene';
 import { InteractionTestScene } from './scenes/InteractionTestScene';
 import { OrganisationTestScene } from './scenes/OrganisationTestScene';
+import { PlanningTestScene } from './scenes/PlanningTestScene';
 import { Game as MainGame } from './scenes/Game';
 import { AUTO, Game, Scale, Types } from 'phaser';
 
@@ -27,6 +28,7 @@ const config: Types.Core.GameConfig = {
         autoCenter: Scale.CENTER_BOTH
     },
     scene: [
+        PlanningTestScene,
         GameScene,
         ReplayTestScene,
         OrganisationTestScene,
