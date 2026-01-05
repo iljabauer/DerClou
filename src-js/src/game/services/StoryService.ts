@@ -26,10 +26,17 @@ import {
     SCENE_CALL_FROM_POOLY,
     SCENE_GLUDO_SAILOR,
     SCENE_CALL_BRIGGS,
+    SCENE_MORNING,
+    SCENE_VISITING,
+    SCENE_A_DREAM,
+    SCENE_MISSED_DATE_0,
+    SCENE_MISSED_DATE_1,
     STORY_0_TXT,
+    STORY_1_TXT,
     OLD_MATT_PICTID,
     MATT_PICTID,
     PHONE_PICTID,
+    LETTER_PICTID,
     FACE_GLUDO_SAILOR,
     Person_Matt_Stuvysunt,
     Person_Ben_Riggley,
@@ -39,6 +46,7 @@ import {
     Person_Pater_James,
     Person_Dan_Stanford,
     Person_Eric_Pooly,
+    Person_Sabien_Pardo,
     Building_Kiosk,
     Car_Fiat_Topolino_1940,
     Loot_Ring_des_Abtes,
@@ -115,6 +123,11 @@ export class StoryService {
         this.handlers.set(SCENE_CALL_FROM_POOLY, () => this.tcDoneCallFromPooly());
         this.handlers.set(SCENE_GLUDO_SAILOR, () => this.tcDoneGludoAsSailor());
         this.handlers.set(SCENE_CALL_BRIGGS, () => this.tcDoneCallFromBriggs());
+        this.handlers.set(SCENE_MORNING, () => this.tcDoneBeautifullMorning());
+        this.handlers.set(SCENE_VISITING, () => this.tcDoneVisitingSabien());
+        this.handlers.set(SCENE_A_DREAM, () => this.tcDoneADream());
+        this.handlers.set(SCENE_MISSED_DATE_0, () => this.tcDoneMissedDate());
+        this.handlers.set(SCENE_MISSED_DATE_1, () => this.tcDoneMissedDate());
         // More handlers will be added as they are ported
     }
 
@@ -663,6 +676,109 @@ export class StoryService {
         this.gfxChangeColors();
 
         this.scene.sceneArgs.returnValue = SCENE_NEW_GAME;
+    }
+
+    /**
+     * BEAUTIFUL MORNING
+     * Port of tcDoneBeautifullMorning from story.c
+     * 
+     * Matt wakes up in the morning
+     */
+    private tcDoneBeautifullMorning(): void {
+        // Time passes
+        this.asTimeGoesBy(this.film.getMinute() + 187);
+
+        this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'MORNING_MATT_0');
+
+        // Play sleep animation (stub)
+        this.playAnim('Sleep', 30000);
+        this.asTimeGoesBy(546);
+        this.stopAnim();
+
+        // Show hotel image
+        this.gfxShow(173);
+
+        this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'MORNING_MATT_1');
+
+        // Unlock new taxi location
+        this.scene.addTaxiLocation(61);
+
+        this.scene.sceneArgs.returnValue = SCENE_HOTEL_ROOM;
+    }
+
+    /**
+     * VISITING SABIEN
+     * Port of tcDoneVisitingSabien from story.c
+     * 
+     * Matt visits Sabien Pardo
+     */
+    private tcDoneVisitingSabien(): void {
+        const sabien = this.db.getObject(Person_Sabien_Pardo);
+
+        // Matt now knows Sabien
+        this.db.knowsSet(Person_Matt_Stuvysunt, Person_Sabien_Pardo);
+
+        this.dialog.say(STORY_1_TXT, 0, 0, 'GROVE_SABIEN_0'); // sabien.PictID
+        this.dialog.say(STORY_1_TXT, 0, MATT_PICTID, 'GROVE_MATT_0');
+        this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'GROVE_OLD_MATT_0');
+        this.dialog.say(STORY_1_TXT, 0, 0, 'GROVE_SABIEN_1'); // sabien.PictID
+        this.dialog.say(STORY_1_TXT, 0, MATT_PICTID, 'GROVE_MATT_1');
+        this.dialog.say(STORY_1_TXT, 0, 0, 'GROVE_SABIEN_2'); // sabien.PictID
+        this.dialog.say(STORY_1_TXT, 0, MATT_PICTID, 'GROVE_MATT_2');
+        this.dialog.say(STORY_1_TXT, 0, 0, 'GROVE_SABIEN_3'); // sabien.PictID
+        this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'GROVE_OLD_MATT_1');
+
+        this.scene.sceneArgs.returnValue = SCENE_HOTEL_ROOM;
+    }
+
+    /**
+     * A DREAM
+     * Port of tcDoneADream from story.c
+     * 
+     * Matt has a dream
+     */
+    private tcDoneADream(): void {
+        this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST1_OLD_0');
+
+        // Play sleep animation (stub)
+        this.playAnim('Sleep', 30000);
+        this.asTimeGoesBy(517);
+        this.stopAnim();
+
+        // Show hotel image
+        this.gfxShow(173);
+
+        this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST1_OLD_1');
+
+        // Phone rings
+        this.somebodyIsCalling();
+
+        this.dialog.say(STORY_1_TXT, 0, PHONE_PICTID, 'ST1_BRIGGS_0');
+        this.dialog.say(STORY_1_TXT, 0, MATT_PICTID, 'ST1_MATT_0');
+
+        this.scene.sceneArgs.returnValue = SCENE_HOTEL_ROOM;
+    }
+
+    /**
+     * MISSED DATE
+     * Port of tcDoneMissedDate from story.c
+     * 
+     * Matt missed a date with Sabien
+     */
+    private tcDoneMissedDate(): void {
+        this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'VERPASST_BRIEF');
+        this.dialog.say(STORY_1_TXT, 0, LETTER_PICTID, 'DATE_VERPASST');
+
+        this.scene.sceneArgs.returnValue = SCENE_HOTEL_ROOM;
+    }
+
+    /**
+     * Helper: Play animation
+     */
+    private playAnim(animName: string, duration: number): void {
+        // Port of PlayAnim from C code
+        // TODO: Implement animation playback
+        console.log(`Play animation: ${animName} for ${duration}ms`);
     }
 
     /**
