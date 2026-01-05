@@ -331,3 +331,6 @@ export const tcCOSTS_FOR_HOTEL = 100; // TODO: Find actual value
 
 // Game values
 export const tcVALUE_OF_RING_OF_PATER = 320;
+
+// Loot tracking
+export const CompleteLoot_LastLoot = 35;
