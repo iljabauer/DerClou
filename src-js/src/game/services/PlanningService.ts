@@ -1008,19 +1008,203 @@ export class PlanningService {
     }
 
     /**
-     * Wait action
+     * Wait action - wait for time to pass or for radio signal
+     * Port of plActionWait() from planer.c
      */
     private async actionWait(): Promise<void> {
-        // TODO: Implement wait action
-        await this.ui.showBubble(['Wait action not yet implemented'], 'think', 0);
+        if (!this.state) return;
+        
+        const menuItems = ['Wait', 'Return'];
+        
+        // Add radio option if applicable
+        if (this.currentPerson < this.state.team.length && this.state.team.length > 1) {
+            // Check if Matt has radio
+            const hasRadio = this.db.hasRelation(
+                this.state.team[0], // Matt is always first
+                'has',
+                'Tool_Funkgeraet'
+            );
+            
+            if (hasRadio) {
+                menuItems.splice(1, 0, 'Wait for Radio');
+            }
+        }
+        
+        let active = 0;
+        while (active !== menuItems.length - 1) { // Return option
+            this.displayTimer(false);
+            this.displayInfo();
+            
+            active = await this.ui.showMenu(menuItems, 'Wait');
+            
+            if (active === 0) {
+                // Wait for time
+                this.showMessage('WAIT_1', true);
+                
+                // Show time selection (0-1800 seconds = 30 minutes)
+                let waitTime = 0;
+                
+                // Simple input loop for time selection
+                while (true) {
+                    // TODO: Draw wait time display
+                    
+                    const input = await this.waitForInput(['left', 'right', 'up', 'down', 'click']);
+                    
+                    if (input === 'click') break;
+                    
+                    if (input === 'right' && waitTime < 1800) {
+                        waitTime++;
+                    } else if (input === 'left' && waitTime > 0) {
+                        waitTime--;
+                    } else if (input === 'up' && waitTime <= 1740) {
+                        waitTime += 60;
+                    } else if (input === 'down' && waitTime >= 60) {
+                        waitTime -= 60;
+                    }
+                }
+                
+                if (waitTime > 0) {
+                    const action = this.planningSystem.initAction(
+                        ActionType.WAIT,
+                        0,
+                        0,
+                        waitTime * 60 // PLANING_CORRECT_TIME
+                    );
+                    
+                    if (action) {
+                        this.planChanged = true;
+                        
+                        // Stand animation
+                        const personName = this.state.personNames[this.currentPerson];
+                        this.living.animate(personName, 'STAND', 0, 0);
+                        
+                        await this.sync(false, this.planningSystem.getMaxTimer(), waitTime * 60, true);
+                        this.living.refreshAll();
+                    } else {
+                        await this.say('PLANING_END', this.currentPerson);
+                        active = menuItems.length - 1; // Exit
+                    }
+                }
+            } else if (active === 1 && menuItems[1] === 'Wait for Radio') {
+                // Wait for radio signal
+                const hasRadio = this.db.hasRelation(
+                    this.state.team[0],
+                    'has',
+                    'Tool_Funkgeraet'
+                );
+                
+                if (hasRadio) {
+                    // Select person to wait for
+                    let targetPerson = -1;
+                    
+                    if (this.state.team.length > 2) {
+                        // Show person selection
+                        this.showMessage('RADIO_2', true);
+                        
+                        const otherTeam = this.state.team.filter((_, i) => i !== this.currentPerson);
+                        const personChoice = await this.ui.showMenu(
+                            otherTeam.map(id => this.db.getObjectName(id)),
+                            'Wait for Signal From'
+                        );
+                        
+                        if (personChoice >= 0 && personChoice < otherTeam.length) {
+                            targetPerson = otherTeam[personChoice];
+                        }
+                    } else {
+                        // Only 2 people, wait for the other one
+                        targetPerson = this.state.team[this.currentPerson === 0 ? 1 : 0];
+                        this.showMessage('RADIO_4', true);
+                    }
+                    
+                    if (targetPerson >= 0) {
+                        const action = this.planningSystem.initAction(
+                            ActionType.WAIT_SIGNAL,
+                            targetPerson,
+                            0,
+                            60 // PLANING_CORRECT_TIME
+                        );
+                        
+                        if (action) {
+                            this.planChanged = true;
+                            
+                            const personName = this.state.personNames[this.currentPerson];
+                            this.living.animate(personName, 'STAND', 0, 0);
+                            
+                            await this.sync(false, this.planningSystem.getMaxTimer(), 60, true);
+                            this.living.refreshAll();
+                        } else {
+                            await this.say('PLANING_END', this.currentPerson);
+                            active = menuItems.length - 1; // Exit
+                        }
+                    }
+                } else {
+                    this.showMessage('NO_RADIO', true);
+                }
+            }
+        }
     }
 
     /**
-     * Radio action
+     * Radio action - send radio signal to another team member
+     * Port of plActionRadio() from planer.c
      */
     private async actionRadio(): Promise<void> {
-        // TODO: Implement radio action
-        await this.ui.showBubble(['Radio action not yet implemented'], 'think', 0);
+        if (!this.state) return;
+        
+        // Check if Matt has radio
+        const hasRadio = this.db.hasRelation(
+            this.state.team[0],
+            'has',
+            'Tool_Funkgeraet'
+        );
+        
+        if (!hasRadio) {
+            this.showMessage('NO_RADIO', true);
+            return;
+        }
+        
+        // Select target person
+        let targetPerson = -1;
+        
+        if (this.state.team.length > 2) {
+            // Show person selection
+            this.showMessage('RADIO_1', true);
+            
+            const otherTeam = this.state.team.filter((_, i) => i !== this.currentPerson);
+            const personChoice = await this.ui.showMenu(
+                otherTeam.map(id => this.db.getObjectName(id)),
+                'Send Signal To'
+            );
+            
+            if (personChoice >= 0 && personChoice < otherTeam.length) {
+                targetPerson = otherTeam[personChoice];
+            }
+        } else {
+            // Only 2 people, signal the other one
+            targetPerson = this.state.team[this.currentPerson === 0 ? 1 : 0];
+            this.showMessage('RADIO_3', true);
+        }
+        
+        if (targetPerson >= 0) {
+            const action = this.planningSystem.initAction(
+                ActionType.SIGNAL,
+                targetPerson,
+                0,
+                5 * 60 // PLANING_TIME_RADIO * PLANING_CORRECT_TIME
+            );
+            
+            if (action) {
+                this.planChanged = true;
+                
+                const personName = this.state.personNames[this.currentPerson];
+                this.living.animate(personName, 'MAKE_CALL', 0, 0);
+                
+                await this.sync(false, this.planningSystem.getMaxTimer(), 5 * 60, true);
+                this.living.refreshAll();
+            } else {
+                await this.say('PLANING_END', this.currentPerson);
+            }
+        }
     }
 
     /**
