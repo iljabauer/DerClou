@@ -23,9 +23,11 @@ import {
     SCENE_NEW_GAME,
     SCENE_FST_MEET_BRIGGS,
     SCENE_FREIFAHRT,
+    SCENE_CALL_FROM_POOLY,
     STORY_0_TXT,
     OLD_MATT_PICTID,
     MATT_PICTID,
+    PHONE_PICTID,
     Person_Matt_Stuvysunt,
     Person_Ben_Riggley,
     Person_John_Gludo,
@@ -33,6 +35,7 @@ import {
     Person_Herbert_Briggs,
     Person_Pater_James,
     Person_Dan_Stanford,
+    Person_Eric_Pooly,
     Building_Kiosk,
     Car_Fiat_Topolino_1940,
     Loot_Ring_des_Abtes,
@@ -106,6 +109,7 @@ export class StoryService {
         this.handlers.set(SCENE_HOTEL_ROOM, () => this.tcDoneHotelReception());
         this.handlers.set(SCENE_FST_MEET_BRIGGS, () => this.tcDoneMeetBriggs());
         this.handlers.set(SCENE_FREIFAHRT, () => this.tcDoneFreeTicket());
+        this.handlers.set(SCENE_CALL_FROM_POOLY, () => this.tcDoneCallFromPooly());
         // More handlers will be added as they are ported
     }
 
@@ -540,6 +544,48 @@ export class StoryService {
 
         // Return to taxi scene (location 8)
         this.scene.sceneArgs.returnValue = this.getLocSceneEventNr(8);
+    }
+
+    /**
+     * CALL FROM POOLY
+     * Port of tcDoneCallFromPooly from story.c
+     * 
+     * Eric Pooly calls Matt about the ring
+     */
+    private tcDoneCallFromPooly(): void {
+        let choice = 0;
+
+        // Matt now knows Pooly
+        this.db.knowsSet(Person_Matt_Stuvysunt, Person_Eric_Pooly);
+
+        // Check if Matt has the ring
+        if (this.db.has(Person_Matt_Stuvysunt, Loot_Ring_des_Abtes)) {
+            // Play phone ringing sound effect (stub)
+            this.somebodyIsCalling();
+
+            this.dialog.say(STORY_0_TXT, 0, PHONE_PICTID, 'A_CALL_FOR_YOU');
+
+            this.dialog.say(STORY_0_TXT, 0, PHONE_PICTID, 'DEALER_0');
+            choice = this.dialog.say(STORY_0_TXT, 0, MATT_PICTID, 'DEALER_MATT_1');
+
+            if (choice === 0 || choice === 1) {
+                this.dialog.say(STORY_0_TXT, 0, PHONE_PICTID, 'DEALER_1');
+            } else {
+                this.dialog.say(STORY_0_TXT, 0, PHONE_PICTID, 'DEALER_2');
+            }
+        }
+
+        this.scene.sceneArgs.returnValue = SCENE_HOTEL_ROOM;
+    }
+
+    /**
+     * Helper: Play phone ringing sound
+     */
+    private somebodyIsCalling(): void {
+        // Port of tcSomebodyIsCalling from story.c
+        // Plays phone ringing sound effect multiple times
+        // TODO: Implement sound effects
+        console.log('Phone is ringing...');
     }
 
     /**
