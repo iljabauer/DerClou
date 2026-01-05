@@ -773,6 +773,19 @@ export class StoryService {
     }
 
     /**
+     * AFTER MEETING BRIGGS
+     * Port of tcDoneAfterMeetingBriggs from story.c
+     * 
+     * Matt reflects after meeting Briggs
+     */
+    private tcDoneAfterMeetingBriggs(): void {
+        this.dialog.setBubbleType('think');
+        this.dialog.say(STORY_0_TXT, 0, MATT_PICTID, 'AFTER_MEETING_BRIGGS');
+
+        this.scene.sceneArgs.returnValue = SCENE_WATLING;
+    }
+
+    /**
      * Helper: Play animation
      */
     private playAnim(animName: string, duration: number): void {
