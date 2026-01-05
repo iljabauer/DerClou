@@ -4,7 +4,27 @@
 
 ## Current Sprint: Phase 2 - Dialog System
 
-### High Priority 🔴 (Replay System Fix)
+### High Priority 🔴 (Phase 2: Dialog System - Continued)
+
+- [ ] Complete DynamicTalk() implementation
+  - [ ] Person data structure integration
+  - [ ] Knowledge tracking system
+  - [ ] Dialog tree navigation
+  - [ ] Question/answer system
+  - [ ] Talk bits handling
+
+- [ ] Character portrait display
+  - [ ] Load character portraits
+  - [ ] Display in dialog bubbles
+  - [ ] Portrait positioning
+
+- [ ] Dialog tree system
+  - [ ] Parse dialog text with keywords
+  - [ ] Handle conversation flow
+  - [ ] Choice evaluation
+  - [ ] State management
+
+### Medium Priority 🟡 (Replay System Fix)
 
 - [ ] Debug replay system screenshot generation
   - [ ] Check NW.js screenshot capture in headless mode
@@ -12,7 +32,7 @@
   - [ ] Test with simple replay file
   - [ ] Fix visual regression testing
 
-### Medium Priority 🟡 (Phase 2: Dialog System)
+### Medium Priority 🟡 (Phase 2: Dialog System - Application Logic)
 
 - [ ] Port dialog.c - Core dialog system
   - [ ] Say() - Display dialog with choices
@@ -76,6 +96,18 @@
 - [x] Create LivingTestScene for testing
 - [x] Character positioning and visibility
 - [x] Animation state management
+
+### Phase 2: Dialog System (In Progress)
+- [x] Port Say() function from dialog.c
+- [x] Create DialogService.ts
+- [x] Add text file ID constants (BUSINESS_TXT, TALK_0_TXT, TALK_1_TXT)
+- [x] Implement bubble() and think() helpers
+- [x] Add getTextLines() to TextService
+- [x] Create DialogTestScene for testing
+- [ ] Complete DynamicTalk() implementation
+- [ ] Character portrait display
+- [ ] Dialog tree navigation
+- [ ] Knowledge tracking system
 
 ## Blocked ⛔
 

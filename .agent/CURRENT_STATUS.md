@@ -75,13 +75,24 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - Frame-based animation with proper cropping
    - LivingTestScene for testing
 
-8. **Test Scenes**
+8. **Dialog System** - In Progress 🚧
+   - DialogService for conversations
+   - Say() function for dialog display
+   - Bubble() and Think() helpers
+   - Text file integration (BUSINESS_TXT, TALK_0_TXT, TALK_1_TXT)
+   - DialogTestScene for testing
+   - ⚠️ DynamicTalk() needs full implementation
+   - ⚠️ Dialog tree navigation
+   - ⚠️ Character portrait display
+
+9. **Test Scenes**
    - ReplayTestScene (original)
    - DataLoaderTestScene
    - TextTestScene
    - UITestScene
    - ImageTestScene
-   - LivingTestScene (new)
+   - LivingTestScene
+   - DialogTestScene (new)
    - GameScene, MainMenuScene, LondonScene
 
 ### What Needs Work 🚧
@@ -91,11 +102,15 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - ⚠️ Visual regression testing blocked
    - ⚠️ Need to debug NW.js screenshot capture
 
-2. **Dialog System** (src/dialog/)
-   - Conversation trees
-   - NPC interactions
-   - Dynamic text insertion
-   - Integration with UI and Text systems
+2. **Dialog System** (src/dialog/) - IN PROGRESS
+   - ✅ Basic Say() function
+   - ✅ Bubble() and Think() helpers
+   - ✅ Text file integration
+   - ⚠️ DynamicTalk() full implementation
+   - ⚠️ Conversation trees and dialog navigation
+   - ⚠️ NPC interaction system
+   - ⚠️ Character portrait display
+   - ⚠️ Knowledge tracking system
 
 3. **Data Verification**
    - Load object names from text files (OBJECTS.TXT)
@@ -137,14 +152,16 @@ src-js/src/game/
 │   ├── TextService.ts       ✅ Text loading & lookup
 │   ├── ImageService.ts      ✅ Image loading (ILBM)
 │   ├── UIService.ts         ✅ Menus & bubbles
-│   ├── LivingService.ts     🚧 Character management
-│   └── BackgroundService.ts ✅ Background display
+│   ├── LivingService.ts     ✅ Character management
+│   ├── BackgroundService.ts ✅ Background display
+│   └── DialogService.ts     🚧 Dialog system
 └── scenes/
     ├── ReplayTestScene.ts   ✅ Replay testing
     ├── DataLoaderTestScene.ts ✅ Data loading test
     ├── TextTestScene.ts     ✅ Text system test
     ├── UITestScene.ts       ✅ UI system test
     ├── LivingTestScene.ts   ✅ Living system test
+    ├── DialogTestScene.ts   ✅ Dialog system test
     ├── GameScene.ts         ✅ Main scene
     ├── MainMenuScene.ts     ✅ Menu
     └── LondonScene.ts       ✅ Hub scene
@@ -161,8 +178,12 @@ src-js/src/game/
 6. ✅ Load animation templates from TEMPLATE.LST
 7. ✅ Load character sprites from ALLMAXI
 8. ✅ Implement frame-based animation system
-9. ⚠️ Fix replay system screenshot generation
-10. ⚠️ Start Phase 2: Dialog System
+9. ✅ Start Phase 2: Dialog System
+10. ✅ Port Say() function
+11. ✅ Create DialogService
+12. ✅ Create DialogTestScene
+13. ⚠️ Fix replay system screenshot generation
+14. ⚠️ Complete DynamicTalk() implementation
 
 ### Short-term (Next 2-3 Sessions)
 1. Complete Living/Location System
@@ -221,7 +242,7 @@ npm run dev
 
 ## Notes
 
-- 38 TypeScript files, ~7000 lines of code
+- 40 TypeScript files, ~7400 lines of code
 - 72 C source files to port (~35k lines)
 - TCMAIN.DAT and TCBUILD.DAT are main data files
 - Building-specific files: *ETA0.DAT, *ETA1.DAT, etc.
