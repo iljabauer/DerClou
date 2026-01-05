@@ -42,6 +42,11 @@ import {
     SCENE_9TH_BURG,
     SCENE_WALRUS,
     SCENE_BIRTHDAY,
+    SCENE_SOUTHHAMPTON,
+    SCENE_TOWER_OUT,
+    SCENE_KASERNE_OUTSIDE,
+    Building_Tower_of_London,
+    Environment_TheClou,
     STORY_0_TXT,
     STORY_1_TXT,
     OLD_MATT_PICTID,
@@ -221,6 +226,7 @@ export class StoryService {
         this.handlers.set(SCENE_6TH_BURG, () => this.tcDone6thBurglary());
         this.handlers.set(SCENE_7TH_BURG, () => this.tcDone7thBurglary());
         this.handlers.set(SCENE_BIRTHDAY, () => this.tcDoneBirthday());
+        this.handlers.set(SCENE_SOUTHHAMPTON, () => this.tcDoneSouthhampton());
         // More handlers will be added as they are ported
     }
 
@@ -1583,6 +1589,89 @@ export class StoryService {
         this.gfxShow(141); // graphics
 
         this.scene.sceneArgs.returnValue = SCENE_WALRUS;
+    }
+
+    /**
+     * SOUTHHAMPTON
+     * Port of tcDoneSouthhampton from story.c
+     * 
+     * Southampton menu scene - planning and executing Tower of London burglary
+     * TODO: This is a complex menu-based scene that needs full UI integration
+     */
+    private tcDoneSouthhampton(): void {
+        const Env = this.db.getObject(Environment_TheClou) as any;
+
+        this.scene.sceneArgs.overwritten = 1;
+        this.scene.sceneArgs.returnValue = 0;
+
+        this.film.setEnabledChoices(GP_ALL_CHOICES_ENABLED);
+
+        // Add random time (9-14 hours)
+        this.addVTime(this.calcRandomNr(560, 830));
+        // TODO: ShowTime(0);
+
+        if (Env.FirstTimeInSouth) {
+            Env.FirstTimeInSouth = 0;
+            this.tcDoneFirstTimeLonelyInSouth();
+            this.tcInitTowerBurglary();
+        }
+
+        // TODO: Implement menu loop
+        // For now, just stub the scene
+        console.log('Southampton scene - menu system not yet implemented');
+        
+        // Stub: Go directly to Tower burglary
+        this.tcInitTowerBurglary();
+        
+        // TODO: Menu options:
+        // 1. Walk (spazieren) - add time
+        // 2. Wait (warten) - add time
+        // 3. Fish (fischen) - add time
+        // 4. Plan (planen) - call plPlaner(Building_Tower_of_London)
+        // 5. Information - call Information()
+        // 6. Execute burglary - call tcDoTowerBurglary()
+
+        // For now, return to Tower outside
+        this.addVTime(this.calcRandomNr(560, 830));
+        this.scene.sceneArgs.returnValue = SCENE_TOWER_OUT;
+
+        this.stopAnim();
+        this.gfxChangeColors();
+    }
+
+    /**
+     * Helper: First time in Southampton (lonely)
+     * Port of tcDoneFirstTimeLonelyInSouth from story.c
+     */
+    private tcDoneFirstTimeLonelyInSouth(): void {
+        // TODO: Implement first time in Southampton scene
+        console.log('First time in Southampton - not yet implemented');
+    }
+
+    /**
+     * Helper: Initialize Tower of London burglary
+     * Port of tcInitTowerBurglary from story.c
+     */
+    private tcInitTowerBurglary(): void {
+        // TODO: Implement Tower burglary initialization
+        // - Set up team (Matt, Briggs, Marc Smith, Mohammed Abdula)
+        // - Give all tools
+        // - Set abilities
+        // - Set up car (Cadillac Club 1952)
+        console.log('Initialize Tower burglary - not yet implemented');
+    }
+
+    /**
+     * Helper: Execute Tower of London burglary
+     * Port of tcDoTowerBurglary from story.c
+     */
+    private tcDoTowerBurglary(): boolean {
+        // TODO: Implement Tower burglary execution
+        // - Call plPlayer(Building_Tower_of_London)
+        // - Check if successful
+        // - Show appropriate dialog
+        console.log('Execute Tower burglary - not yet implemented');
+        return false;
     }
 
     /**
