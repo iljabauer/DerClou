@@ -351,6 +351,13 @@ export class TextService {
     }
 
     /**
+     * Get text lines by key (alias for goKey)
+     */
+    getTextLines(textId: number, key: string): string[] | null {
+        return this.goKey(textId, key);
+    }
+
+    /**
      * Extract a specific key from a comma-separated key string
      */
     getKey(keyNr: number, keyString: string): string | null {
