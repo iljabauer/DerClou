@@ -2,14 +2,17 @@
  * Planning Service - Port of planing/ directory
  * Handles burglary planning and execution
  * 
- * This is a stub implementation that provides the interface.
- * Full planning system will be implemented in future sessions.
+ * Main interface for the planning system.
+ * Uses PlanningSystemService for core functionality.
  */
 
 import { Database } from '../core/Database';
 import { UIService } from './UIService';
 import { TextService } from './TextService';
 import { LandscapeService } from './LandscapeService';
+import { PlanningSystemService } from './PlanningSystemService';
+import { Building } from '../types/GameTypes';
+import { LS_COLL_PLAN } from './LandscapeService';
 
 // Planning modes
 export const PLANING_INIT_PERSONSLIST = 1;
@@ -44,17 +47,37 @@ export const PLANING_ACTION_RADIO = 7;
 export const PLANING_PERSON_CHANGE = 8;
 export const PLANING_ACTION_RETURN = 9;
 
+// Notebook menu IDs
+export const PLANING_NOTE_TARGET = 0;
+export const PLANING_NOTE_TEAM = 1;
+export const PLANING_NOTE_CAR = 2;
+export const PLANING_NOTE_TOOLS = 3;
+export const PLANING_NOTE_LOOTS = 4;
+
+// Look menu IDs
+export const PLANING_LOOK_PLAN = 0;
+export const PLANING_LOOK_PERSON_CHANGE = 1;
+export const PLANING_LOOK_RETURN = 2;
+
 // Burglary result codes
 export const BURGLARY_SUCCESS = 1;
 export const BURGLARY_FAILED = 0;
 export const BURGLARY_ARRESTED = -1;
+
+// Constants
+export const PLANING_NR_PERSONS = 4;
+export const PLANING_NR_GUARDS = 4;
+export const PLANING_NR_LOOTS = 256;
 
 interface PlanningState {
     buildingId: number;
     team: number[];  // Person IDs
     tools: number[];  // Tool IDs
     car: number | null;  // Car ID
-    plan: any[];  // Action plan
+    personNames: string[];  // Names of team members
+    guardNames: string[];  // Names of guards
+    currentPerson: number;  // Current person index
+    planChanged: boolean;  // Has plan been modified?
 }
 
 export class PlanningService {
@@ -63,6 +86,7 @@ export class PlanningService {
     private ui: UIService;
     private text: TextService;
     private landscape: LandscapeService;
+    private system: PlanningSystemService;
     private state: PlanningState | null = null;
 
     constructor(
@@ -77,6 +101,328 @@ export class PlanningService {
         this.ui = ui;
         this.text = text;
         this.landscape = landscape;
+        this.system = new PlanningSystemService(db);
+    }
+
+    /**
+     * Prepare system for planning
+     * Port of plPrepareSys() from prepare.c
+     */
+    private prepareSys(buildingId: number, mode: number): void {
+        if (mode & PLANING_INIT_PERSONSLIST) {
+            // Initialize persons list
+            // TODO: Get team members from organisation
+        }
+
+        if (mode & PLANING_HANDLER_ADD) {
+            // Add handlers for team members
+            if (this.state) {
+                for (const personId of this.state.team) {
+                    this.system.initHandler(personId);
+                }
+            }
+        }
+
+        if (mode & PLANING_HANDLER_CLEAR) {
+            // Clear all handlers
+            if (this.state) {
+                for (const personId of this.state.team) {
+                    this.system.clearHandler(personId);
+                }
+            }
+        }
+
+        if (mode & PLANING_HANDLER_SET) {
+            // Set first handler as active
+            if (this.state && this.state.team.length > 0) {
+                this.system.setActivHandler(this.state.team[0]);
+                this.state.currentPerson = 0;
+            }
+        }
+
+        if (mode & PLANING_GUARDS_LOAD) {
+            // Load guard data
+            // TODO: Load guard patrol routes
+        }
+    }
+
+    /**
+     * Prepare graphics for planning
+     * Port of plPrepareGfx() from prepare.c
+     */
+    private prepareGfx(buildingId: number, collMode: number, gfxMode: number): void {
+        if (gfxMode & PLANING_GFX_LANDSCAPE) {
+            // Initialize landscape
+            this.landscape.initLandscape(buildingId, collMode);
+        }
+
+        if (gfxMode & PLANING_GFX_SPRITES) {
+            // Initialize sprites for team members
+            // TODO: Set up character sprites
+        }
+
+        if (gfxMode & PLANING_GFX_BACKGROUND) {
+            // Initialize background
+            // TODO: Set up background graphics
+        }
+    }
+
+    /**
+     * Unprepare system
+     * Port of plUnprepareSys() from prepare.c
+     */
+    private unprepareSys(): void {
+        this.system.closeSystem();
+    }
+
+    /**
+     * Unprepare graphics
+     * Port of plUnprepareGfx() from prepare.c
+     */
+    private unprepareGfx(): void {
+        this.landscape.doneLandscape();
+    }
+
+    /**
+     * Display timer
+     * Port of plDisplayTimer() from planer.c
+     */
+    private displayTimer(mode: number, refresh: number): void {
+        const maxTimer = this.system.getMaxTimer();
+        const minutes = Math.floor(maxTimer / 20);
+        const seconds = Math.floor((maxTimer % 20) * 3);
+
+        // TODO: Display timer on screen
+        console.log(`[Planning] Timer: ${minutes}:${seconds.toString().padStart(2, '0')}`);
+    }
+
+    /**
+     * Display info
+     * Port of plDisplayInfo() from planer.c
+     */
+    private displayInfo(): void {
+        // TODO: Display current person, weight, volume, etc.
+        if (this.state) {
+            console.log(`[Planning] Current person: ${this.state.currentPerson}`);
+        }
+    }
+
+    /**
+     * Notebook menu
+     * Port of plNoteBook() from planer.c
+     */
+    private async notebook(): Promise<void> {
+        const menuItems = [
+            'Target',
+            'Team',
+            'Car',
+            'Tools',
+            'Loots',
+            'Return'
+        ];
+
+        const choice = await this.ui.showMenu(menuItems, 'Notebook');
+
+        switch (choice) {
+            case PLANING_NOTE_TARGET:
+                // Show target building info
+                await this.ui.showBubble(['Target building information'], 'think', 0);
+                break;
+            case PLANING_NOTE_TEAM:
+                // Show team members
+                await this.ui.showBubble(['Team members'], 'think', 0);
+                break;
+            case PLANING_NOTE_CAR:
+                // Show car info
+                await this.ui.showBubble(['Car information'], 'think', 0);
+                break;
+            case PLANING_NOTE_TOOLS:
+                // Show tools
+                await this.ui.showBubble(['Tools'], 'think', 0);
+                break;
+            case PLANING_NOTE_LOOTS:
+                // Show loots
+                await this.ui.showBubble(['Loots'], 'think', 0);
+                break;
+        }
+    }
+
+    /**
+     * Look menu
+     * Port of plLook() from planer.c
+     */
+    private async look(): Promise<void> {
+        const menuItems = [
+            'View Plan',
+            'Change Person',
+            'Return'
+        ];
+
+        const choice = await this.ui.showMenu(menuItems, 'Look');
+
+        switch (choice) {
+            case PLANING_LOOK_PLAN:
+                // Show plan overview
+                await this.ui.showBubble(['Plan overview'], 'think', 0);
+                break;
+            case PLANING_LOOK_PERSON_CHANGE:
+                // Change active person
+                await this.changePerson();
+                break;
+        }
+    }
+
+    /**
+     * Change active person
+     */
+    private async changePerson(): Promise<void> {
+        if (!this.state || this.state.team.length === 0) return;
+
+        const personNames = this.state.team.map((id, idx) => {
+            const person = this.db.getObject(id);
+            return person?.name || `Person ${idx + 1}`;
+        });
+
+        const choice = await this.ui.showMenu(personNames, 'Select Person');
+
+        if (choice >= 0 && choice < this.state.team.length) {
+            this.state.currentPerson = choice;
+            this.system.setActivHandler(this.state.team[choice]);
+        }
+    }
+
+    /**
+     * Action menu
+     * Port of plAction() from planer.c
+     */
+    private async action(): Promise<void> {
+        const menuItems = [
+            'Walk',
+            'Use',
+            'Open',
+            'Close',
+            'Take',
+            'Drop',
+            'Wait',
+            'Radio',
+            'Change Person',
+            'Return'
+        ];
+
+        const choice = await this.ui.showMenu(menuItems, 'Action');
+
+        switch (choice) {
+            case PLANING_PERSON_WALK:
+                await this.actionWalk();
+                break;
+            case PLANING_ACTION_USE:
+                await this.actionUse();
+                break;
+            case PLANING_ACTION_OPEN:
+                await this.actionOpen();
+                break;
+            case PLANING_ACTION_CLOSE:
+                await this.actionClose();
+                break;
+            case PLANING_ACTION_TAKE:
+                await this.actionTake();
+                break;
+            case PLANING_ACTION_DROP:
+                await this.actionDrop();
+                break;
+            case PLANING_ACTION_WAIT:
+                await this.actionWait();
+                break;
+            case PLANING_ACTION_RADIO:
+                await this.actionRadio();
+                break;
+            case PLANING_PERSON_CHANGE:
+                await this.changePerson();
+                break;
+        }
+    }
+
+    /**
+     * Walk action
+     */
+    private async actionWalk(): Promise<void> {
+        // TODO: Implement walk action
+        await this.ui.showBubble(['Walk action not yet implemented'], 'think', 0);
+    }
+
+    /**
+     * Use action
+     */
+    private async actionUse(): Promise<void> {
+        // TODO: Implement use action
+        await this.ui.showBubble(['Use action not yet implemented'], 'think', 0);
+    }
+
+    /**
+     * Open action
+     */
+    private async actionOpen(): Promise<void> {
+        // TODO: Implement open action
+        await this.ui.showBubble(['Open action not yet implemented'], 'think', 0);
+    }
+
+    /**
+     * Close action
+     */
+    private async actionClose(): Promise<void> {
+        // TODO: Implement close action
+        await this.ui.showBubble(['Close action not yet implemented'], 'think', 0);
+    }
+
+    /**
+     * Take action
+     */
+    private async actionTake(): Promise<void> {
+        // TODO: Implement take action
+        await this.ui.showBubble(['Take action not yet implemented'], 'think', 0);
+    }
+
+    /**
+     * Drop action
+     */
+    private async actionDrop(): Promise<void> {
+        // TODO: Implement drop action
+        await this.ui.showBubble(['Drop action not yet implemented'], 'think', 0);
+    }
+
+    /**
+     * Wait action
+     */
+    private async actionWait(): Promise<void> {
+        // TODO: Implement wait action
+        await this.ui.showBubble(['Wait action not yet implemented'], 'think', 0);
+    }
+
+    /**
+     * Radio action
+     */
+    private async actionRadio(): Promise<void> {
+        // TODO: Implement radio action
+        await this.ui.showBubble(['Radio action not yet implemented'], 'think', 0);
+    }
+
+    /**
+     * Check if plan has changed and prompt to save
+     * Port of plSaveChanged() from planer.c
+     */
+    private async saveChanged(buildingId: number): Promise<void> {
+        if (!this.state || !this.state.planChanged) return;
+
+        const lines = [
+            'The plan has been modified.',
+            'Do you want to save it?'
+        ];
+
+        const choice = await this.ui.showMenu(['Yes', 'No'], 'Save Plan?');
+
+        if (choice === 0) {
+            await this.savePlan(buildingId);
+        }
     }
 
     /**
@@ -93,34 +439,93 @@ export class PlanningService {
     async planner(buildingId: number): Promise<void> {
         console.log(`[PlanningService] Opening planner for building ${buildingId}`);
 
+        const building = this.db.getObject(buildingId) as Building;
+        if (!building) {
+            console.error('Building not found:', buildingId);
+            return;
+        }
+
         // Initialize planning state
         this.state = {
             buildingId,
-            team: [],
-            tools: [],
-            car: null,
-            plan: [],
+            team: [],  // TODO: Get from organisation
+            tools: [],  // TODO: Get from organisation
+            car: null,  // TODO: Get from organisation
+            personNames: [],
+            guardNames: [],
+            currentPerson: 0,
+            planChanged: false,
         };
 
-        // TODO: Full implementation
-        // This requires:
-        // 1. Team selection UI
-        // 2. Tool selection UI
-        // 3. Car selection UI
-        // 4. Action planning UI (walk, use, open, close, take, drop, wait, radio)
-        // 5. Plan save/load system
-        // 6. Plan validation
-        // 7. Integration with landscape system
-        // 8. Guard simulation
-        // 9. Time tracking
-        // 10. Loot tracking
+        // Initialize system
+        this.system.initSystem();
 
-        // For now, show a placeholder message
-        await this.ui.showBubble(
-            ['Planning system not yet implemented.', 'This will allow you to plan burglaries.'],
-            'think',
-            0
+        // Prepare system
+        this.prepareSys(
+            buildingId,
+            PLANING_INIT_PERSONSLIST | PLANING_HANDLER_ADD | PLANING_HANDLER_OPEN |
+            PLANING_GUARDS_LOAD | PLANING_HANDLER_SET
         );
+
+        // Prepare graphics
+        this.prepareGfx(buildingId, LS_COLL_PLAN, PLANING_GFX_LANDSCAPE | PLANING_GFX_SPRITES | PLANING_GFX_BACKGROUND);
+
+        // Main planning loop
+        let active = 0;
+        while (active !== PLANING_RETURN) {
+            this.displayTimer(0, 1);
+            this.displayInfo();
+
+            const menuItems = [
+                'Start',
+                'Notebook',
+                'Save',
+                'Load',
+                'Clear',
+                'Look',
+                'Return'
+            ];
+
+            active = await this.ui.showMenu(menuItems, 'Planning');
+
+            switch (active) {
+                case PLANING_START:
+                    await this.action();
+                    break;
+
+                case PLANING_NOTE:
+                    await this.notebook();
+                    break;
+
+                case PLANING_SAVE:
+                    await this.savePlan(buildingId);
+                    this.state.planChanged = false;
+                    break;
+
+                case PLANING_LOAD:
+                    await this.saveChanged(buildingId);
+                    await this.loadPlan(buildingId);
+                    this.state.planChanged = false;
+                    break;
+
+                case PLANING_CLEAR:
+                    await this.saveChanged(buildingId);
+                    this.prepareSys(0, PLANING_HANDLER_CLEAR | PLANING_HANDLER_SET);
+                    this.state.planChanged = false;
+                    break;
+
+                case PLANING_LOOK:
+                    await this.look();
+                    break;
+            }
+        }
+
+        // Save if changed
+        await this.saveChanged(buildingId);
+
+        // Cleanup
+        this.unprepareGfx();
+        this.unprepareSys();
 
         this.state = null;
     }
@@ -177,16 +582,26 @@ export class PlanningService {
 
     /**
      * Load a plan for a building
+     * Port of plLoad() from io.c
      */
     async loadPlan(buildingId: number): Promise<boolean> {
         console.log(`[PlanningService] Loading plan for building ${buildingId}`);
 
-        // TODO: Load plan from file
+        if (!this.state) {
+            console.error('No active planning state');
+            return false;
+        }
+
+        // TODO: Load plan from file system
+        // For now, just show a message
+        await this.ui.showBubble(['Plan loading not yet implemented'], 'think', 0);
+
         return false;
     }
 
     /**
      * Save a plan for a building
+     * Port of plSave() from io.c
      */
     async savePlan(buildingId: number): Promise<boolean> {
         console.log(`[PlanningService] Saving plan for building ${buildingId}`);
@@ -196,7 +611,22 @@ export class PlanningService {
             return false;
         }
 
-        // TODO: Save plan to file
+        // Generate save data
+        let saveData = '';
+
+        // Save system
+        saveData += this.system.saveSystem();
+
+        // Save handlers
+        for (const personId of this.state.team) {
+            saveData += this.system.saveHandler(personId);
+        }
+
+        // TODO: Write to file system
+        console.log('[PlanningService] Plan data:', saveData);
+
+        await this.ui.showBubble(['Plan saved'], 'think', 0);
+
         return true;
     }
 
