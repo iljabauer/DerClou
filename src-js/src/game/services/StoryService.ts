@@ -1168,6 +1168,64 @@ export class StoryService {
     }
 
     /**
+     * 9TH BURGLARY
+     * Port of tcDone9thBurglary from story.c
+     * 
+     * After 9th burglary - endgame sequence
+     */
+    private tcDone9thBurglary(): void {
+        const Env = this.db.getObject(Environment_TheClou) as any;
+
+        this.film.setMinute(540);
+
+        if (this.db.has(Person_Matt_Stuvysunt, Loot_Koffer)) {
+            this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST_15_OLD_0');
+            this.gfxShow(174); // cracks
+        } else {
+            this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST_15_OLD_NOT_0');
+            this.dialog.setBubbleType('think');
+            this.dialog.say(STORY_1_TXT, 0, MATT_PICTID, 'ST_15_MATT_NOT_0');
+
+            this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST_15_OLD_NOT_1');
+            this.gfxShow(174); // cracks
+        }
+
+        // TODO: inpDelay(150);
+        this.gfxShow(173); // hotel
+
+        this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST_15_OLD_1');
+
+        this.somebodyIsCalling();
+
+        this.dialog.say(STORY_1_TXT, 0, PHONE_PICTID, 'ST_15_ALLEN_0');
+
+        // Remove police from London
+        this.db.livesInUnSet(London_London_1, Person_John_Gludo);
+        this.db.livesInUnSet(London_London_1, Person_Miles_Chickenwing);
+        this.db.livesInUnSet(London_London_1, Person_Red_Stanson);
+
+        this.moveAPerson(Person_John_Gludo, Location_Nirvana);
+        this.moveAPerson(Person_Miles_Chickenwing, Location_Nirvana);
+        this.moveAPerson(Person_Red_Stanson, Location_Nirvana);
+
+        // Reset taxi locations - only cars and lisson grove
+        this.db.removeAllRelationsOfType(Relation_taxi);
+        this.db.addRelationType(Relation_taxi);
+
+        this.scene.addTaxiLocation(1); // cars
+
+        if (Env.MattIsInLove) {
+            this.scene.addTaxiLocation(61); // lisson
+        }
+
+        // Only GO and WAIT actions available
+        this.film.setEnabledChoices(GO | WAIT);
+
+        // TODO: GetScene(SCENE_FAHNDUNG)->Geschehen = 0;
+        this.scene.sceneArgs.returnValue = this.getLocSceneEventNr(this.film.getLocation());
+    }
+
+    /**
      * Helper: Play animation
      */
     private playAnim(animName: string, duration: number): void {
