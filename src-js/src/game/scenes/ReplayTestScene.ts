@@ -59,15 +59,26 @@ export class ReplayTestScene extends Scene {
             const action = this.inputHandler.simulateTick();
             this.updateDisplay(action);
 
-            // Match C implementation logic:
-            // if (action & ~INP_TIME) { Replay_CaptureScreenshot(); }
-            if (action !== null && (action & ~INP_TIME)) {
-                this.captureScreenshot();
+            if (action !== null) {
+                const tick = this.inputHandler.getSimulationTick();
+                const actionStr = this.replayService.actionToString(action);
+                console.log(`[Replay] Tick ${tick}: ${actionStr}`);
+
+                // Match C implementation logic:
+                // if (action & ~INP_TIME) { Replay_CaptureScreenshot(); }
+                if (action & ~INP_TIME) {
+                    this.captureScreenshot();
+                }
             }
 
             if (this.replayService.isComplete()) {
                 this.isPlaying = false;
                 this.statusText.setText('Status: Completed');
+
+                if (ScreenshotService.isHeadlessMode()) {
+                    console.log('Replay complete in headless mode. Exiting...');
+                    ScreenshotService.exitApp();
+                }
             }
         }
     }
@@ -123,6 +134,11 @@ export class ReplayTestScene extends Scene {
             this.statusText.setText('Status: Ready');
             this.updateDisplay(null);
             console.log(`Loaded replay with ${data.records.length} records`);
+
+            if (ScreenshotService.isHeadlessMode()) {
+                console.log('Headless mode detected. Auto-playing...');
+                this.togglePlayback();
+            }
         } else {
             this.statusText.setText('Status: Load Failed');
         }
