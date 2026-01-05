@@ -13,8 +13,10 @@ import { SceneService } from '../services/SceneService';
 import { DialogService } from '../services/DialogService';
 import { FilmService } from '../services/FilmService';
 import { InteractionService } from '../services/InteractionService';
+import { InvestigationService } from '../services/InvestigationService';
 import { BackgroundService, BackgroundId } from '../services/BackgroundService';
 import { ImageService } from '../services/ImageService';
+import { GameState } from '../core/GameState';
 import {
     GO, WAIT, BUSINESS_TALK, LOOK, INFO,
     Person_Matt_Stuvysunt,
@@ -30,8 +32,10 @@ export class InteractionTestScene extends Phaser.Scene {
     private dialog!: DialogService;
     private film!: FilmService;
     private interaction!: InteractionService;
+    private investigation!: InvestigationService;
     private background!: BackgroundService;
     private image!: ImageService;
+    private gameState!: GameState;
 
     constructor() {
         super({ key: 'InteractionTestScene' });
@@ -42,6 +46,7 @@ export class InteractionTestScene extends Phaser.Scene {
 
         // Initialize services
         this.db = new Database();
+        this.gameState = new GameState();
         this.ui = new UIService(this);
         this.text = new TextService();
         this.image = new ImageService();
@@ -50,6 +55,7 @@ export class InteractionTestScene extends Phaser.Scene {
         this.background = new BackgroundService(this, this.image);
         this.sceneService = new SceneService(this, this.db, this.ui, this.text, this.film);
         this.dialog = new DialogService(this, this.db, this.ui, this.text);
+        this.investigation = new InvestigationService(this.db, this.gameState, this.text, this.ui);
         this.interaction = new InteractionService(
             this,
             this.db,
@@ -57,7 +63,8 @@ export class InteractionTestScene extends Phaser.Scene {
             this.text,
             this.sceneService,
             this.dialog,
-            this.film
+            this.film,
+            this.investigation
         );
 
         // Load data

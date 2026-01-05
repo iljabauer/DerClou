@@ -11,6 +11,7 @@ import { TextService } from './TextService';
 import { SceneService } from './SceneService';
 import { DialogService } from './DialogService';
 import { FilmService } from './FilmService';
+import { InvestigationService } from './InvestigationService';
 import {
     GO, WAIT, BUSINESS_TALK, LOOK, INVESTIGATE, PLAN, CALL_TAXI, MAKE_CALL, INFO,
     MENU_TXT, THECLOU_TXT, BUSINESS_TXT,
@@ -52,6 +53,7 @@ export class InteractionService {
     private sceneService: SceneService;
     private dialog: DialogService;
     private film: FilmService;
+    private investigation: InvestigationService;
 
     constructor(
         scene: Phaser.Scene,
@@ -60,7 +62,8 @@ export class InteractionService {
         text: TextService,
         sceneService: SceneService,
         dialog: DialogService,
-        film: FilmService
+        film: FilmService,
+        investigation: InvestigationService
     ) {
         this.scene = scene;
         this.db = db;
@@ -69,6 +72,7 @@ export class InteractionService {
         this.sceneService = sceneService;
         this.dialog = dialog;
         this.film = film;
+        this.investigation = investigation;
     }
 
     /**
@@ -314,23 +318,14 @@ export class InteractionService {
      * Handle INVESTIGATE action
      * Port of INVESTIGATE case from StdHandle() in gp_app.c
      * 
-     * This is a complex system that simulates observing a building over time.
-     * For now, this is a simplified stub implementation.
+     * Simulates observing a building over time to gather intelligence.
      */
     private async handleInvestigate(): Promise<number> {
-        // TODO: Full implementation of Investigate() from invest.c
-        // This requires:
-        // - Building observation system
-        // - Time-based event system
-        // - Patrol tracking
-        // - Knowledge gain system
-        // - Investigation text files (INVESTIGATIONS_TXT)
+        // Get location name for investigation text lookup
+        const locationName = this.film.getLocationName(this.film.currentLocation);
         
-        // For now, show a placeholder message
-        await this.ui.showBubble({
-            text: 'Investigation system not yet implemented.',
-            bubbleType: 1  // THINK_BUBBLE
-        });
+        // Run investigation
+        await this.investigation.investigate(locationName);
 
         return 0;
     }
