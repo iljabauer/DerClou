@@ -641,6 +641,83 @@ export class LandscapeService {
         });
         
         this.objectRetrieval = objects;
+        
+        // Patch objects (fix incorrect status bits)
+        this.patchObjects();
+    }
+    
+    /**
+     * Patch objects
+     * Port of lsPatchObjects() from landscap.c
+     * 
+     * Fixes incorrect status bits set by the level designer
+     */
+    private patchObjects(): void {
+        if (!this.objectRetrieval) return;
+        
+        for (const lso of this.objectRetrieval) {
+            // Get item to copy size
+            const item = this.db.getObject(lso.type);
+            if (item && 'size' in item) {
+                lso.size = (item as any).size;
+            }
+            
+            // Patch specific item types
+            switch (lso.type) {
+                case 2022: // Item_Statue
+                    // Set access bit
+                    lso.status |= (1 << 0); // Const_tcACCESS_BIT
+                    break;
+                    
+                case 2040: // Item_WC
+                case 2041: // Item_Kuehlschrank
+                case 2042: // Item_Nachtkaestchen
+                    // Set unlocked bit
+                    lso.status |= (1 << 1); // Const_tcLOCK_UNLOCK_BIT
+                    break;
+                    
+                case 2003: // Item_Steinmauer
+                case 2050: // Item_Tresen
+                case 2021: // Item_Vase
+                case 2004: // Item_Sockel
+                case 2051: // Item_Leiter
+                    // Clear access bit (no access)
+                    lso.status &= ~(1 << 0); // Const_tcACCESS_BIT
+                    break;
+            }
+            
+            // Set old state (for state change detection)
+            this.setOldState(lso);
+        }
+    }
+    
+    /**
+     * Set old state
+     * Port of lsSetOldState() macro from landscap.h
+     * 
+     * Saves current state as old state for change detection
+     */
+    private setOldState(lso: LSObject): void {
+        // Old state is stored in upper 16 bits
+        // New state is in lower 16 bits
+        const newState = lso.status & 0xFFFF;
+        lso.status = ((newState << 16) & 0xFFFF0000) + newState;
+    }
+    
+    /**
+     * Get old state
+     * Port of lsGetOldState() macro from landscap.h
+     */
+    getOldState(lso: LSObject): number {
+        return (lso.status >> 16) & 0xFFFF;
+    }
+    
+    /**
+     * Get new state
+     * Port of lsGetNewState() macro from landscap.h
+     */
+    getNewState(lso: LSObject): number {
+        return lso.status & 0xFFFF;
     }
     
     /**
@@ -811,11 +888,18 @@ export class LandscapeService {
     
     /**
      * Check if object is a wall
-     * Port of lsIsObjectAWall() from landscap.c
+     * Port of lsIsObjectAWall() from access.c
      */
     private isObjectAWall(lso: LSObject): boolean {
-        // Walls typically have offsetFact < 32
-        return lso.offsetFact < 32;
+        // Check by item type
+        const wallTypes = [
+            2001, // Item_Mauer
+            2002, // Item_Mauerecke
+            2003, // Item_Steinmauer
+            2004, // Item_Sockel
+        ];
+        
+        return wallTypes.includes(lso.type);
     }
 
     /**
@@ -921,47 +1005,104 @@ export class LandscapeService {
     
     /**
      * Get loudness at position
-     * Port of lsGetLoudness() from landscap.c
+     * Port of lsGetLoudness() from access.c
+     * 
+     * Returns the loudness level at a position.
+     * If there's a microphone on the floor, loudness is 15.
+     * Otherwise, loudness is 255 (max).
      */
     getLoudness(x: number, y: number): number {
-        // TODO: Implement loudness calculation based on floor type
-        // For now, return default value
-        return 0;
+        if (!this.currFloor) return 255;
+        
+        const floorIndex = this.getFloorIndex(x, y);
+        if (floorIndex < 0 || floorIndex >= this.currFloor.length) {
+            return 255;
+        }
+        
+        const floor = this.currFloor[floorIndex];
+        
+        // Check if floor exists (bit 5 not set)
+        const noFloor = (floor.floorType & (1 << 5)) !== 0;
+        if (noFloor) {
+            return 255;
+        }
+        
+        // Check if microphone is on floor (bit 6 set)
+        const hasMicro = (floor.floorType & (1 << 6)) !== 0;
+        if (hasMicro) {
+            return 15; // Low loudness threshold
+        }
+        
+        return 255; // Max loudness (no microphone)
     }
     
     /**
      * Check if object is a door
-     * Port of lsIsObjectADoor() from landscap.c
+     * Port of lsIsObjectADoor() from access.c
      */
     isObjectADoor(lso: LSObject): boolean {
-        // Doors typically have specific offset ranges
-        return lso.offsetFact >= 32 && lso.offsetFact < 48;
+        // Check by item type
+        const doorTypes = [
+            2010, // Item_Holztuer
+            2011, // Item_Stahltuer
+            2012, // Item_Mauertor
+            2013, // Item_Tresorraum
+        ];
+        
+        return doorTypes.includes(lso.type);
     }
     
     /**
      * Check if object is a standard object
-     * Port of lsIsObjectAStdObj() from landscap.c
+     * Port of lsIsObjectAStdObj() from access.c
      */
     isObjectAStdObj(lso: LSObject): boolean {
-        return lso.offsetFact >= 48;
+        // Standard objects are not doors, walls, addons, or special
+        return (
+            !this.isObjectADoor(lso) &&
+            !this.isObjectAWall(lso) &&
+            !this.isObjectAnAddOn(lso) &&
+            !this.isObjectSpecial(lso)
+        );
     }
     
     /**
      * Check if object is an addon
-     * Port of lsIsObjectAnAddOn() from landscap.c
+     * Port of lsIsObjectAnAddOn() from access.c
      */
     isObjectAnAddOn(lso: LSObject): boolean {
-        // Addons are objects that attach to walls
-        return lso.offsetFact >= 16 && lso.offsetFact < 32;
+        // Check by item type
+        const addonTypes = [
+            2020, // Item_Kasse
+            2021, // Item_Vase
+            2022, // Item_Statue
+            2023, // Item_Kreuz
+            2024, // Item_Kranz
+        ];
+        
+        return addonTypes.includes(lso.type);
     }
     
     /**
      * Check if object is special
-     * Port of lsIsObjectSpecial() from landscap.c
+     * Port of lsIsObjectSpecial() from access.c
      */
     isObjectSpecial(lso: LSObject): boolean {
-        // Special objects (statues, etc.)
-        return false; // TODO: Implement
+        // Special objects that need special refresh (like doors)
+        // These are typically from the Profidisk version
+        const specialTypes = [
+            2030, // Item_Heiligenstatue
+            2031, // Item_Hottentotten_Figur
+            2032, // Item_Batman_Figur
+            2033, // Item_Dicker_Man
+            2034, // Item_Unbekannter
+            2035, // Item_Jack_the_Ripper_Figur
+            2036, // Item_Koenigs_Figur
+            2037, // Item_Wache_Figur
+            2038, // Item_Miss_World_1952
+        ];
+        
+        return specialTypes.includes(lso.type);
     }
     
     /**
@@ -1028,16 +1169,55 @@ export class LandscapeService {
     /**
      * Calculate exact size of object
      * Port of lsCalcExactSize() from landscap.c
+     * 
+     * Calculates the bounding box of an object based on its type and orientation
      */
     calcExactSize(lso: LSObject): { x0: number; y0: number; x1: number; y1: number } {
-        // TODO: Implement exact size calculation
-        // For now, return object position and default size
-        return {
-            x0: lso.xPos,
-            y0: lso.yPos,
-            x1: lso.xPos + 16,
-            y1: lso.yPos + 16,
-        };
+        const item = this.db.getObject(lso.type);
+        let vertical = 0;
+        
+        // For pictures and paintings, OPEN_CLOSE_BIT and HORIZ_VERT_BIT are swapped
+        const isPicture = lso.type === 2060 || lso.type === 2061; // Item_Bild, Item_Gemaelde
+        if (isPicture) {
+            vertical = lso.status & 3;
+        } else {
+            vertical = (lso.status >> 2) & 1; // Const_tcHORIZ_VERT_BIT
+        }
+        
+        let x0 = lso.destX;
+        let y0 = lso.destY;
+        let x1 = x0;
+        let y1 = y0;
+        
+        // Calculate size based on object size and orientation
+        const size = lso.size || 16;
+        
+        if (vertical) {
+            // Vertical orientation
+            x1 = x0 + size;
+            y1 = y0 + size * 2;
+        } else {
+            // Horizontal orientation
+            x1 = x0 + size * 2;
+            y1 = y0 + size;
+        }
+        
+        return { x0, y0, x1, y1 };
+    }
+    
+    /**
+     * Check if object is inside rectangle
+     * Port of lsIsInside() from landscap.c
+     */
+    isInside(lso: LSObject, x: number, y: number, x1: number, y1: number): boolean {
+        const size = this.calcExactSize(lso);
+        
+        return (
+            size.x0 <= x1 &&
+            size.x1 >= x &&
+            size.y0 <= y1 &&
+            size.y1 >= y
+        );
     }
     
     /**
