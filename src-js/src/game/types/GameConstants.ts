@@ -56,6 +56,9 @@ export const Person_Tina_Olavson = 9856;
 export const Person_Phil_Ciggy = 9857;
 export const Person_Pere_Ubu = 9858;
 
+// Environment object
+export const Environment_TheClou = 28;
+
 // Key Location IDs
 export const London_London_1 = 1;
 export const Location_Walrus = 143;
@@ -134,6 +137,7 @@ export const Ability_Kampf = 6;
 
 // Text file IDs (from theclou.h)
 export const THECLOU_TXT = 0;
+export const MENU_TXT = 0;  // Same as THECLOU_TXT
 export const BUSINESS_TXT = 2;
 export const OBJECTS_ENUM_TXT = 3;
 export const ABILITY_TXT = 4;
