@@ -383,12 +383,20 @@ export class InteractionService {
 
     /**
      * Handle CALL_TAXI action
+     * Port of CALL_TAXI case from StdHandle() in gp_app.c
      */
     private async handleCallTaxi(): Promise<number> {
-        // TODO: Play taxi sound effect randomly
-        // TODO: Return taxi scene event number
-        console.log('CALL_TAXI action - not yet fully implemented');
-        return 0;
+        // TODO: Play taxi sound effect randomly (10% chance)
+        // const random = Math.floor(Math.random() * 11);
+        // if (random === 1) {
+        //     // Play "taxi.voc" sound effect
+        // }
+
+        // Return taxi scene event number
+        // TODO: Get taxi scene from GetLocScene(8)->EventNr
+        // For now, return a hardcoded taxi scene ID
+        const TAXI_SCENE = 8;  // Location 8 is taxi
+        return TAXI_SCENE;
     }
 
     /**
