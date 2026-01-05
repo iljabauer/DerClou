@@ -73,6 +73,33 @@ interface LSDoorRefreshNode {
     yOffset: number;
 }
 
+// Spot position (guard patrol waypoint)
+interface SpotPosition {
+    xPos: number;
+    yPos: number;
+}
+
+// Spot (guard patrol)
+interface Spot {
+    size: number; // 16, 32, or 48
+    speed: number; // seconds per move
+    ctrlObjId: number; // control object ID
+    areaId: number;
+    status: number; // LS_SPOT_ON or LS_SPOT_OFF
+    oldXPos: number;
+    oldYPos: number;
+    posCount: number;
+    positions: SpotPosition[];
+    currPosIndex: number;
+}
+
+// Spot constants
+const LS_SPOT_ON = 1;
+const LS_SPOT_OFF = 2;
+const LS_SPOT_SMALL_SIZE = 16;
+const LS_SPOT_MEDIUM_SIZE = 32;
+const LS_SPOT_LARGE_SIZE = 48;
+
 interface LandscapeState {
     buildingId: number;
     areaId: number;
@@ -123,6 +150,9 @@ export class LandscapeService {
     
     // Door refresh list
     private doorRefreshList: LSDoorRefreshNode[] = [];
+    
+    // Spot list (guard patrols)
+    private spots: Spot[] = [];
     
     // Phaser graphics objects
     private floorLayer: Phaser.GameObjects.Container | null = null;
@@ -1391,16 +1421,158 @@ export class LandscapeService {
     /**
      * Get guy inside spot
      * Port of lsGuyInsideSpot() from landscap.c
+     * 
+     * Checks if any of the given positions are inside a guard patrol spot
+     * Updates spotTouchCount for each position
      */
-    guyInsideSpot(): { xPos: number; yPos: number; areaId: number } | null {
-        if (!this.state) return null;
-        
-        // TODO: Implement spot detection
-        // For now, return current position
-        return {
-            xPos: this.state.personXPos,
-            yPos: this.state.personYPos,
-            areaId: this.state.areaId,
-        };
+    guyInsideSpot(
+        positions: Array<{ xPos: number; yPos: number; areaId: number }>,
+        spotTouchCount: number[]
+    ): void {
+        for (const spot of this.spots) {
+            if (!(spot.status & LS_SPOT_ON)) continue;
+            
+            const currPos = spot.positions[spot.currPosIndex];
+            if (!currPos) continue;
+            
+            const x = currPos.xPos;
+            const y = currPos.yPos;
+            const size = spot.size - 4;
+            
+            for (let i = 0; i < positions.length; i++) {
+                const pos = positions[i];
+                
+                if (pos.xPos === -1 || pos.yPos === -1) continue;
+                if (pos.areaId !== spot.areaId) continue;
+                
+                // Check if position is inside spot
+                if (
+                    pos.xPos < x + size - 2 &&
+                    pos.xPos > x + 2 &&
+                    pos.yPos < y + size - 2 &&
+                    pos.yPos > y + 2
+                ) {
+                    spotTouchCount[i]++;
+                }
+            }
+        }
+    }
+    
+    /**
+     * Initialize spots
+     * Port of lsInitSpots() from spot.c
+     */
+    initSpots(): void {
+        this.spots = [];
+        console.log('[LandscapeService] Spots initialized');
+    }
+    
+    /**
+     * Done spots
+     * Port of lsDoneSpots() from spot.c
+     */
+    doneSpots(): void {
+        this.spots = [];
+    }
+    
+    /**
+     * Load spots from file
+     * Port of lsLoadSpots() from spot.c
+     */
+    loadSpots(buildingId: number, fileName: string): void {
+        // TODO: Load spot data from file
+        // For now, spots are empty
+        console.log(`[LandscapeService] Load spots for building ${buildingId} from ${fileName}`);
+    }
+    
+    /**
+     * Move all spots
+     * Port of lsMoveAllSpots() from spot.c
+     * 
+     * Updates guard patrol positions based on time
+     */
+    moveAllSpots(time: number): void {
+        for (const spot of this.spots) {
+            if (spot.posCount <= 1) continue;
+            if (!(spot.status & LS_SPOT_ON)) continue;
+            
+            // Check if control object is in active area
+            const ctrlObj = this.db.getObject(spot.ctrlObjId) as LSObject;
+            if (!ctrlObj || !this.isLSObjectInActivArea(ctrlObj)) continue;
+            
+            // Move spot based on time and speed
+            if (time % spot.speed === 0) {
+                const count = Math.floor(time / spot.speed);
+                
+                // Ping-pong movement (back and forth)
+                let posIndex = count % (spot.posCount * 2 - 2);
+                if (posIndex >= spot.posCount) {
+                    posIndex = spot.posCount * 2 - 2 - posIndex;
+                }
+                
+                spot.currPosIndex = posIndex;
+            }
+        }
+    }
+    
+    /**
+     * Show all spots
+     * Port of lsShowAllSpots() from spot.c
+     */
+    showAllSpots(time: number, mode: number): void {
+        for (const spot of this.spots) {
+            // Check if control object is in active area
+            const ctrlObj = this.db.getObject(spot.ctrlObjId) as LSObject;
+            if (!ctrlObj || !this.isLSObjectInActivArea(ctrlObj)) continue;
+            
+            if (mode & 1) { // LS_ALL_VISIBLE_SPOTS
+                if (spot.status & LS_SPOT_ON) {
+                    this.showSpot(spot, time);
+                }
+            }
+            
+            if (mode & 2) { // LS_ALL_INVISIBLE_SPOTS
+                if (spot.status & LS_SPOT_OFF) {
+                    this.hideSpot(spot);
+                }
+            }
+        }
+    }
+    
+    /**
+     * Show spot
+     * Renders a guard patrol spot
+     */
+    private showSpot(spot: Spot, time: number): void {
+        // TODO: Render spot visualization
+        // This would show the guard patrol area during planning
+    }
+    
+    /**
+     * Hide spot
+     * Hides a guard patrol spot
+     */
+    private hideSpot(spot: Spot): void {
+        // TODO: Hide spot visualization
+    }
+    
+    /**
+     * Set spot status
+     * Port of lsSetSpotStatus() from spot.c
+     */
+    setSpotStatus(ctrlObjId: number, status: number): void {
+        for (const spot of this.spots) {
+            if (spot.ctrlObjId === ctrlObjId) {
+                spot.status = status;
+            }
+        }
+    }
+    
+    /**
+     * Get spot list
+     * Port of lsGetSpotList() from spot.c
+     */
+    getSpotList(): Spot[] {
+        return this.spots;
     }
 }
