@@ -284,11 +284,26 @@ export class InteractionService {
 
     /**
      * Handle INVESTIGATE action
+     * Port of INVESTIGATE case from StdHandle() in gp_app.c
+     * 
+     * This is a complex system that simulates observing a building over time.
+     * For now, this is a simplified stub implementation.
      */
     private async handleInvestigate(): Promise<number> {
-        // TODO: Implement investigate functionality
-        // This is used for special investigation actions
-        console.log('INVESTIGATE action - not yet fully implemented');
+        // TODO: Full implementation of Investigate() from invest.c
+        // This requires:
+        // - Building observation system
+        // - Time-based event system
+        // - Patrol tracking
+        // - Knowledge gain system
+        // - Investigation text files (INVESTIGATIONS_TXT)
+        
+        // For now, show a placeholder message
+        await this.ui.showBubble({
+            text: 'Investigation system not yet implemented.',
+            bubbleType: 1  // THINK_BUBBLE
+        });
+
         return 0;
     }
 
