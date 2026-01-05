@@ -343,6 +343,82 @@ export class FilmService {
     }
 
     /**
+     * Get event count - how many times an event has happened
+     * Port of GetEventCount() from gp.c
+     */
+    getEventCount(eventNr: number): number {
+        const scene = this.getScene(eventNr);
+        return scene ? scene.geschehen : 0;
+    }
+
+    /**
+     * Mark that an event has happened
+     * Port of EventDidHappen() from gp.c
+     */
+    eventDidHappen(eventNr: number): void {
+        const scene = this.getScene(eventNr);
+        if (scene) {
+            const CAN_ALWAYS_HAPPEN = 65535;
+            if (scene.geschehen < CAN_ALWAYS_HAPPEN) {
+                scene.geschehen += 1;
+            }
+        }
+    }
+
+    /**
+     * Check if scene conditions are met
+     * Port of CheckConditions() from gp.c
+     */
+    checkConditions(scene: Scene): boolean {
+        // Location scenes (locationNr != -1) are always available
+        if (scene.locationNr !== -1) {
+            return true;
+        }
+
+        // Story scenes need to check conditions
+        
+        // Check if scene has already happened too many times
+        const CAN_ALWAYS_HAPPEN = 65535;
+        if (scene.anzahl !== CAN_ALWAYS_HAPPEN && scene.geschehen >= scene.anzahl) {
+            return false;
+        }
+
+        // If no conditions, scene is available
+        if (!scene.conditions) {
+            return true;
+        }
+
+        const conditions = scene.conditions;
+
+        // Check location condition
+        if (conditions.ort !== -1) {
+            if (this.film.currentLocation !== conditions.ort) {
+                return false;
+            }
+        }
+
+        // Check that forbidden events have NOT happened
+        if (conditions.nEvents && conditions.nEvents.length > 0) {
+            for (const eventNr of conditions.nEvents) {
+                if (this.getEventCount(eventNr) > 0) {
+                    return false;
+                }
+            }
+        }
+
+        // Check that required events HAVE happened
+        if (conditions.events && conditions.events.length > 0) {
+            for (const eventNr of conditions.events) {
+                if (this.getEventCount(eventNr) === 0) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /**
      * Initialize film service (for backward compatibility)
      * This is a no-op now - use initStory() to load story file
      */
