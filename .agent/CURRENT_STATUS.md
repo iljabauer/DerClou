@@ -1,6 +1,6 @@
 # Der Clou! TypeScript Port - Current Status
 
-**Last Updated:** 2026-01-05 (Session 16 continued)
+**Last Updated:** 2026-01-05 (Session 17)
 
 ## Overview
 
@@ -253,7 +253,15 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - CompleteLoot type fixed (added vase, totalWeight, totalVolume)
    - Summary formatting
 
-18. **Test Scenes**
+18. **Commerce Systems** - Complete ✅
+   - ToolsService for tool buying/selling
+   - CarsService for car buying/selling/maintenance
+   - DealerService for selling stolen loot
+   - Integration with Mary Bolton (tools)
+   - Integration with Marc Smith (cars)
+   - Integration with fences (Maloya, Pooly, Parker)
+
+19. **Test Scenes**
    - ReplayTestScene (original)
    - DataLoaderTestScene
    - TextTestScene
@@ -315,7 +323,8 @@ src-js/src/game/
 │   └── GameEngine.ts        ✅ Main engine
 ├── types/
 │   ├── GameTypes.ts         ✅ Core types (updated Building)
-│   └── SceneTypes.ts        ✅ Scene types
+│   ├── SceneTypes.ts        ✅ Scene types
+│   └── GameConstants.ts     ✅ Game constants
 ├── services/
 │   ├── ReplayService.ts     ✅ Replay handling
 │   ├── InputHandler.ts      ✅ Input simulation
@@ -340,7 +349,10 @@ src-js/src/game/
 │   ├── PlanningService.ts   🚧 Burglary planning (stub)
 │   ├── OrganisationService.ts ✅ Team/car/driver selection
 │   ├── LootService.ts       ✅ Loot management
-│   └── PresentationService.ts ✅ Object display
+│   ├── PresentationService.ts ✅ Object display
+│   ├── ToolsService.ts      ✅ Tool buying/selling
+│   ├── CarsService.ts       ✅ Car buying/selling/maintenance
+│   └── DealerService.ts     ✅ Loot fencing
 └── scenes/
     ├── ReplayTestScene.ts   ✅ Replay testing
     ├── DataLoaderTestScene.ts ✅ Data loading test
@@ -438,9 +450,9 @@ npm run dev
 
 ## Notes
 
-- 55 TypeScript files, ~14,339 lines of code (up from ~13,093)
+- 58 TypeScript files, ~15,505 lines of code (up from ~14,339)
 - 72 C source files to port (~35k lines)
-- Progress: ~37% complete (estimated)
+- Progress: ~40% complete (estimated)
 - TCMAIN.DAT and TCBUILD.DAT are main data files
 - Building-specific files: *ETA0.DAT, *ETA1.DAT, etc.
 - Relations in .REL files (text format)
