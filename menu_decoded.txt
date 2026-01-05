@@ -1,0 +1,98 @@
+#Mainmenu
+Gehen
+Warten
+Reden
+Umsehen
+Beobachten
+Planen
+Taxi rufen
+Telefonieren
+Nachdenken
+#ESCMenu_STD
+Weiterspielen
+Spiel beenden
+Spiel speichern
+Spiel laden
+#ESCMenu_CD32
+Weiterspielen
+Spiel beenden
+Spiel merken
+Spiel laden
+Passwort eingeben
+Passwort ansehen
+#Beobachtungsmenu
+Beobachtung abbrechen
+#LEVEL_DESIGN
+Gebude whlen
+Gebiet whlen
+Eingabe
+Entfernen
+Speichern
+Relationen
+Scheinwerfer
+Helligkeit
+wo bin i?
+QUIT
+#LEVEL_OBJECTS
+*Objekte
+*Bden
+#LEVEL_RELATIONS
+*Beute
+*besondere Beutestcke
+*mit Alarmanlage verbinden
+*Schloá hinzufgen
+*Stromversorgung
+*alle Relationen entfernen
+*Stechuhr
+*Intergalactical Level Jump
+*So a schaá
+#LEVEL_SPOTS
+*eingeben
+*entfernen
+#LEVEL_DARKNESS
+*Darkness
+*Brightness
+*Funny Darkness
+#ORGANISATION
+Zielgebude
+Komplizen
+Fluchtauto
+Fahrer
+Nachdenken
+Plan ausarbeiten
+Einbruch starten
+Fr kleine Jungs
+#ORG_KOMPLIZEN
+Aufnehmen
+Ausgliedern
+Fertig!
+#STARTUP_MENU
+Neues Spiel starten
+Altes Spiel fortsetzen
+Spiel beenden
+#INSIDE_MENU
+Gebude verlassen
+Erdgeschoá
+1. Stock
+2. Stock
+3. Stock
+#SouthhamptonMenu
+Gehen
+Spazieren gehen
+Schlafen
+Fischen
+Planen
+Nachdenken
+Einbruch starten!
+#LookMenu
+nchster Gegenstand
+vorheriger Gegenstand
+Genau ansehen
+Wchter
+Fertig!
+#KaserneMenu
+Kaserne ansehen
+Nachdenken
+Planen
+Den Clou starten!
+^
