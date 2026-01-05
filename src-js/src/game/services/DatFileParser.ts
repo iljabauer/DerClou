@@ -4,7 +4,7 @@
  */
 
 import { BinaryReader } from './BinaryReader';
-import { ObjectType, Person, Player, Car, Building, Tool, GameObject } from '../types/GameTypes';
+import { ObjectType, Person, Player, Car, Building, Tool, Loot, Evidence, Environment, GameObject } from '../types/GameTypes';
 
 // Object type constants from C (Object_Person, etc.)
 const C_OBJECT_TYPES: Record<number, ObjectType> = {
@@ -95,6 +95,12 @@ export class DatFileParser {
                     return this.readBuilding(header);
                 case ObjectType.Tool:
                     return this.readTool(header);
+                case ObjectType.Loot:
+                    return this.readLoot(header);
+                case ObjectType.Evidence:
+                    return this.readEvidence(header);
+                case ObjectType.Environment:
+                    return this.readEnvironment(header);
                 default:
                     // Skip unknown object types
                     console.warn(`Unimplemented object type ${objectType}, skipping`);
@@ -241,6 +247,77 @@ export class DatFileParser {
             danger,
             volume,
             effect,
+        };
+    }
+
+    private readLoot(header: ObjectHeader): Loot {
+        const lootType = this.reader.readUInt16();
+        const lootName = this.reader.readUInt16();
+        const volume = this.reader.readUInt32();
+        const weight = this.reader.readUInt16();
+        const pictId = this.reader.readUInt16();
+
+        return {
+            id: header.nr,
+            name: `Loot_${header.nr}`,
+            type: ObjectType.Loot,
+            lootType,
+            lootName,
+            volume,
+            weight,
+            pictId,
+        };
+    }
+
+    private readEvidence(header: ObjectHeader): Evidence {
+        const pers = this.reader.readUInt32();
+        const recognition = this.reader.readUInt8();
+        const walkTrail = this.reader.readUInt8();
+        const waitTrail = this.reader.readUInt8();
+        const workTrail = this.reader.readUInt8();
+        const killTrail = this.reader.readUInt8();
+        const callTrail = this.reader.readUInt8();
+        const paperTrail = this.reader.readUInt8();
+        const fotoTrail = this.reader.readUInt8();
+
+        return {
+            id: header.nr,
+            name: `Evidence_${header.nr}`,
+            type: ObjectType.Evidence,
+            pers,
+            recognition,
+            walkTrail,
+            waitTrail,
+            workTrail,
+            killTrail,
+            callTrail,
+            paperTrail,
+            fotoTrail,
+        };
+    }
+
+    private readEnvironment(header: ObjectHeader): Environment {
+        const mattHasHotelRoom = this.reader.readUInt8();
+        const mattHasIdentityCard = this.reader.readUInt8();
+        const withOrWithoutYou = this.reader.readUInt8();
+        const mattIsInLove = this.reader.readUInt8();
+        const southhamptonHappened = this.reader.readUInt8();
+        const present = this.reader.readUInt8();
+        const firstTimeInSouth = this.reader.readUInt8();
+        const postzugDone = this.reader.readUInt8();
+
+        return {
+            id: header.nr,
+            name: `Environment_${header.nr}`,
+            type: ObjectType.Environment,
+            mattHasHotelRoom,
+            mattHasIdentityCard,
+            withOrWithoutYou,
+            mattIsInLove,
+            southhamptonHappened,
+            present,
+            firstTimeInSouth,
+            postzugDone,
         };
     }
 
