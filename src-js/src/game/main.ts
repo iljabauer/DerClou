@@ -1,5 +1,7 @@
+import { GameScene } from './scenes/GameScene';
 import { ReplayTestScene } from './scenes/ReplayTestScene';
 import { ScreenshotTestScene } from './scenes/ScreenshotTestScene';
+import { TestGameScene } from './scenes/TestGameScene';
 import { Game as MainGame } from './scenes/Game';
 import { AUTO, Game, Scale, Types } from 'phaser';
 
@@ -10,14 +12,16 @@ const config: Types.Core.GameConfig = {
     width: 1024,
     height: 768,
     parent: 'game-container',
-    backgroundColor: '#028af8',
+    backgroundColor: '#000000',
     scale: {
         mode: Scale.FIT,
         autoCenter: Scale.CENTER_BOTH
     },
     scene: [
+        GameScene,
         ReplayTestScene,
         ScreenshotTestScene,
+        TestGameScene,
         MainGame
     ]
 };

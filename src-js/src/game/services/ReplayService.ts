@@ -48,7 +48,6 @@ export interface ReplayData {
 export class ReplayService {
     private records: ReplayRecord[] = [];
     private currentIndex: number = 0;
-    private header: ReplayHeader | null = null;
 
     async loadReplay(filePath: string): Promise<ReplayData | null> {
         try {
@@ -109,7 +108,6 @@ export class ReplayService {
     }
 
     initPlayback(data: ReplayData): void {
-        this.header = data.header;
         this.records = data.records;
         this.currentIndex = 0;
 
