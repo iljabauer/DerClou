@@ -6,29 +6,23 @@
 
 ### High Priority 🔴
 
-- [ ] Test current data loading with TCMAIN.DAT and TCBUILD.DAT
-- [ ] Add parsers for remaining object types in DatFileParser.ts:
-  - [ ] Loot
-  - [ ] Evidence
-  - [ ] Environment
-  - [ ] LSArea
-  - [ ] LSObject
-  - [ ] Ability
-  - [ ] LSLock
-  - [ ] LSPower
-  - [ ] LSAlarm
-  - [ ] Lso
-  - [ ] CompleteLoot
-  - [ ] Scene
-  - [ ] Timer
-  - [ ] Item
-  - [ ] Location
-  - [ ] London
-  - [ ] Police
-  - [ ] LSRoom
+- [x] Test current data loading with TCMAIN.DAT and TCBUILD.DAT
+- [x] Add parsers for remaining object types in DatFileParser.ts:
+  - [x] Loot
+  - [x] Evidence
+  - [x] Environment
+  - [x] LSObject
+  - [x] Ability
+  - [x] LSLock
+  - [x] CompleteLoot
+  - [x] Item
+  - [x] Location
+  - [x] London
+  - [x] LSRoom
 - [ ] Load building-specific data files (*ETA0.DAT, *ETA1.DAT, etc.)
 - [ ] Verify object counts match C version
 - [ ] Load object names from text files
+- [ ] Add Building type parser (currently missing)
 
 ### Medium Priority 🟡
 
@@ -67,10 +61,12 @@
 - [x] Create basic Renderer
 - [x] Integrate GameEngine
 - [x] Create BinaryReader
-- [x] Create DatFileParser (partial)
+- [x] Create DatFileParser with all object types
 - [x] Create RelFileParser
 - [x] Create DataLoader service
 - [x] Create DataLoaderTestScene
+- [x] Add all object type interfaces (Location, Ability, Item, London, CompleteLoot, LSLock, LSObject, LSRoom)
+- [x] Implement parsers for all object types
 
 ## Blocked ⛔
 
