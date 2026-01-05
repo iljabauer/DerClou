@@ -10,6 +10,7 @@ export const Person_Herbert_Briggs = 9805;
 export const Person_Jim_Danner = 9817;
 export const Person_Dan_Stanford = 9821;
 export const Person_John_Gludo = 9822;
+export const Person_Eric_Pooly = 9825;
 export const Person_Pater_James = 9848;
 
 // Key Location IDs
@@ -183,7 +184,7 @@ export const SCENE_PROFI_28_INSIDE = 50331648;
 export const PHONE_PICTID = 144;
 export const LETTER_PICTID = 151;
 export const OLD_MATT_PICTID = 0; // TODO: Find actual value
-export const MATT_PICTID = 0; // TODO: Find actual value
+export const MATT_PICTID = 7; // TODO: Verify this value
 
 // Story text file
 export const STORY_0_TXT = 18; // TODO: Verify this value
