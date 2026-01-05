@@ -786,6 +786,39 @@ export class StoryService {
     }
 
     /**
+     * DEALER IS AFRAID
+     * Port of tcDoneDealerIsAfraid from story.c
+     * 
+     * A dealer is afraid and talks to Matt
+     */
+    private tcDoneDealerIsAfraid(): void {
+        let persID = 0;
+        const location = this.film.getLocation();
+
+        switch (location) {
+            case 52:
+                persID = Person_Helen_Parker;
+                this.scene.sceneArgs.returnValue = SCENE_WATLING;
+                break;
+            case 53:
+                persID = Person_Frank_Maloya;
+                this.scene.sceneArgs.returnValue = SCENE_HOLLAND_STR;
+                break;
+            case 54:
+                persID = Person_Eric_Pooly;
+                this.scene.sceneArgs.returnValue = SCENE_HOLLAND_STR;
+                break;
+        }
+
+        this.db.knowsSet(Person_Matt_Stuvysunt, persID);
+
+        const pers = this.db.getObject(persID) as any;
+        this.dialog.say(STORY_0_TXT, 0, pers.PictID, 'DEALER_IS_AFRAID');
+
+        this.gfxChangeColors(5, 'fade_out');
+    }
+
+    /**
      * Helper: Play animation
      */
     private playAnim(animName: string, duration: number): void {
