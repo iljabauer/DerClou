@@ -120,6 +120,10 @@ export class DatFileParser {
                     return this.readLSObject(header);
                 case ObjectType.LSRoom:
                     return this.readLSRoom(header);
+                case ObjectType.Police:
+                    return this.readPolice(header);
+                case ObjectType.LSArea:
+                    return this.readLSArea(header);
                 default:
                     // Skip unknown object types
                     console.warn(`Unimplemented object type ${objectType}, skipping`);
@@ -487,6 +491,76 @@ export class DatFileParser {
             id: header.nr,
             name: `LSRoom_${header.nr}`,
             type: ObjectType.LSRoom,
+        };
+    }
+
+    private readPolice(header: ObjectHeader): Police {
+        const pictId = this.reader.readUInt16();
+        const livingId = this.reader.readUInt8();
+
+        return {
+            id: header.nr,
+            name: `Police_${header.nr}`,
+            type: ObjectType.Police,
+            pictId,
+            livingId,
+        };
+    }
+
+    private readLSArea(header: ObjectHeader): LSArea {
+        const coll16Id = this.reader.readUInt16();
+        const coll32Id = this.reader.readUInt16();
+        const coll48Id = this.reader.readUInt16();
+        const planColl16Id = this.reader.readUInt16();
+        const planColl32Id = this.reader.readUInt16();
+        const planColl48Id = this.reader.readUInt16();
+        const floorCollId = this.reader.readUInt16();
+        const planFloorCollId = this.reader.readUInt16();
+        const width = this.reader.readUInt16();
+        const height = this.reader.readUInt16();
+        const objectBaseNr = this.reader.readUInt32();
+        const darkness = this.reader.readUInt8();
+        const startX0 = this.reader.readUInt16();
+        const startX1 = this.reader.readUInt16();
+        const startX2 = this.reader.readUInt16();
+        const startX3 = this.reader.readUInt16();
+        const startX4 = this.reader.readUInt16();
+        const startX5 = this.reader.readUInt16();
+        const startY0 = this.reader.readUInt16();
+        const startY1 = this.reader.readUInt16();
+        const startY2 = this.reader.readUInt16();
+        const startY3 = this.reader.readUInt16();
+        const startY4 = this.reader.readUInt16();
+        const startY5 = this.reader.readUInt16();
+
+        return {
+            id: header.nr,
+            name: `LSArea_${header.nr}`,
+            type: ObjectType.LSArea,
+            coll16Id,
+            coll32Id,
+            coll48Id,
+            planColl16Id,
+            planColl32Id,
+            planColl48Id,
+            floorCollId,
+            planFloorCollId,
+            width,
+            height,
+            objectBaseNr,
+            darkness,
+            startX0,
+            startX1,
+            startX2,
+            startX3,
+            startX4,
+            startX5,
+            startY0,
+            startY1,
+            startY2,
+            startY3,
+            startY4,
+            startY5,
         };
     }
 
