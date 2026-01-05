@@ -110,7 +110,7 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - Scene constants (SCENE_*)
    - Player money management
    - Environment state management
-   - Story handlers ported (32 of 43 - 74%):
+   - Story handlers ported (33 of 43 - 77%):
      - tcDoneArrival (game opening)
      - tcDoneHotelReception (hotel room)
      - tcDoneCredits (receive money)
@@ -143,8 +143,12 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
      - tcDoneTerror (car explosion)
      - tcDoneConfessingSabien (confession scene)
      - tcDone8thBurglary (8th burglary)
-   - Helper methods: time progression, location changes, graphics/animation stubs
-   - ⚠️ 11 more story handlers needed (mostly burglary handlers)
+     - tcDone9thBurglary (9th burglary, endgame)
+   - Helper methods: time progression, location changes, graphics/animation stubs, moveAPerson
+   - Database enhancements: removeAllRelationsOfType, addRelationType
+   - FilmService enhancements: enabledChoices, setEnabledChoices
+   - Action/choice constants: GO, WAIT, BUSINESS_TALK, etc.
+   - ⚠️ 10 more story handlers needed (7 burglary handlers + 3 complex scenes)
    - ⚠️ Environment needs database integration
 
 12. **Test Scenes**
