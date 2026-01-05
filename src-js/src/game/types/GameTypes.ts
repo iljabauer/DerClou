@@ -27,6 +27,8 @@ export enum ObjectType {
     LSObject = 13,
     LSRoom = 14,
     Building = 15,
+    Police = 16,
+    LSArea = 17,
 }
 
 export interface Person extends GameObject {
@@ -201,6 +203,40 @@ export interface LSObject extends GameObject {
 export interface LSRoom extends GameObject {
     type: ObjectType.LSRoom;
     // Structure not fully defined in tcdata.h, will add fields as needed
+}
+
+export interface Police extends GameObject {
+    type: ObjectType.Police;
+    pictId: number;
+    livingId: number;
+}
+
+export interface LSArea extends GameObject {
+    type: ObjectType.LSArea;
+    coll16Id: number;
+    coll32Id: number;
+    coll48Id: number;
+    planColl16Id: number;
+    planColl32Id: number;
+    planColl48Id: number;
+    floorCollId: number;
+    planFloorCollId: number;
+    width: number;
+    height: number;
+    objectBaseNr: number;
+    darkness: number;
+    startX0: number;
+    startX1: number;
+    startX2: number;
+    startX3: number;
+    startX4: number;
+    startX5: number;
+    startY0: number;
+    startY1: number;
+    startY2: number;
+    startY3: number;
+    startY4: number;
+    startY5: number;
 }
 
 // Relations between objects (from tcdata.h)
