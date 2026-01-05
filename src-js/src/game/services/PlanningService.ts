@@ -1675,22 +1675,313 @@ export class PlanningService {
      * Port of plPlayerAction() from player.c
      */
     private async playerAction(): Promise<void> {
-        if (!this.playerData || !this.search) return;
+        if (!this.playerData || !this.search || !this.state) return;
 
         // Increment timer
         this.playerData.timer++;
         this.playerData.realTime = Math.floor(this.playerData.timer / PLANING_CORRECT_TIME);
 
-        // TODO: Implement full plPlayerAction logic:
-        // - Check alarms (time clock, loudness, patrol, etc.)
-        // - Update guards
-        // - Execute actions
-        // - Check for police arrival
-        // - Check team mood
-        // - Handle special events
+        // Display timer
+        this.displayTimer(this.playerData.realTime, false);
 
-        // For now, just check if we should end
-        // (This will be expanded in later commits)
+        // TODO: Check alarms
+        // - Time clock alarms
+        // - Loudness detection
+        // - Patrol detection
+        // - Microphone detection
+
+        // TODO: Check for police arrival
+        // if (alarm && time >= policeTime) { surrounded }
+
+        // TODO: Check team mood
+        // if (mood < PLANING_MOOD_MIN) { escape }
+
+        // Execute actions for each person
+        const burglarsNr = this.state.team.length;
+        const personsNr = burglarsNr;  // TODO: Add guards
+
+        for (let i = 0; i < personsNr; i++) {
+            // Skip if handler ended
+            if (i < burglarsNr && this.playerData.handlerEnded[i]) {
+                continue;
+            }
+
+            // Get next action for this person
+            const action = this.planningSystem.nextAction();
+            if (!action) {
+                continue;
+            }
+
+            this.playerData.action = action;
+
+            // Execute action based on type
+            await this.executeAction(i, action);
+        }
+
+        // TODO: Handle scrolling if needed
+    }
+
+    /**
+     * Execute a single action
+     * Port of action switch statement from plPlayerAction()
+     */
+    private async executeAction(personIndex: number, action: any): Promise<void> {
+        if (!this.playerData || !this.search) return;
+
+        const actionType = action.Type;
+
+        // Set animation based on action type
+        if (actionType !== ACTION_GO) {
+            if (actionType === ACTION_SIGNAL) {
+                // TODO: livAnimate(name, ANM_MAKE_CALL, 0, 0);
+            } else {
+                // TODO: plWork(personIndex);
+            }
+        }
+
+        // Execute action
+        switch (actionType) {
+            case ACTION_GO:
+                await this.executeActionGo(personIndex, action);
+                break;
+
+            case ACTION_WAIT:
+                await this.executeActionWait(personIndex, action);
+                break;
+
+            case ACTION_SIGNAL:
+                await this.executeActionSignal(personIndex, action);
+                break;
+
+            case ACTION_WAIT_SIGNAL:
+                await this.executeActionWaitSignal(personIndex, action);
+                break;
+
+            case ACTION_USE:
+                await this.executeActionUse(personIndex, action);
+                break;
+
+            case ACTION_OPEN:
+                await this.executeActionOpen(personIndex, action);
+                break;
+
+            case ACTION_CLOSE:
+                await this.executeActionClose(personIndex, action);
+                break;
+
+            case ACTION_TAKE:
+                await this.executeActionTake(personIndex, action);
+                break;
+
+            case ACTION_DROP:
+                await this.executeActionDrop(personIndex, action);
+                break;
+
+            default:
+                console.warn(`[PlanningService] Unknown action type: ${actionType}`);
+                break;
+        }
+    }
+
+    /**
+     * Execute GO action
+     */
+    private async executeActionGo(personIndex: number, action: any): Promise<void> {
+        if (!this.playerData || !this.search) return;
+
+        // Check exhaustion
+        if (this.search.exhaust[personIndex] > PLANING_EXHAUST_MAX) {
+            await this.unableToWork(personIndex, ACTION_EXHAUST);
+            return;
+        }
+
+        // Move person
+        const direction = action.Direction;
+        // TODO: plMove(personIndex, direction);
+
+        // Check if can walk
+        // TODO: if (livCanWalk(name)) {
+        //   Update loudness, exhaustion, walk time
+        //   Handle scrolling if current person
+        // } else {
+        //   UnableToWork if in active area
+        // }
+
+        this.playerData.currLoudness[personIndex] = PLANING_LOUDNESS_STD;
+        this.search.walkTime[personIndex]++;
+    }
+
+    /**
+     * Execute WAIT action
+     */
+    private async executeActionWait(personIndex: number, action: any): Promise<void> {
+        await this.unableToWork(personIndex, ACTION_WAIT);
+    }
+
+    /**
+     * Execute SIGNAL action
+     */
+    private async executeActionSignal(personIndex: number, action: any): Promise<void> {
+        if (!this.playerData || !this.search) return;
+
+        this.playerData.currLoudness[personIndex] = PLANING_LOUDNESS_RADIO;
+
+        // TODO: Check if action started
+        // if (ActionStarted(plSys)) {
+        //   Search.CallCount++;
+        //   InitSignal(plSys, personId, receiverId);
+        //   Check alarm by radio
+        // }
+
+        // TODO: Check if action ended
+        // if (ActionEnded(plSys)) {
+        //   CloseSignal(sig);
+        // }
+
+        this.search.callCount++;
+    }
+
+    /**
+     * Execute WAIT_SIGNAL action
+     */
+    private async executeActionWaitSignal(personIndex: number, action: any): Promise<void> {
+        // TODO: Check if signal received
+        // if (IsSignal(plSys, senderId, receiverId)) {
+        //   CloseSignal(sig);
+        // } else {
+        //   UnableToWork(personIndex, ACTION_WAIT_SIGNAL);
+        // }
+
+        await this.unableToWork(personIndex, ACTION_WAIT_SIGNAL);
+    }
+
+    /**
+     * Execute USE action
+     */
+    private async executeActionUse(personIndex: number, action: any): Promise<void> {
+        if (!this.search) return;
+
+        this.search.workTime[personIndex]++;
+
+        // TODO: Full implementation
+        // - Check if stairs (area transition)
+        // - Check if guard (combat)
+        // - Check if object (tool usage)
+        // - Update loudness
+        // - Check alarms
+        // - Update object state
+    }
+
+    /**
+     * Execute OPEN action
+     */
+    private async executeActionOpen(personIndex: number, action: any): Promise<void> {
+        if (!this.playerData) return;
+
+        this.playerData.currLoudness[personIndex] = PLANING_LOUDNESS_OPEN_CLOSE;
+
+        // TODO: Full implementation
+        // - Check if locked
+        // - Open object
+        // - Update state
+        // - Check alarms
+    }
+
+    /**
+     * Execute CLOSE action
+     */
+    private async executeActionClose(personIndex: number, action: any): Promise<void> {
+        if (!this.playerData) return;
+
+        this.playerData.currLoudness[personIndex] = PLANING_LOUDNESS_OPEN_CLOSE;
+
+        // TODO: Full implementation
+        // - Close object
+        // - Update state
+    }
+
+    /**
+     * Execute TAKE action
+     */
+    private async executeActionTake(personIndex: number, action: any): Promise<void> {
+        if (!this.search) return;
+
+        this.search.workTime[personIndex]++;
+
+        // TODO: Full implementation
+        // - Take loot from container
+        // - Update weight/volume
+        // - Update container state
+    }
+
+    /**
+     * Execute DROP action
+     */
+    private async executeActionDrop(personIndex: number, action: any): Promise<void> {
+        if (!this.search) return;
+
+        this.search.workTime[personIndex]++;
+
+        // TODO: Full implementation
+        // - Drop loot to bag
+        // - Update weight/volume
+        // - Update bag state
+    }
+
+    /**
+     * Handle unable to work condition
+     * Port of UnableToWork() from player.c
+     */
+    private async unableToWork(personIndex: number, actionType: number): Promise<void> {
+        if (!this.playerData || !this.search) return;
+
+        this.playerData.currLoudness[personIndex] = PLANING_LOUDNESS_STD;
+        // TODO: Search.Exhaust[personIndex] = tcGuyIsWaiting(personId, exhaust);
+        this.search.waitTime[personIndex]++;
+
+        // TODO: livAnimate(name, ANM_STAND, 0, 0);
+
+        // Show message if first time
+        if (!this.playerData.unableToWork[personIndex]) {
+            let messageKey = '';
+            switch (actionType) {
+                case ACTION_EXHAUST:
+                    messageKey = 'PLAYER_UTW_EXHAUST';
+                    break;
+                case ACTION_GO:
+                    messageKey = 'PLAYER_UTW_GO';
+                    break;
+                case ACTION_OPEN:
+                    messageKey = 'PLAYER_UTW_OPEN';
+                    break;
+                case ACTION_CLOSE:
+                    messageKey = 'PLAYER_UTW_CLOSE';
+                    break;
+            }
+
+            if (messageKey) {
+                await this.showMessage(messageKey, true);
+            }
+
+            this.playerData.unableToWork[personIndex] = 1;
+        }
+
+        // TODO: CheckSurrounding(personIndex);
+
+        // Increase deviation time
+        if (actionType !== ACTION_WAIT && actionType !== ACTION_WAIT_SIGNAL) {
+            this.search.deriTime += 3;  // PLANING_DERI_UNABLE_TO_WORK
+
+            if (!this.playerData.badPlaning) {
+                await this.showMessage('PLAYER_BAD_PLANING', true);
+                this.playerData.badPlaning = true;
+            }
+        }
+
+        // Increment timer
+        if (actionType !== ACTION_WAIT) {
+            // TODO: IncCurrentTimer(plSys, 1, 0);
+        }
     }
 
     /**
