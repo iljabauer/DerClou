@@ -19,6 +19,7 @@ export interface Film {
     currentDay: number;
     currentMinute: number;
     scenes: Scene[];
+    enabledChoices: number;  // EnabledChoices - bitmask for enabled actions
 }
 
 export class FilmService {
@@ -31,7 +32,8 @@ export class FilmService {
             currentScene: 0,
             currentDay: 1,
             currentMinute: 0,
-            scenes: []
+            scenes: [],
+            enabledChoices: 0xFFFFFFFF  // All choices enabled by default
         };
     }
 
@@ -137,6 +139,21 @@ export class FilmService {
      */
     addScene(scene: Scene): void {
         this.film.scenes.push(scene);
+    }
+
+    /**
+     * Set enabled choices (action menu bitmask)
+     * Port of SetEnabledChoices from gp.c
+     */
+    setEnabledChoices(choiceMask: number): void {
+        this.film.enabledChoices = choiceMask;
+    }
+
+    /**
+     * Get enabled choices
+     */
+    getEnabledChoices(): number {
+        return this.film.enabledChoices;
     }
 
     /**
