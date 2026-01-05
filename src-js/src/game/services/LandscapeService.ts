@@ -900,7 +900,7 @@ export class LandscapeService {
                 return a.offsetFact - b.offsetFact;
             }
             // Then sort by Y position (top to bottom)
-            return a.yPos - b.yPos;
+            return a.destY - b.destY;
         });
         
         this.objectRetrieval = objects;
