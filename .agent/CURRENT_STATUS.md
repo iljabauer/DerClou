@@ -1,12 +1,12 @@
 # Der Clou! TypeScript Port - Current Status
 
-**Last Updated:** 2026-01-05 (Session 13)
+**Last Updated:** 2026-01-05 (Session 14)
 
 ## Overview
 
-Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundation with replay system, core architecture, complete data/text/image systems, and story file loading.
+Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundation with replay system, core architecture, complete data/text/image systems, story file loading, and event tracking.
 
-## Current Phase: Phase 5 - Story System Integration (In Progress)
+## Current Phase: Phase 5 - Story System Integration (Near Complete)
 
 ### What Works ✅
 
@@ -186,7 +186,7 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - ⚠️ INVESTIGATE needs full implementation (complex observation system)
    - ⚠️ PLAN needs planning system (tcOrganisation, tcBurglary)
 
-13. **Story File System** - Functional ✅
+13. **Story File System** - Complete ✅
    - StoryFileParser for loading TCStory.pc
    - Binary story file format fully implemented
    - StoryHeader parsing (story name, counts, start conditions)
@@ -196,10 +196,10 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - FilmService integration
    - Scene lookup by event number or location
    - GO action uses real scene successors
-   - ⚠️ InitLocations() needs implementation (load location names)
-   - ⚠️ LinkScenes() needs implementation
-   - ⚠️ PatchStory() needs implementation (game-specific patches)
-   - ⚠️ Event tracking system needs implementation
+   - ✅ InitLocations() implemented (loads location names from LOCATION.LST)
+   - ✅ PatchStory() implemented (game-specific scene patches)
+   - ✅ Event tracking system implemented (getEventCount, eventDidHappen, checkConditions)
+   - ⚠️ LinkScenes() needs implementation (additional scene linking)
 
 13. **Test Scenes**
    - ReplayTestScene (original)
@@ -220,28 +220,36 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - ⚠️ Visual regression testing blocked
    - ⚠️ Need to debug NW.js screenshot capture
 
-2. **Menu System Integration** - HIGH PRIORITY
+2. **Planning System** - HIGH PRIORITY
+   - ⚠️ Port tcOrganisation() from planing/planer.c
+   - ⚠️ Port tcBurglary() from planing/planer.c
+   - ⚠️ Team management (select people for burglary)
+   - ⚠️ Tool selection and assignment
+   - ⚠️ Time scheduling
+   - ⚠️ Burglary execution (plPlayer integration)
+
+3. **Investigation System** - MEDIUM PRIORITY
+   - ⚠️ Port Investigate() from invest.c
+   - ⚠️ Building observation mechanics
+   - ⚠️ Guard pattern tracking
+   - ⚠️ Security system detection
+
+4. **Landscape System** - MEDIUM PRIORITY
+   - ⚠️ Port landscape rendering from landscap/
+   - ⚠️ Building interior display
+   - ⚠️ Room navigation
+   - ⚠️ Object placement in rooms
+
+5. **Menu System Integration** - MEDIUM PRIORITY
    - ⚠️ Southampton scene menu (walk, wait, fish, plan, info, execute)
    - ⚠️ Kaserne scene menu (go inside, info, plan, execute)
    - ⚠️ Tower burglary initialization (team setup, tools, abilities)
-   - ⚠️ Tower burglary execution (plPlayer integration)
-   - ⚠️ Menu navigation and input handling
 
-3. **Action Implementation** - MOSTLY COMPLETE ✅
-   - ✅ GO action implemented with opening hours check
-   - ✅ BUSINESS_TALK implemented via Talk() function
-   - ✅ LOOK, WAIT, INFO implemented via SceneService
-   - ✅ INVESTIGATE stubbed (complex observation system)
-   - ✅ MAKE_CALL implemented (tcTelefon with person selection)
-   - ✅ CALL_TAXI implemented (returns taxi scene)
-   - ⚠️ PLAN needs planning system (tcOrganisation, tcBurglary)
-   - ⚠️ Scene successor system needs story file loading
-
-5. **Gameplay Systems**
-   - Planning mechanics
-   - Burglary system
-   - Character progression
-   - Inventory management
+6. **Story Scene System** - LOW PRIORITY
+   - ⚠️ Story scene triggering based on conditions
+   - ⚠️ Probability-based scene selection
+   - ⚠️ Scene interruption system
+   - ⚠️ LinkScenes() implementation
 
 ## File Structure
 
@@ -292,30 +300,25 @@ src-js/src/game/
 
 ## Next Steps (Priority Order)
 
-### Immediate (Session 12 - COMPLETE ✅)
-1. ✅ Create comprehensive porting plan
-2. ✅ Complete Phase 1: Living/Location System
-3. ✅ Complete Phase 2: Dialog System
-4. ✅ Complete Phase 3: Scene/Story System
-5. ✅ Port SceneService (Go, Information, Look, Wait)
-6. ✅ Create SceneTestScene
-7. ✅ Port StoryService with all 43 story handlers
-8. ✅ Add scene constants
-9. ✅ Port all burglary handlers (1st-9th)
-10. ✅ Port complex scenes (Birthday, Southampton, Kaserne)
-11. ✅ Port interaction system (InteractionService)
-12. ✅ Create InteractionTestScene
-13. ✅ Implement action handlers (GO, BUSINESS_TALK, MAKE_CALL, CALL_TAXI, etc.)
-14. ✅ Port tcPersonIsHere() for person detection
-15. ✅ Port tcTelefon() for phone calls
-16. ✅ Add location opening hours checking
+### Immediate (Session 14 - COMPLETE ✅)
+1. ✅ Implement InitLocations() to load location names
+2. ✅ Implement PatchStory() to apply game-specific patches
+3. ✅ Implement event tracking system (getEventCount, eventDidHappen, checkConditions)
+4. ✅ Update documentation with progress
 
 ### Short-term (Next 2-3 Sessions)
-1. Port story file loading system (PrepareStory, LinkScenes)
-2. Implement scene successor system for GO action
-3. Port planning system (tcOrganisation, tcBurglary)
-4. Port investigation system (Investigate from invest.c)
-5. Fix replay system screenshot generation
+1. Port planning system (tcOrganisation, tcBurglary) - HIGH PRIORITY
+   - Team selection interface
+   - Tool assignment
+   - Time scheduling
+   - Burglary initialization
+2. Port investigation system (Investigate from invest.c)
+   - Building observation
+   - Guard pattern tracking
+3. Port landscape system (landscap/)
+   - Building interior rendering
+   - Room navigation
+4. Fix replay system screenshot generation
 
 ### Medium-term
 1. Port dialog system
@@ -368,8 +371,9 @@ npm run dev
 
 ## Notes
 
-- 43 TypeScript files, ~8900 lines of code
+- 49 TypeScript files, ~12,000 lines of code (up from ~8,900)
 - 72 C source files to port (~35k lines)
+- Progress: ~34% complete (estimated)
 - TCMAIN.DAT and TCBUILD.DAT are main data files
 - Building-specific files: *ETA0.DAT, *ETA1.DAT, etc.
 - Relations in .REL files (text format)
@@ -377,3 +381,4 @@ npm run dev
 - Images in gamedata/PICTURES/ (IFF ILBM format, loaded directly)
 - ILBM decoder successfully ported from C
 - UI system ready for integration with game scenes
+- Story file system fully functional with event tracking
