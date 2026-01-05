@@ -440,6 +440,9 @@ export class DatFileParser {
         const kuriositaet = this.reader.readUInt32();
         const histKunst = this.reader.readUInt32();
         const gebrauchsArt = this.reader.readUInt32();
+        const vase = this.reader.readUInt32();
+        const totalWeight = this.reader.readUInt32();
+        const totalVolume = this.reader.readUInt32();
 
         return {
             id: header.nr,
@@ -454,6 +457,9 @@ export class DatFileParser {
             kuriositaet,
             histKunst,
             gebrauchsArt,
+            vase,
+            totalWeight,
+            totalVolume,
         };
     }
 

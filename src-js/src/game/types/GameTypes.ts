@@ -186,6 +186,9 @@ export interface CompleteLoot extends GameObject {
     kuriositaet: number;
     histKunst: number;
     gebrauchsArt: number;
+    vase: number;
+    totalWeight: number;
+    totalVolume: number;
 }
 
 export interface LSLock extends GameObject {
