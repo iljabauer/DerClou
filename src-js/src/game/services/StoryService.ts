@@ -972,6 +972,21 @@ export class StoryService {
     }
 
     /**
+     * SABIEN CALL
+     * Port of tcDoneSabienCall from story.c
+     * 
+     * Sabien calls Matt
+     */
+    private tcDoneSabienCall(): void {
+        this.somebodyIsCalling();
+
+        this.dialog.say(STORY_0_TXT, 0, PHONE_PICTID, 'A_CALL_FOR_YOU');
+        this.dialog.say(STORY_1_TXT, 0, PHONE_PICTID, 'ST_10_SABIEN');
+
+        this.scene.sceneArgs.returnValue = SCENE_HOTEL_ROOM;
+    }
+
+    /**
      * Helper: Play animation
      */
     private playAnim(animName: string, duration: number): void {
