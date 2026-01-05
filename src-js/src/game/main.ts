@@ -5,6 +5,7 @@ import { TestGameScene } from './scenes/TestGameScene';
 import { DataLoaderTestScene } from './scenes/DataLoaderTestScene';
 import { TextTestScene } from './scenes/TextTestScene';
 import { UITestScene } from './scenes/UITestScene';
+import { ImageTestScene } from './scenes/ImageTestScene';
 import { Game as MainGame } from './scenes/Game';
 import { AUTO, Game, Scale, Types } from 'phaser';
 
@@ -21,6 +22,7 @@ const config: Types.Core.GameConfig = {
         autoCenter: Scale.CENTER_BOTH
     },
     scene: [
+        ImageTestScene,
         UITestScene,
         TextTestScene,
         DataLoaderTestScene,
