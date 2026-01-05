@@ -166,6 +166,36 @@ export class Database {
     sortObjectsByName(objects: GameObject[]): GameObject[] {
         return [...objects].sort((a, b) => a.name.localeCompare(b.name));
     }
+
+    /**
+     * Get object ID of Location by location number
+     * Port of GetObjNrOfLocation() from dataappl.c
+     */
+    getObjNrOfLocation(locationNr: number): ObjectId {
+        const locations = this.getObjectsByType(ObjectType.Location);
+        for (const loc of locations) {
+            const locData = loc as any;
+            if (locData.LocationNr === locationNr) {
+                return loc.id;
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Get object ID of Building by location number
+     * Port of GetObjNrOfBuilding() from dataappl.c
+     */
+    getObjNrOfBuilding(locationNr: number): ObjectId {
+        const buildings = this.getObjectsByType(ObjectType.Building);
+        for (const bui of buildings) {
+            const buiData = bui as any;
+            if (buiData.LocationNr === locationNr) {
+                return bui.id;
+            }
+        }
+        return 0;
+    }
 }
 
 export const db = new Database();
