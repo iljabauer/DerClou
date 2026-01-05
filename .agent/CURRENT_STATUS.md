@@ -105,12 +105,12 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - Taxi location management
    - SceneTestScene for testing
 
-11. **Story System** - In Progress 🚧
+11. **Story System** - Complete ✅
    - StoryService with handler system
    - Scene constants (SCENE_*)
    - Player money management
    - Environment state management
-   - Story handlers ported (33 of 43 - 77%):
+   - Story handlers ported (43 of 43 - 100%):
      - tcDoneArrival (game opening)
      - tcDoneHotelReception (hotel room)
      - tcDoneCredits (receive money)
@@ -144,12 +144,23 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
      - tcDoneConfessingSabien (confession scene)
      - tcDone8thBurglary (8th burglary)
      - tcDone9thBurglary (9th burglary, endgame)
-   - Helper methods: time progression, location changes, graphics/animation stubs, moveAPerson
+     - tcDone1stBurglary (1st burglary)
+     - tcDone2ndBurglary (2nd burglary)
+     - tcDone3rdBurglary (3rd burglary)
+     - tcDone4thBurglary (4th burglary)
+     - tcDone5thBurglary (5th burglary)
+     - tcDone6thBurglary (6th burglary)
+     - tcDone7thBurglary (7th burglary)
+     - tcDoneBirthday (birthday party)
+     - tcDoneSouthhampton (Southampton menu scene - stubbed)
+     - tcDoneKaserne (Kaserne menu scene - stubbed)
+   - Helper methods: time progression, location changes, graphics/animation stubs, moveAPerson, calcRandomNr
    - Database enhancements: removeAllRelationsOfType, addRelationType
    - FilmService enhancements: enabledChoices, setEnabledChoices
    - Action/choice constants: GO, WAIT, BUSINESS_TALK, etc.
-   - ⚠️ 10 more story handlers needed (7 burglary handlers + 3 complex scenes)
-   - ⚠️ Environment needs database integration
+   - Person/Car/Tool/Building/Ability constants (100+ IDs)
+   - ⚠️ Southampton and Kaserne menu systems need full UI integration
+   - ⚠️ Tower burglary initialization and execution need implementation
 
 12. **Test Scenes**
    - ReplayTestScene (original)
@@ -169,22 +180,14 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - ⚠️ Visual regression testing blocked
    - ⚠️ Need to debug NW.js screenshot capture
 
-2. **Story System** (src/story/) - IN PROGRESS
-   - ✅ SceneService with core functions complete
-   - ✅ StoryService with handler system
-   - ✅ Scene constants (SCENE_*)
-   - ✅ 6 story handlers ported
-   - ⚠️ Need more story handlers (30+ remaining)
-   - ⚠️ Environment needs database integration
-   - See SCENE_STORY_ANALYSIS.md for details
+2. **Menu System Integration** - HIGH PRIORITY
+   - ⚠️ Southampton scene menu (walk, wait, fish, plan, info, execute)
+   - ⚠️ Kaserne scene menu (go inside, info, plan, execute)
+   - ⚠️ Tower burglary initialization (team setup, tools, abilities)
+   - ⚠️ Tower burglary execution (plPlayer integration)
+   - ⚠️ Menu navigation and input handling
 
-3. **Story Handlers** (src/story/)
-   - Port tcDone* functions (story scene handlers)
-   - Scene constants (SCENE_*)
-   - Story progression logic
-   - Event triggers
-
-4. **Interaction System** (src/present/interac.c)
+3. **Interaction System** (src/present/interac.c)
    - Action menu (Go, Talk, Look, Wait, Think)
    - Player interactions
    - Scene integration
@@ -246,14 +249,15 @@ src-js/src/game/
 1. ✅ Create comprehensive porting plan
 2. ✅ Complete Phase 1: Living/Location System
 3. ✅ Complete Phase 2: Dialog System
-4. ✅ Start Phase 3: Scene/Story System
+4. ✅ Complete Phase 3: Scene/Story System
 5. ✅ Port SceneService (Go, Information, Look, Wait)
 6. ✅ Create SceneTestScene
-7. ✅ Port StoryService with 6 story handlers
+7. ✅ Port StoryService with all 43 story handlers
 8. ✅ Add scene constants
-9. ⚠️ Port more story handlers
-10. ⚠️ Port interaction system
-11. ⚠️ Fix replay system screenshot generation
+9. ✅ Port all burglary handlers (1st-9th)
+10. ✅ Port complex scenes (Birthday, Southampton, Kaserne)
+11. ⚠️ Port interaction system
+12. ⚠️ Fix replay system screenshot generation
 
 ### Short-term (Next 2-3 Sessions)
 1. Complete Living/Location System
