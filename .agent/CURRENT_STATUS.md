@@ -1,6 +1,6 @@
 # Der Clou! TypeScript Port - Current Status
 
-**Last Updated:** 2026-01-05 (Session 18)
+**Last Updated:** 2026-01-05 (Session 19)
 
 ## Overview
 
@@ -241,10 +241,22 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
      - Timer and info display ✅
      - player() - Burglary execution (stubbed)
      - Action implementations (stubbed)
+   - PlanningSupportService - Support functions (PARTIAL)
+     - prepareData() - Initialize planning data ✅
+     - getNextLoot() - Loot slot management ✅
+     - livingsPosAtCar() - Check if at car ✅
+     - allInCar() - Check if all in car ✅
+     - isStair() - Check if object is stairs ✅
+     - correctOpened() - Update object state (stubbed)
+     - ignoreLock() - Check lock state ✅
+     - move() - Move person (stubbed)
+     - work() - Work animation (stubbed)
+     - insertGuard() - Add guard to list (stubbed)
+     - objectInReach() - Check reach (stubbed)
    - PlanningTestScene for testing ✅
    - Integration with StoryService ✅
    - Integration with InteractionService ✅
-   - ⚠️ Action implementations need full porting
+   - ⚠️ Action implementations need full porting (walk, use, open, close, take, drop, wait, radio)
    - ⚠️ Burglary execution needs implementation
 
 16. **Organisation System** - Complete ✅
@@ -391,11 +403,11 @@ src-js/src/game/
 
 ## Next Steps (Priority Order)
 
-### Immediate (Session 18 - COMPLETE ✅)
-1. ✅ Port planning system core (PlanningSystemService from system.c)
-2. ✅ Port planning menu system (planner interface from planer.c)
-3. ✅ Create PlanningTestScene for testing
-4. ✅ Update documentation with progress
+### Immediate (Session 19 - IN PROGRESS 🚧)
+1. ✅ Port planning support functions (PlanningSupportService from support.c)
+2. ⚠️ Port action implementations (walk, use, open, close, take, drop, wait, radio)
+3. ⚠️ Port landscape rendering system (landscap/)
+4. ⚠️ Update documentation with progress
 
 ### Short-term (Next 2-3 Sessions)
 1. Implement planning action handlers - HIGH PRIORITY
@@ -469,7 +481,7 @@ npm run dev
 
 ## Notes
 
-- 60 TypeScript files, ~16,723 lines of code (up from ~15,505)
+- 61 TypeScript files, ~17,045 lines of code (up from ~16,723)
 - 72 C source files to port (~35k lines)
 - Progress: ~45% complete (estimated)
 - TCMAIN.DAT and TCBUILD.DAT are main data files
