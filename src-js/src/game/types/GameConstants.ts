@@ -58,6 +58,7 @@ export const Person_Pere_Ubu = 9858;
 
 // Key Location IDs
 export const London_London_1 = 1;
+export const Location_Walrus = 143;
 export const Location_Nirvana = 151;
 
 // Key Building IDs

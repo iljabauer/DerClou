@@ -40,6 +40,8 @@ import {
     SCENE_7TH_BURG,
     SCENE_8TH_BURG,
     SCENE_9TH_BURG,
+    SCENE_WALRUS,
+    SCENE_BIRTHDAY,
     STORY_0_TXT,
     STORY_1_TXT,
     OLD_MATT_PICTID,
@@ -62,6 +64,7 @@ import {
     tcCOSTS_FOR_HOTEL,
     tcVALUE_OF_RING_OF_PATER,
     London_London_1,
+    Location_Walrus,
     Person_Marc_Smith,
     Person_Mary_Bolton,
     Person_Robert_Bull,
@@ -217,6 +220,7 @@ export class StoryService {
         this.handlers.set(SCENE_5TH_BURG, () => this.tcDone5thBurglary());
         this.handlers.set(SCENE_6TH_BURG, () => this.tcDone6thBurglary());
         this.handlers.set(SCENE_7TH_BURG, () => this.tcDone7thBurglary());
+        this.handlers.set(SCENE_BIRTHDAY, () => this.tcDoneBirthday());
         // More handlers will be added as they are ported
     }
 
@@ -1536,6 +1540,52 @@ export class StoryService {
     }
 
     /**
+     * BIRTHDAY PARTY
+     * Port of tcDoneBirthday from story.c
+     * 
+     * Matt's birthday party at the Walrus - randomly move people to the party
+     */
+    private tcDoneBirthday(): void {
+        this.stopAnim();
+        this.gfxShow(172); // birthday graphics
+
+        // TODO: sndPlayFX('birthd2.voc'); // clapping
+
+        // Get all persons Matt knows
+        const persons = this.db.knowsAll(Person_Matt_Stuvysunt, ObjectType.Person);
+
+        // Move random people to the Walrus (70% chance)
+        for (const personId of persons) {
+            // Skip certain people
+            switch (personId) {
+                case Person_Sabien_Pardo:
+                case Person_Herbert_Briggs:
+                case Person_John_Gludo:
+                case Person_Miles_Chickenwing:
+                case Person_Red_Stanson:
+                    // Don't move these people
+                    break;
+                default:
+                    // If person lives in London and random check passes (70% chance)
+                    if (this.db.livesIn(London_London_1, personId) && this.calcRandomNr(0, 10) < 7) {
+                        this.moveAPerson(personId, Location_Walrus);
+
+                        const person = this.db.getObject(personId) as any;
+                        this.dialog.say(STORY_1_TXT, 0, person.PictID, 'ST_11_ALL_0');
+                    }
+                    break;
+            }
+        }
+
+        // TODO: sndPlayFX('birthd1.voc'); // champagne cork
+
+        this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST_11_OLD_0');
+        this.gfxShow(141); // graphics
+
+        this.scene.sceneArgs.returnValue = SCENE_WALRUS;
+    }
+
+    /**
      * 9TH BURGLARY
      * Port of tcDone9thBurglary from story.c
      * 
@@ -1730,6 +1780,15 @@ export class StoryService {
         // Add person to new location
         this.db.hasSet(persId, newLocId);
         this.db.hasSet(newLocId, persId);
+    }
+
+    /**
+     * Helper: Generate random number for game logic
+     * Port of CalcRandomNrForGameLogic from random.c
+     */
+    private calcRandomNr(min: number, max: number): number {
+        // TODO: Use deterministic RNG from Random service
+        return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
     /**
