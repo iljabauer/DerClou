@@ -99,7 +99,19 @@ import {
     Person_Miguel_Garcia,
     Person_John_O_Keef,
     Person_Samuel_Rosenblatt,
-    FACE_GLUDO_MAGIC
+    FACE_GLUDO_MAGIC,
+    Car_Standard_Vanguard_1950,
+    Car_Cadillac_Club_1952,
+    Car_Fiat_634_N_1943,
+    Tool_Dynamit,
+    Tool_Kernbohrer,
+    Tool_Sauerstofflanze,
+    Tool_Chloroform,
+    Person_Garry_Stevenson,
+    Person_Jiri_Poulin,
+    Person_Prof_Emil_Schmitt,
+    Person_Melanie_Morgan,
+    Person_Sid_Palmer
 } from '../types/GameConstants';
 import { ObjectType, Building } from '../types/GameTypes';
 import { PresentationService } from './PresentationService';
@@ -178,6 +190,7 @@ export class StoryService {
         this.handlers.set(SCENE_1ST_BURG, () => this.tcDone1stBurglary());
         this.handlers.set(SCENE_2ND_BURG, () => this.tcDone2ndBurglary());
         this.handlers.set(SCENE_3RD_BURG, () => this.tcDone3rdBurglary());
+        this.handlers.set(SCENE_4TH_BURG, () => this.tcDone4thBurglary());
         // More handlers will be added as they are ported
     }
 
@@ -1341,6 +1354,57 @@ export class StoryService {
 
         // TODO: GetScene(SCENE_FAHNDUNG)-\u003eGeschehen = 0;
         this.scene.sceneArgs.returnValue = this.getLocSceneEventNr(this.film.getLocation());
+    }
+
+    /**
+     * 4TH BURGLARY
+     * Port of tcDone4thBurglary from story.c
+     * 
+     * After 4th burglary - unlock locations, add cars/tools/persons, dialog with Gludo
+     */
+    private tcDone4thBurglary(): void {
+        const Gludo = this.db.getObject(Person_John_Gludo) as any;
+
+        this.scene.addTaxiLocation(31); // osterly
+        this.scene.addTaxiLocation(29); // ham
+
+        // TODO: if (bProfidisk) this.scene.addTaxiLocation(70); // madame
+
+        this.somebodyIsComing();
+
+        // TODO: sndPlaySound('gludo.bk', 0);
+        this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, 'ARREST_OLD_MATT_0');
+        this.dialog.say(STORY_0_TXT, 0, Gludo.PictID, 'ARREST_GLUDO_0');
+        this.dialog.say(STORY_0_TXT, 0, MATT_PICTID, 'ARREST_MATT_0');
+        this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, 'ARREST_OLD_MATT_1');
+        this.dialog.say(STORY_0_TXT, 0, Gludo.PictID, 'ARREST_GLUDO_1');
+
+        // Add cars to Marc Smith
+        this.db.hasSet(Person_Marc_Smith, Car_Standard_Vanguard_1950);
+        this.db.hasSet(Person_Marc_Smith, Car_Cadillac_Club_1952);
+
+        // TODO: if (bProfidisk) this.db.hasSet(Person_Marc_Smith, Car_Fiat_634_N_1943);
+
+        // Add tools to Mary Bolton
+        this.db.hasSet(Person_Mary_Bolton, Tool_Dynamit);
+        this.db.hasSet(Person_Mary_Bolton, Tool_Kernbohrer);
+        this.db.hasSet(Person_Mary_Bolton, Tool_Sauerstofflanze);
+        this.db.hasSet(Person_Mary_Bolton, Tool_Chloroform);
+
+        // Add persons to London
+        this.db.livesInSet(London_London_1, Person_Garry_Stevenson);
+        this.db.livesInSet(London_London_1, Person_Jiri_Poulin);
+        this.db.livesInSet(London_London_1, Person_Prof_Emil_Schmitt);
+
+        // TODO: if (bProfidisk) {
+        //     this.db.livesInSet(London_London_1, Person_Melanie_Morgan);
+        //     this.db.livesInSet(London_London_1, Person_Sid_Palmer);
+        // }
+
+        this.gfxChangeColors();
+
+        // TODO: GetScene(SCENE_FAHNDUNG)-\u003eGeschehen = 0;
+        this.scene.sceneArgs.returnValue = this.getLocSceneEventNr(7); // Police
     }
 
     /**
