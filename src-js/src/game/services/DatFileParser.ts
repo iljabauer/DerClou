@@ -26,6 +26,7 @@ const C_OBJECT_TYPES: Record<number, ObjectType> = {
     9911: ObjectType.CompleteLoot,
     9912: ObjectType.LSLock,
     9913: ObjectType.LSObject,
+    509990: ObjectType.Building,
     509993: ObjectType.LSRoom,
 };
 
