@@ -987,6 +987,20 @@ export class StoryService {
     }
 
     /**
+     * MEETING AGAIN
+     * Port of tcDoneMeetingAgain from story.c
+     * 
+     * Matt meets someone again
+     */
+    private tcDoneMeetingAgain(): void {
+        this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST_10_OLD_0');
+
+        this.gfxChangeColors(3, 'fade_out');
+
+        this.scene.sceneArgs.returnValue = SCENE_LISSON_GROVE;
+    }
+
+    /**
      * Helper: Play animation
      */
     private playAnim(animName: string, duration: number): void {
