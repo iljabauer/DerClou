@@ -1,6 +1,6 @@
 # Der Clou! TypeScript Port - Current Status
 
-**Last Updated:** 2026-01-05 (Session 14)
+**Last Updated:** 2026-01-05 (Session 15)
 
 ## Overview
 
@@ -170,12 +170,12 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
      - WAIT: Wait and advance time ✅ (implemented via SceneService)
      - BUSINESS_TALK: Talk to people ✅ (implemented via DialogService)
      - LOOK: Examine location ✅ (implemented via SceneService)
-     - INVESTIGATE: Special investigation ✅ (stubbed - complex system)
+     - INVESTIGATE: Building observation ✅ (implemented via InvestigationService)
      - PLAN: Plan burglaries (stubbed - requires planning system)
      - CALL_TAXI: Call a taxi ✅ (implemented)
      - MAKE_CALL: Make phone calls ✅ (tcTelefon implemented)
      - INFO: View information menu ✅ (implemented via SceneService)
-   - Integration with UIService, SceneService, DialogService
+   - Integration with UIService, SceneService, DialogService, InvestigationService
    - InteractionTestScene for testing
    - SceneService.go() made async with proper menu integration
    - DialogService.talk() implemented with person selection
@@ -183,7 +183,6 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - tcTelefon() implemented for phone calls
    - Location opening hours checking
    - Scene successor system integrated ✅
-   - ⚠️ INVESTIGATE needs full implementation (complex observation system)
    - ⚠️ PLAN needs planning system (tcOrganisation, tcBurglary)
 
 13. **Story File System** - Complete ✅
@@ -201,7 +200,19 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - ✅ Event tracking system implemented (getEventCount, eventDidHappen, checkConditions)
    - ⚠️ LinkScenes() needs implementation (additional scene linking)
 
-13. **Test Scenes**
+13. **Investigation System** - Complete ✅
+   - InvestigationService for building observation
+   - Port of Investigate() from invest.c
+   - 24-hour observation simulation
+   - Patrol event display based on guard rate
+   - Scheduled event loading from text files
+   - Knowledge gain (exactlyness) tracking
+   - Suspicion (strike) tracking
+   - Time progression during observation
+   - Integration with InteractionService
+   - Building type updated with all fields from C struct
+
+14. **Test Scenes**
    - ReplayTestScene (original)
    - DataLoaderTestScene
    - TextTestScene
@@ -215,12 +226,7 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
 
 ### What Needs Work 🚧
 
-1. **Replay System Integration** - NEEDS ATTENTION
-   - ⚠️ Screenshot generation not working in headless mode
-   - ⚠️ Visual regression testing blocked
-   - ⚠️ Need to debug NW.js screenshot capture
-
-2. **Planning System** - HIGH PRIORITY
+1. **Planning System** - HIGH PRIORITY
    - ⚠️ Port tcOrganisation() from planing/planer.c
    - ⚠️ Port tcBurglary() from planing/planer.c
    - ⚠️ Team management (select people for burglary)
@@ -228,28 +234,27 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - ⚠️ Time scheduling
    - ⚠️ Burglary execution (plPlayer integration)
 
-3. **Investigation System** - MEDIUM PRIORITY
-   - ⚠️ Port Investigate() from invest.c
-   - ⚠️ Building observation mechanics
-   - ⚠️ Guard pattern tracking
-   - ⚠️ Security system detection
-
-4. **Landscape System** - MEDIUM PRIORITY
+2. **Landscape System** - HIGH PRIORITY
    - ⚠️ Port landscape rendering from landscap/
    - ⚠️ Building interior display
    - ⚠️ Room navigation
    - ⚠️ Object placement in rooms
 
-5. **Menu System Integration** - MEDIUM PRIORITY
+3. **Menu System Integration** - MEDIUM PRIORITY
    - ⚠️ Southampton scene menu (walk, wait, fish, plan, info, execute)
    - ⚠️ Kaserne scene menu (go inside, info, plan, execute)
    - ⚠️ Tower burglary initialization (team setup, tools, abilities)
 
-6. **Story Scene System** - LOW PRIORITY
+4. **Story Scene System** - LOW PRIORITY
    - ⚠️ Story scene triggering based on conditions
    - ⚠️ Probability-based scene selection
    - ⚠️ Scene interruption system
    - ⚠️ LinkScenes() implementation
+
+5. **Replay System Integration** - LOW PRIORITY
+   - ⚠️ Screenshot generation not working in headless mode
+   - ⚠️ Visual regression testing blocked
+   - ⚠️ Need to debug NW.js screenshot capture
 
 ## File Structure
 
@@ -262,7 +267,7 @@ src-js/src/game/
 │   ├── Renderer.ts          ✅ Basic rendering
 │   └── GameEngine.ts        ✅ Main engine
 ├── types/
-│   ├── GameTypes.ts         ✅ Core types
+│   ├── GameTypes.ts         ✅ Core types (updated Building)
 │   └── SceneTypes.ts        ✅ Scene types
 ├── services/
 │   ├── ReplayService.ts     ✅ Replay handling
@@ -282,7 +287,8 @@ src-js/src/game/
 │   ├── FilmService.ts       ✅ Story state
 │   ├── SceneService.ts      ✅ Scene functions
 │   ├── StoryService.ts      ✅ Story handlers (43/43)
-│   ├── InteractionService.ts 🚧 Action menu
+│   ├── InteractionService.ts ✅ Action menu
+│   ├── InvestigationService.ts ✅ Building observation
 │   └── PresentationService.ts ✅ Object display
 └── scenes/
     ├── ReplayTestScene.ts   ✅ Replay testing
@@ -292,7 +298,7 @@ src-js/src/game/
     ├── LivingTestScene.ts   ✅ Living system test
     ├── DialogTestScene.ts   ✅ Dialog system test
     ├── SceneTestScene.ts    ✅ Scene system test
-    ├── InteractionTestScene.ts 🚧 Interaction test
+    ├── InteractionTestScene.ts ✅ Interaction test
     ├── GameScene.ts         ✅ Main scene
     ├── MainMenuScene.ts     ✅ Menu
     └── LondonScene.ts       ✅ Hub scene
@@ -300,25 +306,27 @@ src-js/src/game/
 
 ## Next Steps (Priority Order)
 
-### Immediate (Session 14 - COMPLETE ✅)
-1. ✅ Implement InitLocations() to load location names
-2. ✅ Implement PatchStory() to apply game-specific patches
-3. ✅ Implement event tracking system (getEventCount, eventDidHappen, checkConditions)
+### Immediate (Session 15 - COMPLETE ✅)
+1. ✅ Port investigation system (Investigate from invest.c)
+2. ✅ Update Building type with all fields
+3. ✅ Integrate InvestigationService with InteractionService
 4. ✅ Update documentation with progress
 
 ### Short-term (Next 2-3 Sessions)
-1. Port planning system (tcOrganisation, tcBurglary) - HIGH PRIORITY
+1. Port landscape system (landscap/) - HIGH PRIORITY
+   - Building interior rendering
+   - Room navigation
+   - Object placement
+   - Required for burglary gameplay
+2. Port planning system (tcOrganisation, tcBurglary) - HIGH PRIORITY
    - Team selection interface
    - Tool assignment
    - Time scheduling
    - Burglary initialization
-2. Port investigation system (Investigate from invest.c)
-   - Building observation
-   - Guard pattern tracking
-3. Port landscape system (landscap/)
-   - Building interior rendering
-   - Room navigation
-4. Fix replay system screenshot generation
+3. Port burglary execution (plPlayer)
+   - Player movement in building
+   - Tool usage
+   - Alarm/guard detection
 
 ### Medium-term
 1. Port dialog system
@@ -371,9 +379,9 @@ npm run dev
 
 ## Notes
 
-- 49 TypeScript files, ~12,227 lines of code (up from ~8,900)
+- 50 TypeScript files, ~12,520 lines of code (up from ~12,227)
 - 72 C source files to port (~35k lines)
-- Progress: ~35% complete (estimated)
+- Progress: ~36% complete (estimated)
 - TCMAIN.DAT and TCBUILD.DAT are main data files
 - Building-specific files: *ETA0.DAT, *ETA1.DAT, etc.
 - Relations in .REL files (text format)
