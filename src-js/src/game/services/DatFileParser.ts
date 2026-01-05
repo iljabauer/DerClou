@@ -4,7 +4,11 @@
  */
 
 import { BinaryReader } from './BinaryReader';
-import { ObjectType, Person, Player, Car, Building, Tool, Loot, Evidence, Environment, GameObject } from '../types/GameTypes';
+import { 
+    ObjectType, Person, Player, Car, Building, Tool, Loot, Evidence, Environment,
+    Location, Ability, Item, London, CompleteLoot, LSLock, LSObject, LSRoom,
+    GameObject 
+} from '../types/GameTypes';
 
 // Object type constants from C (Object_Person, etc.)
 const C_OBJECT_TYPES: Record<number, ObjectType> = {
@@ -97,6 +101,22 @@ export class DatFileParser {
                     return this.readEvidence(header);
                 case ObjectType.Environment:
                     return this.readEnvironment(header);
+                case ObjectType.Location:
+                    return this.readLocation(header);
+                case ObjectType.Ability:
+                    return this.readAbility(header);
+                case ObjectType.Item:
+                    return this.readItem(header);
+                case ObjectType.London:
+                    return this.readLondon(header);
+                case ObjectType.CompleteLoot:
+                    return this.readCompleteLoot(header);
+                case ObjectType.LSLock:
+                    return this.readLSLock(header);
+                case ObjectType.LSObject:
+                    return this.readLSObject(header);
+                case ObjectType.LSRoom:
+                    return this.readLSRoom(header);
                 default:
                     // Skip unknown object types
                     console.warn(`Unimplemented object type ${objectType}, skipping`);
@@ -314,6 +334,156 @@ export class DatFileParser {
             present,
             firstTimeInSouth,
             postzugDone,
+        };
+    }
+
+    private readLocation(header: ObjectHeader): Location {
+        const locationNr = this.reader.readUInt32();
+        const openFromMinute = this.reader.readUInt16();
+        const openToMinute = this.reader.readUInt16();
+
+        return {
+            id: header.nr,
+            name: `Location_${header.nr}`,
+            type: ObjectType.Location,
+            locationNr,
+            openFromMinute,
+            openToMinute,
+        };
+    }
+
+    private readAbility(header: ObjectHeader): Ability {
+        const abilityName = this.reader.readUInt16();
+        const use = this.reader.readUInt32();
+
+        return {
+            id: header.nr,
+            name: `Ability_${header.nr}`,
+            type: ObjectType.Ability,
+            abilityName,
+            use,
+        };
+    }
+
+    private readItem(header: ObjectHeader): Item {
+        const itemType = this.reader.readUInt16();
+        const offsetFact = this.reader.readUInt16();
+        const hExactXOffset = this.reader.readUInt16();
+        const hExactYOffset = this.reader.readUInt16();
+        const hExactWidth = this.reader.readUInt16();
+        const hExactHeight = this.reader.readUInt16();
+        const vExactXOffset = this.reader.readUInt16();
+        const vExactYOffset = this.reader.readUInt16();
+        const vExactWidth = this.reader.readUInt16();
+        const vExactHeight = this.reader.readUInt16();
+
+        return {
+            id: header.nr,
+            name: `Item_${header.nr}`,
+            type: ObjectType.Item,
+            itemType,
+            offsetFact,
+            hExactXOffset,
+            hExactYOffset,
+            hExactWidth,
+            hExactHeight,
+            vExactXOffset,
+            vExactYOffset,
+            vExactWidth,
+            vExactHeight,
+        };
+    }
+
+    private readLondon(header: ObjectHeader): London {
+        const useless = this.reader.readUInt8();
+
+        return {
+            id: header.nr,
+            name: `London_${header.nr}`,
+            type: ObjectType.London,
+            useless,
+        };
+    }
+
+    private readCompleteLoot(header: ObjectHeader): CompleteLoot {
+        const bild = this.reader.readUInt32();
+        const gold = this.reader.readUInt32();
+        const geld = this.reader.readUInt32();
+        const juwelen = this.reader.readUInt32();
+        const delikates = this.reader.readUInt32();
+        const statue = this.reader.readUInt32();
+        const kuriositaet = this.reader.readUInt32();
+        const histKunst = this.reader.readUInt32();
+        const gebrauchsArt = this.reader.readUInt32();
+
+        return {
+            id: header.nr,
+            name: `CompleteLoot_${header.nr}`,
+            type: ObjectType.CompleteLoot,
+            bild,
+            gold,
+            geld,
+            juwelen,
+            delikates,
+            statue,
+            kuriositaet,
+            histKunst,
+            gebrauchsArt,
+        };
+    }
+
+    private readLSLock(header: ObjectHeader): LSLock {
+        const lockType = this.reader.readUInt16();
+
+        return {
+            id: header.nr,
+            name: `LSLock_${header.nr}`,
+            type: ObjectType.LSLock,
+            lockType,
+        };
+    }
+
+    private readLSObject(header: ObjectHeader): LSObject {
+        const offsetFact = this.reader.readUInt16();
+        const destX = this.reader.readUInt16();
+        const destY = this.reader.readUInt16();
+        const exactX = this.reader.readUInt8();
+        const exactY = this.reader.readUInt8();
+        const exactX1 = this.reader.readUInt8();
+        const exactY1 = this.reader.readUInt8();
+        const size = this.reader.readUInt8();
+        const visible = this.reader.readUInt8();
+        const chained = this.reader.readUInt8();
+        const status = this.reader.readUInt32();
+        const lsType = this.reader.readUInt32();
+
+        return {
+            id: header.nr,
+            name: `LSObject_${header.nr}`,
+            type: ObjectType.LSObject,
+            offsetFact,
+            destX,
+            destY,
+            exactX,
+            exactY,
+            exactX1,
+            exactY1,
+            size,
+            visible,
+            chained,
+            status,
+            lsType,
+        };
+    }
+
+    private readLSRoom(header: ObjectHeader): LSRoom {
+        // LSRoom structure not fully defined, skip for now
+        this.reader.skip(header.size);
+        
+        return {
+            id: header.nr,
+            name: `LSRoom_${header.nr}`,
+            type: ObjectType.LSRoom,
         };
     }
 
