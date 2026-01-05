@@ -31,6 +31,15 @@ import {
     SCENE_A_DREAM,
     SCENE_MISSED_DATE_0,
     SCENE_MISSED_DATE_1,
+    SCENE_1ST_BURG,
+    SCENE_2ND_BURG,
+    SCENE_3RD_BURG,
+    SCENE_4TH_BURG,
+    SCENE_5TH_BURG,
+    SCENE_6TH_BURG,
+    SCENE_7TH_BURG,
+    SCENE_8TH_BURG,
+    SCENE_9TH_BURG,
     STORY_0_TXT,
     STORY_1_TXT,
     OLD_MATT_PICTID,
@@ -52,7 +61,26 @@ import {
     Loot_Ring_des_Abtes,
     tcCOSTS_FOR_HOTEL,
     tcVALUE_OF_RING_OF_PATER,
-    London_London_1
+    London_London_1,
+    Person_Marc_Smith,
+    Person_Mary_Bolton,
+    Person_Robert_Bull,
+    Person_Thomas_Groul,
+    Person_Peter_Brook,
+    Person_Luthmilla_Nervesaw,
+    Person_Tom_Cooler,
+    Person_Tina_Olavson,
+    Car_Morris_Minor_1950,
+    Car_Fiat_Topolino_1942,
+    Car_Jeep_1945,
+    Car_Pontiac_Streamliner_1946,
+    Car_Ford_Model_T__1926,
+    Tool_Dietrich,
+    Tool_Bohrmaschine,
+    Tool_Strickleiter,
+    Tool_Schloszstecher,
+    Tool_Winkelschleifer,
+    Tool_Schutzanzug
 } from '../types/GameConstants';
 import { ObjectType, Building } from '../types/GameTypes';
 import { PresentationService } from './PresentationService';
@@ -128,6 +156,7 @@ export class StoryService {
         this.handlers.set(SCENE_A_DREAM, () => this.tcDoneADream());
         this.handlers.set(SCENE_MISSED_DATE_0, () => this.tcDoneMissedDate());
         this.handlers.set(SCENE_MISSED_DATE_1, () => this.tcDoneMissedDate());
+        this.handlers.set(SCENE_1ST_BURG, () => this.tcDone1stBurglary());
         // More handlers will be added as they are ported
     }
 
@@ -1164,6 +1193,53 @@ export class StoryService {
         this.scene.addTaxiLocation(25); // villa
 
         // TODO: GetScene(SCENE_FAHNDUNG)->Geschehen = 0;
+        this.scene.sceneArgs.returnValue = this.getLocSceneEventNr(this.film.getLocation());
+    }
+
+    /**
+     * 1ST BURGLARY
+     * Port of tcDone1stBurglary from story.c
+     * 
+     * After 1st burglary - unlock locations, add cars/tools/persons
+     */
+    private tcDone1stBurglary(): void {
+        this.scene.addTaxiLocation(22); // highgate
+        this.scene.addTaxiLocation(16); // anti
+
+        // TODO: if (bProfidisk) this.scene.addTaxiLocation(75); // train
+
+        // Add cars to Marc Smith
+        this.db.hasSet(Person_Marc_Smith, Car_Morris_Minor_1950);
+        this.db.hasSet(Person_Marc_Smith, Car_Fiat_Topolino_1942);
+        this.db.hasSet(Person_Marc_Smith, Car_Jeep_1945);
+        this.db.hasSet(Person_Marc_Smith, Car_Pontiac_Streamliner_1946);
+
+        // TODO: if (bProfidisk) this.db.hasSet(Person_Marc_Smith, Car_Ford_Model_T__1926);
+
+        // Add tools to Mary Bolton
+        this.db.hasSet(Person_Mary_Bolton, Tool_Dietrich);
+        this.db.hasSet(Person_Mary_Bolton, Tool_Bohrmaschine);
+        this.db.hasSet(Person_Mary_Bolton, Tool_Strickleiter);
+        this.db.hasSet(Person_Mary_Bolton, Tool_Schloszstecher);
+        this.db.hasSet(Person_Mary_Bolton, Tool_Winkelschleifer);
+        this.db.hasSet(Person_Mary_Bolton, Tool_Schutzanzug);
+
+        // Add persons to London
+        this.db.livesInSet(London_London_1, Person_Marc_Smith);
+        this.db.livesInSet(London_London_1, Person_Robert_Bull);
+        this.db.livesInSet(London_London_1, Person_Thomas_Groul);
+        this.db.livesInSet(London_London_1, Person_Lucas_Grull);
+        this.db.livesInSet(London_London_1, Person_Peter_Brook);
+        this.db.livesInSet(London_London_1, Person_Luthmilla_Nervesaw);
+
+        // TODO: if (bProfidisk) {
+        //     this.db.livesInSet(London_London_1, Person_Tom_Cooler);
+        //     this.db.livesInSet(London_London_1, Person_Tina_Olavson);
+        // }
+
+        this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, 'LOBHUDEL');
+
+        // TODO: GetScene(SCENE_FAHNDUNG)-\u003eGeschehen = 0;
         this.scene.sceneArgs.returnValue = this.getLocSceneEventNr(this.film.getLocation());
     }
 
