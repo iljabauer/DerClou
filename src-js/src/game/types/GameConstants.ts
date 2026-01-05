@@ -44,6 +44,7 @@ export const Person_John_O_Keef = 9841;
 export const Person_Luthmilla_Nervesaw = 9842;
 export const Person_Thomas_Smith = 9843;
 export const Person_Ben_Riggley = 9844;
+export const Person_Richard_Doil = 9845;
 export const Person_Sabien_Pardo = 9846;
 export const Person_Red_Stanson = 9847;
 export const Person_Pater_James = 9848;

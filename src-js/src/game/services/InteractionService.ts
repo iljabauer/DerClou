@@ -15,7 +15,20 @@ import {
     GO, WAIT, BUSINESS_TALK, LOOK, INVESTIGATE, PLAN, CALL_TAXI, MAKE_CALL, INFO,
     MENU_TXT, THECLOU_TXT,
     Person_Matt_Stuvysunt,
-    Environment_TheClou
+    Environment_TheClou,
+    Location_Fat_Mans_Pub,
+    Location_Cars_Vans_Office,
+    Location_Walrus,
+    Location_Holland_Street,
+    Location_Policestation,
+    Location_Hotel,
+    Person_Richard_Doil,
+    Person_Marc_Smith,
+    Person_Thomas_Smith,
+    Person_Frank_Maloya,
+    Person_John_Gludo,
+    Person_Miles_Chickenwing,
+    Person_Ben_Riggley
 } from '../types/GameConstants';
 
 export interface InteractionOptions {
@@ -305,12 +318,45 @@ export class InteractionService {
 
     /**
      * Check if a person is at the current location
+     * Port of tcPersonIsHere() from gp_app.c
      */
     private isPersonHere(): boolean {
-        // TODO: Implement tcPersonIsHere()
-        // This should check if any person is at the current location
-        // using livWhereIs() or similar
-        return false;
+        const locNr = this.film.getLocation();
+
+        if (!locNr) {
+            return false;
+        }
+
+        // Move specific people to specific locations
+        if (locNr === Location_Fat_Mans_Pub) {
+            this.moveAPerson(Person_Richard_Doil, locNr);
+        } else if (locNr === Location_Cars_Vans_Office) {
+            this.moveAPerson(Person_Marc_Smith, locNr);
+        } else if (locNr === Location_Walrus) {
+            this.moveAPerson(Person_Thomas_Smith, locNr);
+        } else if (locNr === Location_Holland_Street) {
+            this.moveAPerson(Person_Frank_Maloya, locNr);
+        } else if (locNr === Location_Policestation) {
+            this.moveAPerson(Person_John_Gludo, locNr);
+            this.moveAPerson(Person_Miles_Chickenwing, locNr);
+        } else if (locNr === Location_Hotel) {
+            this.moveAPerson(Person_Ben_Riggley, locNr);
+        }
+
+        // Check if any person is at this location
+        const people = this.db.hasAll(locNr, 0, 'Person');
+        return people.length > 0;
+    }
+
+    /**
+     * Move a person to a location
+     * Helper for isPersonHere
+     */
+    private moveAPerson(personId: number, locationId: number): void {
+        // Add relation between person and location
+        // This is a simplified version - the full implementation would check
+        // if the person is already there, etc.
+        this.db.addRelation(locationId, personId, 'hasAll');
     }
 
     /**
