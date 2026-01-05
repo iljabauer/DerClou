@@ -9,8 +9,10 @@
 import { Database } from '../core/Database';
 import { UIService } from './UIService';
 import { TextService } from './TextService';
-import { LandscapeService } from './LandscapeService';
-import { PlanningSystemService } from './PlanningSystemService';
+import { LandscapeService, LS_SCROLL_LEFT, LS_SCROLL_RIGHT, LS_SCROLL_UP, LS_SCROLL_DOWN } from './LandscapeService';
+import { PlanningSystemService, ActionType } from './PlanningSystemService';
+import { PlanningSupportService } from './PlanningSupportService';
+import { LivingService } from './LivingService';
 import { Building } from '../types/GameTypes';
 import { LS_COLL_PLAN } from './LandscapeService';
 
@@ -86,22 +88,32 @@ export class PlanningService {
     private ui: UIService;
     private text: TextService;
     private landscape: LandscapeService;
-    private system: PlanningSystemService;
+    private living: LivingService;
+    private planningSystem: PlanningSystemService;
+    private support: PlanningSupportService;
     private state: PlanningState | null = null;
+    
+    // Planning state
+    private currentPerson: number = 0;
+    private planChanged: boolean = false;
+    private animCounter: number = 0;
 
     constructor(
         db: Database,
         scene: Phaser.Scene,
         ui: UIService,
         text: TextService,
-        landscape: LandscapeService
+        landscape: LandscapeService,
+        living: LivingService
     ) {
         this.db = db;
         this.scene = scene;
         this.ui = ui;
         this.text = text;
         this.landscape = landscape;
-        this.system = new PlanningSystemService(db);
+        this.living = living;
+        this.planningSystem = new PlanningSystemService(db);
+        this.support = new PlanningSupportService(db, landscape, living);
     }
 
     /**
@@ -343,11 +355,107 @@ export class PlanningService {
     }
 
     /**
-     * Walk action
+     * Walk action - allows player to move character in the landscape
      */
     private async actionWalk(): Promise<void> {
-        // TODO: Implement walk action
-        await this.ui.showBubble(['Walk action not yet implemented'], 'think', 0);
+        const action = this.planningSystem.getCurrentAction();
+        
+        this.showMessage('WALK', true);
+        
+        // Disable mouse and function keys during walk
+        // In TypeScript we handle this through input state
+        
+        while (true) {
+            let direction = 0;
+            
+            // Wait for input (arrow keys or mouse click)
+            const input = await this.waitForInput(['left', 'right', 'up', 'down', 'escape', 'click']);
+            
+            if (input === 'click') {
+                break;
+            }
+            
+            if (input === 'escape') {
+                // Remove last action if ESC pressed
+                if (this.removeLastAction()) {
+                    // Action was removed, get new current action
+                    continue;
+                }
+            } else {
+                // Convert input to direction
+                if (input === 'left') direction += LS_SCROLL_LEFT;
+                if (input === 'right') direction += LS_SCROLL_RIGHT;
+                if (input === 'up') direction += LS_SCROLL_UP;
+                if (input === 'down') direction += LS_SCROLL_DOWN;
+                
+                // Check for collision
+                const collision = this.landscape.initScrollLandscape(direction, true);
+                
+                if (!collision) {
+                    const currentAction = this.planningSystem.getCurrentAction();
+                    
+                    // Create or update GO action
+                    if (!currentAction || currentAction.type !== ActionType.GO) {
+                        const newAction = this.planningSystem.initAction(
+                            ActionType.GO,
+                            direction,
+                            0,
+                            0
+                        );
+                        
+                        if (!newAction) {
+                            await this.say('PLANING_END', this.currentPerson);
+                            return;
+                        }
+                        
+                        this.planChanged = true;
+                    } else {
+                        // Check if direction changed
+                        const actionData = currentAction.data as { direction: number };
+                        
+                        if (actionData.direction === direction) {
+                            // Same direction, increment timer
+                            this.planningSystem.incCurrentTimer(1, true);
+                        } else {
+                            // Direction changed, create new action
+                            const newAction = this.planningSystem.initAction(
+                                ActionType.GO,
+                                direction,
+                                0,
+                                1
+                            );
+                            
+                            if (!newAction) {
+                                await this.say('PLANING_END', this.currentPerson);
+                                return;
+                            }
+                            
+                            this.planChanged = true;
+                        }
+                    }
+                    
+                    // Sync animation
+                    await this.sync(
+                        false, // PLANING_ANIMATE_STD
+                        this.planningSystem.getMaxTimer(),
+                        1,
+                        true
+                    );
+                    
+                    // Move character
+                    await this.support.move(this.currentPerson, direction);
+                    
+                    // Scroll landscape
+                    this.landscape.scrollLandscape();
+                    
+                    // Animate characters
+                    this.living.doAnims(this.animCounter++ % 2, true);
+                    
+                    // Update display
+                    this.displayTimer(false);
+                }
+            }
+        }
     }
 
     /**
@@ -654,5 +762,96 @@ export class PlanningService {
      */
     isActive(): boolean {
         return this.state !== null;
+    }
+
+    /**
+     * Wait for user input
+     * Helper for action implementations
+     */
+    private async waitForInput(validInputs: string[]): Promise<string> {
+        return new Promise((resolve) => {
+            const handleInput = (input: string) => {
+                if (validInputs.includes(input)) {
+                    resolve(input);
+                }
+            };
+
+            // Set up input listeners
+            // This is a simplified version - in real implementation would use Phaser input
+            this.scene.input.keyboard?.once('keydown', (event: KeyboardEvent) => {
+                const key = event.key.toLowerCase();
+                if (key === 'arrowleft') handleInput('left');
+                else if (key === 'arrowright') handleInput('right');
+                else if (key === 'arrowup') handleInput('up');
+                else if (key === 'arrowdown') handleInput('down');
+                else if (key === 'escape') handleInput('escape');
+            });
+
+            this.scene.input.once('pointerdown', () => {
+                handleInput('click');
+            });
+        });
+    }
+
+    /**
+     * Remove last action from current handler
+     * Port of plRemLastAction() from planer.c
+     */
+    private removeLastAction(): boolean {
+        if (!this.planningSystem.isHandlerCleared()) {
+            const action = this.planningSystem.getCurrentAction();
+            if (action) {
+                // Sync back to before this action
+                this.sync(
+                    false,
+                    this.planningSystem.getMaxTimer() - action.timeNeeded,
+                    action.timeNeeded,
+                    false
+                );
+
+                // Reset active living
+                // TODO: Get person name from state
+                // this.landscape.setActivLiving(personName, -1, -1);
+
+                this.planningSystem.remLastAction();
+
+                this.displayTimer(false);
+                this.displayInfo();
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Synchronize animation and time
+     * Port of plSync() from sync.c
+     */
+    private async sync(animate: boolean, maxTimer: number, time: number, forward: boolean): Promise<void> {
+        // TODO: Full implementation
+        // For now, just update timer
+        if (forward) {
+            this.planningSystem.incCurrentTimer(time, true);
+        }
+    }
+
+    /**
+     * Show a message to the player
+     * Port of plMessage() from planer.c
+     */
+    private showMessage(key: string, refresh: boolean): void {
+        // TODO: Get text from PLAN_TXT and display
+        console.log(`[PlanningService] Message: ${key}`);
+    }
+
+    /**
+     * Show a dialog from the player
+     * Port of plSay() from planer.c
+     */
+    private async say(key: string, personIndex: number): Promise<void> {
+        // TODO: Get text and show dialog
+        await this.ui.showBubble([`Say: ${key}`], 'say', 0);
     }
 }
