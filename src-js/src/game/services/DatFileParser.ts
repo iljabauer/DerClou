@@ -237,11 +237,20 @@ export class DatFileParser {
 
     private readBuilding(header: ObjectHeader): Building {
         const locationNr = this.reader.readUInt32();
-        const policeTime = this.reader.readUInt32();
-        const guardStrength = this.reader.readUInt8();
-        const maxVolume = this.reader.readUInt32();
-        const radioGuarding = this.reader.readUInt8();
+        const policeTime = this.reader.readUInt16();
+        const gTime = this.reader.readUInt16();
+        const exactlyness = this.reader.readUInt8();
+        const gRate = this.reader.readUInt8();
+        const strike = this.reader.readUInt8();
+        const values = this.reader.readUInt32();
         const escapeRoute = this.reader.readUInt8();
+        const escapeRouteLength = this.reader.readUInt8();
+        const radioGuarding = this.reader.readUInt8();
+        const maxVolume = this.reader.readUInt8();
+        const guardStrength = this.reader.readUInt8();
+        const carXPos = this.reader.readUInt16();
+        const carYPos = this.reader.readUInt16();
+        const diskId = this.reader.readUInt8();
 
         return {
             id: header.nr,
@@ -249,10 +258,19 @@ export class DatFileParser {
             type: ObjectType.Building,
             locationNr,
             policeTime,
-            guardStrength,
-            maxVolume,
-            radioGuarding,
+            gTime,
+            exactlyness,
+            gRate,
+            strike,
+            values,
             escapeRoute,
+            escapeRouteLength,
+            radioGuarding,
+            maxVolume,
+            guardStrength,
+            carXPos,
+            carYPos,
+            diskId,
         };
     }
 

@@ -86,10 +86,19 @@ export interface Building extends GameObject {
     type: ObjectType.Building;
     locationNr: number;
     policeTime: number;
-    guardStrength: number;
-    maxVolume: number;
-    radioGuarding: number;
+    gTime: number;
+    exactlyness: number;
+    gRate: number;
+    strike: number;
+    values: number;
     escapeRoute: number;
+    escapeRouteLength: number;
+    radioGuarding: number;
+    maxVolume: number;
+    guardStrength: number;
+    carXPos: number;
+    carYPos: number;
+    diskId: number;
 }
 
 export interface Tool extends GameObject {
