@@ -798,19 +798,213 @@ export class PlanningService {
     }
 
     /**
-     * Take action
+     * Take action - pick up loot
+     * Port of plActionTake() from planer.c
      */
     private async actionTake(): Promise<void> {
-        // TODO: Implement take action
-        await this.ui.showBubble(['Take action not yet implemented'], 'think', 0);
+        if (!this.state) return;
+        
+        // Get objects in reach
+        const actionList = this.support.getObjectsList(this.currentPerson, true);
+        
+        if (actionList.length === 0) {
+            this.showMessage('NO_OBJECTS', true);
+            return;
+        }
+        
+        // Build list of takeable loot
+        const takeableList: Array<{lootId: number, containerId: number, name: string, inContainer: boolean}> = [];
+        
+        for (const containerId of actionList) {
+            const containerState = this.landscape.getObjectState(containerId);
+            
+            // Get loot in this container
+            const lootItems = this.db.getRelatedObjects(containerId, 'hasLoot', 'Loot');
+            
+            if (lootItems.length > 0) {
+                // Check if container has TAKE bit or is open
+                const hasTakeBit = (containerState & (1 << 4)) !== 0; // Const_tcTAKE_BIT
+                const isOpen = (containerState & (1 << 0)) !== 0; // Const_tcOPEN_CLOSE_BIT
+                
+                if (hasTakeBit) {
+                    // Can take directly (e.g., painting on wall)
+                    const loot = lootItems[0];
+                    takeableList.push({
+                        lootId: loot,
+                        containerId: containerId,
+                        name: this.db.getObjectName(loot),
+                        inContainer: false
+                    });
+                } else if (isOpen) {
+                    // Can take from open container
+                    for (const loot of lootItems) {
+                        takeableList.push({
+                            lootId: loot,
+                            containerId: containerId,
+                            name: this.db.getObjectName(loot),
+                            inContainer: true
+                        });
+                    }
+                }
+            }
+        }
+        
+        if (takeableList.length === 0) {
+            this.showMessage('NO_OBJECTS', true);
+            return;
+        }
+        
+        // Show loot selection
+        this.showMessage('TAKE', true);
+        const lootChoice = await this.ui.showMenu(
+            takeableList.map(item => item.name),
+            'Take Loot'
+        );
+        
+        if (lootChoice < 0 || lootChoice >= takeableList.length) return;
+        
+        const selectedLoot = takeableList[lootChoice];
+        const loot = this.db.getObject(selectedLoot.lootId);
+        
+        // Check weight and volume
+        const person = this.db.getObject(this.state.team[this.currentPerson]);
+        // TODO: Get actual capacity from person
+        const weightCapacity = 10000; // Placeholder
+        const volumeCapacity = 10000; // Placeholder
+        
+        // TODO: Track current weight/volume
+        const currentWeight = 0;
+        const currentVolume = 0;
+        
+        const lootWeight = (loot as any).Weight || 0;
+        const lootVolume = (loot as any).Volume || 0;
+        
+        if (currentWeight + lootWeight > weightCapacity) {
+            this.showMessage('TOO_HEAVY', true);
+            return;
+        }
+        
+        if (currentVolume + lootVolume > volumeCapacity) {
+            this.showMessage('TOO_BIG', true);
+            return;
+        }
+        
+        // Create take action
+        const action = this.planningSystem.initAction(
+            ActionType.TAKE,
+            selectedLoot.containerId,
+            selectedLoot.lootId,
+            3 * 60 // PLANING_TIME_TAKE * PLANING_CORRECT_TIME
+        );
+        
+        if (action) {
+            this.planChanged = true;
+            
+            await this.support.work(this.currentPerson);
+            await this.sync(false, this.planningSystem.getMaxTimer(), 3 * 60, true);
+            
+            // Update loot ownership
+            if (!selectedLoot.inContainer) {
+                // Remove from container
+                this.landscape.turnObject(
+                    selectedLoot.containerId,
+                    true, // LS_OBJECT_INVISIBLE
+                    true  // LS_NO_COLLISION
+                );
+                this.landscape.setObjectState(selectedLoot.containerId, 1 << 5, 0); // Const_tcACCESS_BIT
+                this.showMessage('TAKEN_LOOT', true);
+            }
+            
+            // Add to person's inventory
+            this.db.setRelation(
+                this.state.team[this.currentPerson],
+                'take',
+                selectedLoot.lootId,
+                1
+            );
+            
+            // Remove from container
+            this.db.removeRelation(
+                selectedLoot.containerId,
+                'hasLoot',
+                selectedLoot.lootId
+            );
+            
+            // TODO: Update weight/volume tracking
+            
+            this.landscape.refresh(selectedLoot.containerId);
+            this.living.refreshAll();
+        } else {
+            await this.say('PLANING_END', this.currentPerson);
+        }
     }
 
     /**
-     * Drop action
+     * Drop action - drop loot
+     * Port of plActionDrop() from planer.c
      */
     private async actionDrop(): Promise<void> {
-        // TODO: Implement drop action
-        await this.ui.showBubble(['Drop action not yet implemented'], 'think', 0);
+        if (!this.state) return;
+        
+        // Get loot carried by person
+        const carriedLoot = this.db.getRelatedObjects(
+            this.state.team[this.currentPerson],
+            'take',
+            'Loot'
+        );
+        
+        if (carriedLoot.length === 0) {
+            this.showMessage('DROP_1', true);
+            return;
+        }
+        
+        // Show loot selection
+        this.showMessage('DROP_2', true);
+        const lootChoice = await this.ui.showMenu(
+            carriedLoot.map(loot => this.db.getObjectName(loot)),
+            'Drop Loot'
+        );
+        
+        if (lootChoice < 0 || lootChoice >= carriedLoot.length) return;
+        
+        const lootId = carriedLoot[lootChoice];
+        const loot = this.db.getObject(lootId);
+        
+        // Get next available loot bag
+        const lootBagId = this.support.getNextLoot();
+        
+        if (!lootBagId) {
+            this.showMessage('DROP_3', true);
+            return;
+        }
+        
+        // Create drop action
+        const action = this.planningSystem.initAction(
+            ActionType.DROP,
+            lootBagId,
+            lootId,
+            3 * 60 // PLANING_TIME_DROP * PLANING_CORRECT_TIME
+        );
+        
+        if (action) {
+            this.planChanged = true;
+            
+            await this.support.work(this.currentPerson);
+            await this.sync(false, this.planningSystem.getMaxTimer(), 3 * 60, true);
+            
+            // Transfer loot to bag
+            this.db.setRelation(lootBagId, 'hasLoot', lootId, 1);
+            this.db.removeRelation(this.state.team[this.currentPerson], 'take', lootId);
+            
+            // TODO: Update weight/volume tracking
+            const lootWeight = (loot as any).Weight || 0;
+            const lootVolume = (loot as any).Volume || 0;
+            
+            this.landscape.refresh(lootBagId);
+            this.living.refreshAll();
+        } else {
+            await this.say('PLANING_END', this.currentPerson);
+        }
     }
 
     /**
