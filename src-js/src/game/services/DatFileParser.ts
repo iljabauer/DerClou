@@ -7,7 +7,7 @@ import { BinaryReader } from './BinaryReader';
 import { 
     ObjectType, Person, Player, Car, Building, Tool, Loot, Evidence, Environment,
     Location, Ability, Item, London, CompleteLoot, LSLock, LSObject, LSRoom,
-    GameObject 
+    Police, LSArea, GameObject 
 } from '../types/GameTypes';
 
 // Object type constants from C (Object_Person, etc.)
@@ -27,6 +27,8 @@ const C_OBJECT_TYPES: Record<number, ObjectType> = {
     9912: ObjectType.LSLock,
     9913: ObjectType.LSObject,
     509990: ObjectType.Building,
+    509991: ObjectType.Police,
+    509992: ObjectType.LSArea,
     509993: ObjectType.LSRoom,
 };
 
