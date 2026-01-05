@@ -60,6 +60,18 @@ export const OLF_INSERT_STAR = 4;
 // Relation IDs
 export const Relation_taxi = 16;
 
+// Action/Choice flags (from gp.h)
+export const GO = 1 << 0;
+export const WAIT = 1 << 1;
+export const BUSINESS_TALK = 1 << 2;
+export const LOOK = 1 << 3;
+export const INVESTIGATE = 1 << 4;
+export const PLAN = 1 << 5;
+export const CALL_TAXI = 1 << 6;
+export const MAKE_CALL = 1 << 7;
+export const INFO = 1 << 8;
+export const GP_ALL_CHOICES_ENABLED = 0xFFFFFFFF;
+
 // Menu/UI constants
 export const TXT_MENU_TIMEOUT = 254;
 
