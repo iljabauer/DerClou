@@ -9,6 +9,7 @@ import { ImageTestScene } from './scenes/ImageTestScene';
 import { PresentationTestScene } from './scenes/PresentationTestScene';
 import { LivingTestScene } from './scenes/LivingTestScene';
 import { DialogTestScene } from './scenes/DialogTestScene';
+import { InteractionTestScene } from './scenes/InteractionTestScene';
 import { Game as MainGame } from './scenes/Game';
 import { AUTO, Game, Scale, Types } from 'phaser';
 
@@ -27,6 +28,7 @@ const config: Types.Core.GameConfig = {
     scene: [
         GameScene,
         ReplayTestScene,
+        InteractionTestScene,
         DialogTestScene,
         LivingTestScene,
         PresentationTestScene,

@@ -74,8 +74,8 @@ export class GameScene extends Scene {
             console.log('Starting in replay mode');
             this.engine.start(SceneId.MainMenu);
         } else {
-            console.log('Starting in normal mode');
-            this.engine.start(SceneId.MainMenu);
+            console.log('Starting in normal mode - launching InteractionTestScene');
+            this.scene.start('InteractionTestScene');
         }
     }
 
