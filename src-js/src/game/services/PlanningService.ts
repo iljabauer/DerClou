@@ -49,6 +49,12 @@ export const PLANING_CLEAR = 4;
 export const PLANING_LOOK = 5;
 export const PLANING_RETURN = 6;
 
+// Player menu IDs
+export const PLANING_PLAYER_PERSON_CHANGE = 0;
+export const PLANING_PLAYER_RADIO_ALL = 1;
+export const PLANING_PLAYER_RADIO_ONE = 2;
+export const PLANING_PLAYER_ESCAPE = 3;
+
 // Action types
 export const PLANING_PERSON_WALK = 0;
 export const PLANING_ACTION_USE = 1;
@@ -1594,16 +1600,227 @@ export class PlanningService {
     private async executionLoop(): Promise<number> {
         console.log('[PlanningService] Starting execution loop');
 
-        // TODO: Implement main execution loop
-        // This will be the core of the burglary execution
-        // For now, just show a message and return success
-        await this.ui.showBubble(
-            ['Burglary execution loop not yet implemented.', 'Returning success for now.'],
-            'think',
-            0
-        );
+        if (!this.playerData || !this.search) {
+            console.error('[PlanningService] Player data not initialized');
+            return BURGLARY_FAILURE;
+        }
+
+        // Get player menu
+        const menuItems = this.text.getTextLines('PLAN_TXT', 'PLAYER_MENU');
+        let activeChoice = 0;
+
+        // Main execution loop
+        while (!this.playerData.ende) {
+            // Update timer and check conditions
+            await this.playerAction();
+
+            // Build menu bitset
+            let bitset = 1 << PLANING_PLAYER_ESCAPE;  // Always allow escape
+
+            // Allow person change if multiple people
+            const burglarsNr = this.state?.team.length || 0;
+            if (burglarsNr > 1) {
+                bitset |= 1 << PLANING_PLAYER_PERSON_CHANGE;
+            }
+
+            // Allow radio if Matt has radio
+            const mattId = 1;  // Person_Matt_Stuvysunt
+            const radioId = 1;  // Tool_Funkgeraet - TODO: Get correct ID
+            if (this.db.hasRelation(mattId, radioId)) {
+                bitset |= (1 << PLANING_PLAYER_RADIO_ALL) | (1 << PLANING_PLAYER_RADIO_ONE);
+            }
+
+            // Display timer and info
+            this.displayTimer(this.playerData.realTime, true);
+            this.displayInfo();
+
+            // Show menu
+            const choice = await this.ui.showMenu(menuItems, bitset, activeChoice);
+            activeChoice = choice;
+
+            // Handle menu choice
+            switch (choice) {
+                case PLANING_PLAYER_PERSON_CHANGE:
+                    await this.handlePersonChange();
+                    break;
+
+                case PLANING_PLAYER_RADIO_ALL:
+                    await this.handleRadioAll();
+                    break;
+
+                case PLANING_PLAYER_RADIO_ONE:
+                    await this.handleRadioOne();
+                    break;
+
+                case PLANING_PLAYER_ESCAPE:
+                    // Player wants to escape
+                    this.search.escapeBits |= FAHN_ESCAPE;
+                    for (let i = 0; i < PLANING_NR_PERSONS; i++) {
+                        this.playerData.handlerEnded[i] = 1;
+                    }
+                    break;
+
+                default:
+                    activeChoice = 0;
+                    break;
+            }
+        }
+
+        // Execution ended - determine result
+        return this.determineResult();
+    }
+
+    /**
+     * Per-tick update during execution
+     * Port of plPlayerAction() from player.c
+     */
+    private async playerAction(): Promise<void> {
+        if (!this.playerData || !this.search) return;
+
+        // Increment timer
+        this.playerData.timer++;
+        this.playerData.realTime = Math.floor(this.playerData.timer / PLANING_CORRECT_TIME);
+
+        // TODO: Implement full plPlayerAction logic:
+        // - Check alarms (time clock, loudness, patrol, etc.)
+        // - Update guards
+        // - Execute actions
+        // - Check for police arrival
+        // - Check team mood
+        // - Handle special events
+
+        // For now, just check if we should end
+        // (This will be expanded in later commits)
+    }
+
+    /**
+     * Handle person change menu
+     */
+    private async handlePersonChange(): Promise<void> {
+        if (!this.state) return;
+
+        await this.showMessage('CHANGE_PERSON_2', true);
+
+        // Get list of team members
+        const teamList = this.state.team.map((personId, index) => {
+            const person = this.db.getObject(personId);
+            return (person as any).Name || `Person ${index}`;
+        });
+
+        // Show selection menu
+        const choice = await this.ui.showMenu(teamList, 0xFFFFFFFF, this.currentPerson);
+
+        if (choice >= 0 && choice < teamList.length) {
+            // TODO: Switch to selected person
+            // - Change active area if needed
+            // - Update handler
+            // - Update active living
+            this.currentPerson = choice;
+            console.log(`[PlanningService] Switched to person ${choice}`);
+        }
+    }
+
+    /**
+     * Handle radio all menu
+     */
+    private async handleRadioAll(): Promise<void> {
+        if (!this.search) return;
+
+        await this.showMessage('PLAYER_RADIO_ALL', true);
+
+        const radioOptions = this.text.getTextLines('PLAN_TXT', 'PLAYER_RADIO_1');
+        const choice = await this.ui.showMenu(radioOptions, 0xFFFFFFFF, 0);
+
+        if (choice >= 0 && choice < 2) {
+            // TODO: Port tcCalcCallValue()
+            this.search.callCount++;
+        }
+    }
+
+    /**
+     * Handle radio one menu
+     */
+    private async handleRadioOne(): Promise<void> {
+        if (!this.state || !this.search) return;
+
+        const burglarsNr = this.state.team.length;
+
+        let targetPersonId = 0;
+
+        if (burglarsNr > 2) {
+            // Show person selection
+            const teamList = this.state.team
+                .filter((_, index) => index !== this.currentPerson)
+                .map((personId) => {
+                    const person = this.db.getObject(personId);
+                    return (person as any).Name || `Person ${personId}`;
+                });
+
+            const choice = await this.ui.showMenu(teamList, 0xFFFFFFFF, 0);
+            if (choice < 0) return;
+
+            targetPersonId = this.state.team.filter((_, index) => index !== this.currentPerson)[choice];
+        } else {
+            // Only 2 people, select the other one
+            targetPersonId = this.state.team[this.currentPerson === 0 ? 1 : 0];
+        }
+
+        // Show radio message options
+        const radioOptions = this.text.getTextLines('PLAN_TXT', 'PLAYER_RADIO_2');
+        const choice = await this.ui.showMenu(radioOptions, 0xFFFFFFFF, 0);
+
+        if (choice >= 0 && choice < 3) {
+            // TODO: Port tcCalcCallValue()
+            this.search.callCount++;
+        }
+    }
+
+    /**
+     * Determine burglary result
+     */
+    private determineResult(): number {
+        if (!this.search) return BURGLARY_FAILURE;
+
+        // Check escape bits
+        if (this.search.escapeBits & FAHN_SURROUNDED) {
+            return BURGLARY_SURROUNDED;
+        }
+
+        if (this.search.escapeBits & FAHN_ESCAPE) {
+            return BURGLARY_ESCAPE;
+        }
+
+        // TODO: Check if all team members are at car
+        // TODO: Handle loot transfer
+        // TODO: Calculate escape time
 
         return BURGLARY_SUCCESS;
+    }
+
+    /**
+     * Display timer
+     */
+    private displayTimer(time: number, refresh: boolean): void {
+        // TODO: Port plDisplayTimer()
+        console.log(`[PlanningService] Timer: ${time}s`);
+    }
+
+    /**
+     * Display info
+     */
+    private displayInfo(): void {
+        // TODO: Port plDisplayInfo()
+        // Shows weight, volume, loudness, etc.
+    }
+
+    /**
+     * Show message
+     */
+    private async showMessage(key: string, refresh: boolean): Promise<void> {
+        const lines = this.text.getTextLines('PLAN_TXT', key);
+        if (lines.length > 0) {
+            await this.ui.showBubble(lines, 'think', 0);
+        }
     }
 
     /**
