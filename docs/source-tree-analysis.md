@@ -63,8 +63,15 @@ The Web Client is a modern port/frontend using TypeScript, Vite, and Phaser.js.
 │   ├── vite-env.d.ts        # Type definitions
 │   └── game/                # [Logic] Phaser Game Instance
 │       ├── main.ts          # Game Config (1024x768, Scale.FIT) & Initialization
-│       └── scenes/          # [Content] Phaser Scenes
-│           └── Game.ts      # Main game scene
+│       ├── scenes/          # [Content] Phaser Scenes
+│       │   ├── Game.ts      # Main game scene (menu/logo)
+│       │   ├── ReplayTestScene.ts     # [Test] Replay system verification scene
+│       │   └── ScreenshotTestScene.ts # [Test] Screenshot system verification scene
+│       └── services/        # [Logic] Game Services
+│           ├── InputHandler.ts        # Input management (Keyboard/Mouse)
+│           ├── Random.ts              # Deterministic RNG (LCG)
+│           ├── ReplayService.ts       # Replay recording/playback logic
+│           └── ScreenshotService.ts   # Screenshot capture logic
 ```
 
 ## Critical Files & Entry Points

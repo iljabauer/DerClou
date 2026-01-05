@@ -28,6 +28,21 @@ The application runs entirely in the browser, relying on Phaser's internal game 
 *   Phaser uses a Scene-based architecture.
 *   **Defined Scenes:**
     *   `Game`: The main (and currently only) scene, loading a background and logo.
+    *   `ReplayTestScene`: A scene for verifying deterministic replay functionality.
+    *   `ScreenshotTestScene`: A scene for automated visual testing via screenshots.
+
+### 4. Service Architecture
+The application uses specialized services to handle core game logic independently of specific scenes:
+*   **InputHandler**: Wrapper for Phaser input to provide consistent state for replays.
+*   **Random**: Deterministic Random Number Generator (LCG) to ensure replay consistency.
+*   **ReplayService**: Handles recording and playback of game sessions.
+*   **ScreenshotService**: Manages capturing and downloading screenshots for testing.
+
+### 5. Runtime Environment (NW.js)
+While the game is built with Phaser (web technology), specific development and testing features require access to the local file system.
+*   **NW.js** is used as a runtime wrapper during development.
+*   **File System Access**: The `ReplayService` (reading/writing `.rec` files) and `ScreenshotService` (saving `.png` files) rely on Node.js modules provided by NW.js.
+*   **Web Browser Fallback**: When running in a standard browser, these features are disabled or limited to file downloads, as direct file system access is restricted.
 
 ## Development Workflow
 

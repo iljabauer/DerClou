@@ -11,6 +11,18 @@ State containers for different parts of the game (Menus, Gameplay, etc.).
 | Component | Path | Description |
 |-----------|------|-------------|
 | **Game** | `src/game/scenes/Game.ts` | The main entry scene. Currently renders the logo and welcome text. |
+| **ReplayTestScene** | `src/game/scenes/ReplayTestScene.ts` | Test scene for recording and playing back input sequences. |
+| **ScreenshotTestScene** | `src/game/scenes/ScreenshotTestScene.ts` | Test scene for automated screenshot capture. |
+
+### Services
+Reusable logic modules managed by the game or scenes.
+
+| Component | Path | Description |
+|-----------|------|-------------|
+| **InputHandler** | `src/game/services/InputHandler.ts` | Abstraction for input management to support replay injection. |
+| **Random** | `src/game/services/Random.ts` | Deterministic random number generator. |
+| **ReplayService** | `src/game/services/ReplayService.ts` | Manages recording and playback state. |
+| **ScreenshotService** | `src/game/services/ScreenshotService.ts` | Manages screenshot capture and saving. |
 
 ### UI Elements
 *(None implemented yet)*
