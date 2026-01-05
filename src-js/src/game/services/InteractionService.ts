@@ -13,7 +13,7 @@ import { DialogService } from './DialogService';
 import { FilmService } from './FilmService';
 import {
     GO, WAIT, BUSINESS_TALK, LOOK, INVESTIGATE, PLAN, CALL_TAXI, MAKE_CALL, INFO,
-    MENU_TXT, THECLOU_TXT,
+    MENU_TXT, THECLOU_TXT, BUSINESS_TXT,
     Person_Matt_Stuvysunt,
     Environment_TheClou,
     Location_Fat_Mans_Pub,
@@ -28,7 +28,11 @@ import {
     Person_Frank_Maloya,
     Person_John_Gludo,
     Person_Miles_Chickenwing,
-    Person_Ben_Riggley
+    Person_Ben_Riggley,
+    PHONE_PICTID,
+    MATT_PICTID,
+    GET_OUT,
+    DLG_TALKMODE_STANDARD
 } from '../types/GameConstants';
 
 export interface InteractionOptions {
@@ -290,10 +294,90 @@ export class InteractionService {
 
     /**
      * Handle MAKE_CALL action
+     * Port of tcTelefon() from scenes.c
      */
     private async handleMakeCall(): Promise<number> {
-        // TODO: Implement phone call system (tcTelefon)
-        console.log('MAKE_CALL action - not yet fully implemented');
+        // TODO: Show phone picture (gfxShow(175, ...))
+        // For now, just proceed with the phone menu
+
+        // Get all people Matt knows
+        const people = this.db.knowsAll(Person_Matt_Stuvysunt, 0, 'Person');
+
+        if (people.length === 0) {
+            // Matt doesn't know anyone
+            await this.dialog.say(THECLOU_TXT, 'POOR_MATT', MATT_PICTID);
+            return 0;
+        }
+
+        // Build menu of people to call
+        const menuItems = [];
+        
+        // Add "Don't connect me" option
+        const dontConnectText = this.text.getFirstLine(BUSINESS_TXT, 'DONT_CONNECT_ME');
+        menuItems.push({
+            text: dontConnectText || 'Cancel',
+            enabled: true,
+            data: -1
+        });
+
+        // Add all known people
+        for (const person of people) {
+            const personObj = this.db.getObject(person) as any;
+            if (personObj && personObj.name) {
+                menuItems.push({
+                    text: personObj.name,
+                    enabled: true,
+                    data: person
+                });
+            }
+        }
+
+        // Ask who to call
+        await this.dialog.say(THECLOU_TXT, 'CONNECT_ME', MATT_PICTID);
+
+        // Show person selection menu
+        const choice = await this.ui.showMenu({
+            items: menuItems,
+            activeIndex: 0
+        });
+
+        if (choice === GET_OUT || choice === 0) {
+            // User cancelled or selected "Don't connect me"
+            return 0;
+        }
+
+        const personId = menuItems[choice].data as number;
+
+        // Check if calling Ben Riggley (the hotel receptionist)
+        if (personId === Person_Ben_Riggley) {
+            const ben = this.db.getObject(Person_Ben_Riggley) as any;
+            await this.dialog.say(BUSINESS_TXT, 'ALREADY_PHONING', ben?.pictID || 0);
+            return 0;
+        }
+
+        // Check if person is in London
+        // TODO: Implement livesIn check properly
+        // For now, assume everyone is in London
+        const isInLondon = true;
+
+        if (isInLondon) {
+            // Random chance of line being occupied (10%)
+            const random = Math.floor(Math.random() * 10);
+            if (random === 3) {
+                const ben = this.db.getObject(Person_Ben_Riggley) as any;
+                await this.dialog.say(BUSINESS_TXT, 'OCCUPIED', ben?.pictID || 0);
+            } else {
+                // Start conversation
+                await this.dialog.dynamicTalk(Person_Matt_Stuvysunt, personId, DLG_TALKMODE_STANDARD);
+            }
+        } else {
+            // Person not at home
+            const ben = this.db.getObject(Person_Ben_Riggley) as any;
+            await this.dialog.say(BUSINESS_TXT, 'NOBODY_AT_HOME', ben?.pictID || 0);
+        }
+
+        // TODO: Hide phone picture (gfxShow(173, ...))
+
         return 0;
     }
 
