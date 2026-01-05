@@ -6,7 +6,7 @@
 
 Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundation with replay system, core architecture, and partial data loading.
 
-## Current Phase: Data Loading & Core Systems
+## Current Phase: Text & Graphics Systems
 
 ### What Works ✅
 
@@ -38,6 +38,21 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - Loads all building-specific files (*ETA*.DAT)
    - DataLoaderTestScene for testing
 
+4. **Text System** - Complete ✅
+   - TextService with XOR decryption (0x75)
+   - Multi-language support (English, German, French, Spanish)
+   - Key-based text lookup
+   - Line extraction and formatting
+   - Parameter substitution (sprintf-like)
+   - TextTestScene for testing
+
+5. **Image System** - Partial ✅
+   - ImageService structure
+   - Collection list loading (COLL.LST)
+   - PNG image loading (for converted images)
+   - Canvas drawing support
+   - ⚠️ Need ILBM format support or image conversion
+
 4. **Test Scenes**
    - ReplayTestScene (original)
    - DataLoaderTestScene (new)
@@ -45,20 +60,16 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
 
 ### What Needs Work 🚧
 
-1. **Text System**
-   - Load object names from text files (OBJECTS.TXT)
-   - Verify data integrity against C version
-
-2. **Graphics System**
-   - Load images from gamedata/PICTURES/
-   - Convert to web-compatible formats
+1. **Graphics System**
+   - ⚠️ Convert IFF ILBM images to PNG/WebP format
+   - ⚠️ Or implement ILBM decoder in JavaScript
    - Sprite management
    - Background rendering
+   - Integration with Phaser
 
-3. **Text System**
-   - Load text files from gamedata/TEXTS/
-   - Multi-language support
-   - Text rendering with formatting
+2. **Data Verification**
+   - Load object names from text files (OBJECTS.TXT)
+   - Verify data integrity against C version
 
 4. **Dialog System**
    - Conversation trees
@@ -92,10 +103,13 @@ src-js/src/game/
 │   ├── BinaryReader.ts      ✅ Binary file reading
 │   ├── DatFileParser.ts     ✅ All 18 object types
 │   ├── RelFileParser.ts     ✅ Relation parsing
-│   └── DataLoader.ts        ✅ All data files
+│   ├── DataLoader.ts        ✅ All data files
+│   ├── TextService.ts       ✅ Text loading & lookup
+│   └── ImageService.ts      ⚠️ Image loading (needs ILBM)
 └── scenes/
     ├── ReplayTestScene.ts   ✅ Replay testing
     ├── DataLoaderTestScene.ts ✅ Data loading test
+    ├── TextTestScene.ts     ✅ Text system test
     ├── GameScene.ts         ✅ Main scene
     ├── MainMenuScene.ts     ✅ Menu
     └── LondonScene.ts       ✅ Hub scene
@@ -167,8 +181,10 @@ npm run dev
 
 ## Notes
 
-- 27 TypeScript files, ~3070 lines of code
+- 30 TypeScript files, ~4200 lines of code
 - 131 C source files to port
 - TCMAIN.DAT and TCBUILD.DAT are main data files
 - Building-specific files: *ETA0.DAT, *ETA1.DAT, etc.
 - Relations in .REL files (text format)
+- Text files in gamedata/TEXTS/ (XOR encrypted with 0x75)
+- Images in gamedata/PICTURES/ (IFF ILBM format, needs conversion)
