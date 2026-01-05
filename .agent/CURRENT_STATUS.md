@@ -1,12 +1,12 @@
 # Der Clou! TypeScript Port - Current Status
 
-**Last Updated:** 2026-01-05 (Session 5)
+**Last Updated:** 2026-01-05 (Session 7)
 
 ## Overview
 
 Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundation with replay system, core architecture, and complete data/text/image systems.
 
-## Current Phase: Building Foundation for Phase 3
+## Current Phase: Phase 3 - Scene and Story System (In Progress)
 
 ### What Works ✅
 
@@ -105,7 +105,22 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - Taxi location management
    - SceneTestScene for testing
 
-11. **Test Scenes**
+11. **Story System** - In Progress 🚧
+   - StoryService with handler system
+   - Scene constants (SCENE_*)
+   - Player money management
+   - Environment state management
+   - Story handlers ported:
+     - tcDoneArrival (game opening)
+     - tcDoneHotelReception (hotel room)
+     - tcDoneCredits (receive money)
+     - tcDoneMamiCalls (phone call)
+     - tcDoneGludoMoney (get money from Gludo)
+     - tcDoneDanner (get money from Danner)
+   - ⚠️ More story handlers needed
+   - ⚠️ Environment needs database integration
+
+12. **Test Scenes**
    - ReplayTestScene (original)
    - DataLoaderTestScene
    - TextTestScene
@@ -125,9 +140,11 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
 
 2. **Story System** (src/story/) - IN PROGRESS
    - ✅ SceneService with core functions complete
-   - ⚠️ Need StoryService for story handlers (tcDone* functions)
-   - ⚠️ Need scene constants (SCENE_*)
-   - ⚠️ Need story state management
+   - ✅ StoryService with handler system
+   - ✅ Scene constants (SCENE_*)
+   - ✅ 6 story handlers ported
+   - ⚠️ Need more story handlers (30+ remaining)
+   - ⚠️ Environment needs database integration
    - See SCENE_STORY_ANALYSIS.md for details
 
 3. **Story Handlers** (src/story/)
@@ -177,6 +194,7 @@ src-js/src/game/
 │   ├── DialogService.ts     ✅ Dialog system
 │   ├── FilmService.ts       ✅ Story state
 │   ├── SceneService.ts      ✅ Scene functions
+│   ├── StoryService.ts      🚧 Story handlers
 │   └── PresentationService.ts ✅ Object display
 └── scenes/
     ├── ReplayTestScene.ts   ✅ Replay testing
@@ -200,9 +218,11 @@ src-js/src/game/
 4. ✅ Start Phase 3: Scene/Story System
 5. ✅ Port SceneService (Go, Information, Look, Wait)
 6. ✅ Create SceneTestScene
-7. ⚠️ Port StoryService (story handlers)
-8. ⚠️ Add scene constants
-9. ⚠️ Fix replay system screenshot generation
+7. ✅ Port StoryService with 6 story handlers
+8. ✅ Add scene constants
+9. ⚠️ Port more story handlers
+10. ⚠️ Port interaction system
+11. ⚠️ Fix replay system screenshot generation
 
 ### Short-term (Next 2-3 Sessions)
 1. Complete Living/Location System
@@ -261,7 +281,7 @@ npm run dev
 
 ## Notes
 
-- 40 TypeScript files, ~7400 lines of code
+- 43 TypeScript files, ~8900 lines of code
 - 72 C source files to port (~35k lines)
 - TCMAIN.DAT and TCBUILD.DAT are main data files
 - Building-specific files: *ETA0.DAT, *ETA1.DAT, etc.

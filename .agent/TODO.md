@@ -1,6 +1,6 @@
 # Der Clou! Port - TODO List
 
-**Last Updated:** 2026-01-05 (Session 5)
+**Last Updated:** 2026-01-05 (Session 7)
 
 ## Current Sprint: Phase 3 - Scene/Story System
 
@@ -15,11 +15,19 @@
   - [x] Create SceneTestScene.ts
 
 - [ ] Port story system (src/story/)
-  - [ ] Create StoryService.ts
-  - [ ] Add scene constants (SCENE_*)
-  - [ ] Port key story handlers (tcDone* functions)
+  - [x] Create StoryService.ts
+  - [x] Add scene constants (SCENE_*)
+  - [x] Port initial story handlers (6 done)
+    - [x] tcDoneArrival
+    - [x] tcDoneHotelReception
+    - [x] tcDoneCredits
+    - [x] tcDoneMamiCalls
+    - [x] tcDoneGludoMoney
+    - [x] tcDoneDanner
+  - [ ] Port remaining story handlers (30+ remaining)
   - [ ] Story state management
   - [ ] Event triggers
+  - [ ] Environment database integration
 
 - [ ] Port interaction system (src/present/interac.c)
   - [ ] Action menu (Go, Talk, Look, Wait, Think)
