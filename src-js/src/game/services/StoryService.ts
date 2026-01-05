@@ -19,6 +19,9 @@ import {
     SCENE_HOLLAND_STR,
     SCENE_WATLING,
     SCENE_CARS_VANS,
+    SCENE_FAT_MANS,
+    SCENE_NEW_GAME,
+    SCENE_FST_MEET_BRIGGS,
     STORY_0_TXT,
     OLD_MATT_PICTID,
     MATT_PICTID,
@@ -26,10 +29,17 @@ import {
     Person_Ben_Riggley,
     Person_John_Gludo,
     Person_Jim_Danner,
+    Person_Herbert_Briggs,
+    Person_Pater_James,
+    Building_Kiosk,
+    Car_Fiat_Topolino_1940,
+    Loot_Ring_des_Abtes,
     tcCOSTS_FOR_HOTEL,
+    tcVALUE_OF_RING_OF_PATER,
     London_London_1
 } from '../types/GameConstants';
-import { ObjectType } from '../types/GameTypes';
+import { ObjectType, Building } from '../types/GameTypes';
+import { PresentationService } from './PresentationService';
 
 /**
  * Environment object data structure
@@ -50,6 +60,7 @@ export class StoryService {
     private text: TextService;
     private dialog: DialogService;
     private scene: SceneService;
+    private presentation: PresentationService | null = null;
     
     // Story handlers map
     private handlers: Map<number, StoryHandler> = new Map();
@@ -79,11 +90,19 @@ export class StoryService {
     }
 
     /**
+     * Set presentation service (optional dependency)
+     */
+    setPresentationService(presentation: PresentationService): void {
+        this.presentation = presentation;
+    }
+
+    /**
      * Register all story scene handlers
      */
     private registerHandlers(): void {
         this.handlers.set(SCENE_ARRIVAL, () => this.tcDoneArrival());
         this.handlers.set(SCENE_HOTEL_ROOM, () => this.tcDoneHotelReception());
+        this.handlers.set(SCENE_FST_MEET_BRIGGS, () => this.tcDoneMeetBriggs());
         // More handlers will be added as they are ported
     }
 
@@ -384,6 +403,235 @@ export class StoryService {
         }
 
         this.scene.sceneArgs.returnValue = SCENE_CARS_VANS;
+    }
+
+    /**
+     * MEET BRIGGS
+     * Port of tcDoneMeetBriggs from story.c
+     * 
+     * Matt meets Herbert Briggs who offers him a job
+     */
+    private tcDoneMeetBriggs(): void {
+        const briggs = this.db.getObject(Person_Herbert_Briggs);
+        let choice = 0;
+
+        // Matt now knows Briggs
+        this.db.knowsSet(Person_Matt_Stuvysunt, Person_Herbert_Briggs);
+
+        // Dialog sequence
+        this.dialog.say(STORY_0_TXT, 0, 0, 'BRIGGS_BRIGGS_1'); // briggs.PictID
+        this.dialog.say(STORY_0_TXT, 0, MATT_PICTID, 'BRIGGS_MATT_1');
+        this.dialog.say(STORY_0_TXT, 0, 0, 'BRIGGS_BRIGGS_2'); // briggs.PictID
+        this.dialog.say(STORY_0_TXT, 0, MATT_PICTID, 'BRIGGS_MATT_2');
+        this.dialog.say(STORY_0_TXT, 0, 0, 'BRIGGS_BRIGGS_3'); // briggs.PictID
+
+        choice = this.dialog.say(STORY_0_TXT, 0, MATT_PICTID, 'BRIGGS_MATT_3');
+
+        if (choice === 0) {
+            // Accepted the job
+            const bui = this.db.getObject(Building_Kiosk) as Building;
+
+            // Matt now has the building
+            this.db.hasSet(Person_Matt_Stuvysunt, Building_Kiosk);
+
+            // Add money (with cheat mode check)
+            if (this.gamePlayMode & StoryService.GP_MORE_MONEY) {
+                this.addPlayerMoney(30);
+            } else {
+                this.addPlayerMoney(15);
+            }
+
+            // Update building properties
+            this.addBuildExactlyness(bui, 255);
+            this.addBuildStrike(bui, 5);
+
+            this.dialog.say(STORY_0_TXT, 0, 0, 'BRIGGS_BRIGGS_4'); // briggs.PictID
+
+            // Present the car and building
+            this.present(Car_Fiat_Topolino_1940, 'Car');
+            this.present(Building_Kiosk, 'Building');
+
+            this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, 'AFTER_MEETING_BRIGGS');
+
+            // Matt gets the car
+            this.db.hasSet(Person_Matt_Stuvysunt, Car_Fiat_Topolino_1940);
+
+            this.scene.sceneArgs.returnValue = SCENE_FAT_MANS;
+        } else {
+            // Rejected the job - monastery path
+            const james = this.db.getObject(Person_Pater_James);
+
+            this.dialog.say(STORY_0_TXT, 0, 0, 'BRIGGS_BRIGGS_5'); // briggs.PictID
+
+            // Show animation (stub)
+            this.gfxShow(170);
+
+            this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, 'BRIGGS_MR_WHISKY');
+
+            // Time passes
+            this.asTimeGoesBy(this.film.getMinute() + 793);
+
+            // Stop animation and fade out (stub)
+            this.stopAnim();
+            this.gfxChangeColors();
+
+            // Matt goes to monastery
+            this.mattGoesTo(60);
+
+            this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, 'KLOSTER');
+            this.dialog.say(STORY_0_TXT, 0, 0, 'ABT'); // james.PictID
+
+            choice = this.dialog.say(STORY_0_TXT, 0, MATT_PICTID, 'HOLY_MATT');
+
+            if (choice === 0) {
+                // Holy path - game ends
+                this.dialog.say(STORY_0_TXT, 0, 155, 'THE_END_MONASTERY');
+                this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, 'THE_EDGE');
+
+                this.scene.sceneArgs.returnValue = SCENE_NEW_GAME;
+            } else {
+                // Evil path - steal ring and continue
+                this.dialog.say(STORY_0_TXT, 0, MATT_PICTID, 'EVIL_MATT');
+                this.dialog.say(STORY_0_TXT, 0, 0, 'EVIL_MATT_ABT'); // james.PictID
+                this.dialog.say(STORY_0_TXT, 0, MATT_PICTID, 'EVIL_MATT_1');
+
+                this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, 'EVIL_OLD_MATT');
+
+                // Matt steals the ring
+                this.hasSetP(Person_Matt_Stuvysunt, Loot_Ring_des_Abtes, tcVALUE_OF_RING_OF_PATER);
+
+                // Advance time to next day
+                this.addVTime(1440 + 525 - this.film.getMinute());
+
+                this.scene.sceneArgs.returnValue = SCENE_HOLLAND_STR;
+            }
+
+            this.stopAnim();
+            this.gfxChangeColors();
+        }
+
+        // Unlock new taxi locations
+        this.scene.addTaxiLocation(10);  // trafik
+        this.scene.addTaxiLocation(18);  // pink
+        this.scene.addTaxiLocation(20);  // senioren
+        this.scene.addTaxiLocation(12);  // aunt
+
+        // TODO: Check bProfidisk flag
+        // if (bProfidisk) this.scene.addTaxiLocation(68); // baker street
+    }
+
+    /**
+     * Helper: Add money to player
+     */
+    private addPlayerMoneyHelper(amount: number): void {
+        this.addPlayerMoney(amount);
+    }
+
+    /**
+     * Helper: Add building exactlyness
+     */
+    private addBuildExactlyness(building: Building, value: number): void {
+        // Port of tcAddBuildExactlyness macro
+        if (building.exactlyness !== undefined) {
+            building.exactlyness = Math.min(255, Math.max(0, building.exactlyness + value));
+        }
+    }
+
+    /**
+     * Helper: Add building strike value
+     */
+    private addBuildStrike(building: Building, value: number): void {
+        // Port of tcAddBuildStrike macro
+        if (building.strike !== undefined) {
+            building.strike = Math.min(255, Math.max(0, building.strike + value));
+        }
+    }
+
+    /**
+     * Helper: Present an object (show details)
+     */
+    private present(objectId: number, objectType: string): void {
+        // Port of Present() function
+        // For now, just log - full implementation would use PresentationService
+        console.log(`Present ${objectType} ${objectId}`);
+        
+        if (this.presentation) {
+            // TODO: Call presentation service methods based on objectType
+        }
+    }
+
+    /**
+     * Helper: Matt goes to a location
+     */
+    private mattGoesTo(locNr: number): void {
+        // Port of tcMattGoesTo from gp_app.c
+        // Sets location, refreshes title, shows time, fades out, plays animation
+        this.film.setLocation(locNr);
+        // TODO: Implement full location transition with graphics
+        console.log(`Matt goes to location ${locNr}`);
+    }
+
+    /**
+     * Helper: Time passes until specified minute
+     */
+    private asTimeGoesBy(untilMinute: number): void {
+        // Port of tcAsTimeGoesBy from gp_app.c
+        untilMinute = untilMinute % 1440;
+
+        while (this.film.getMinute() !== untilMinute) {
+            // TODO: Add delay (inpDelay)
+            this.addVTime(1);
+
+            if (this.film.getMinute() % 60 === 0) {
+                // TODO: Show time
+            }
+        }
+    }
+
+    /**
+     * Helper: Add virtual time (minutes)
+     */
+    private addVTime(minutes: number): void {
+        // Port of AddVTime
+        this.film.addMinutes(minutes);
+    }
+
+    /**
+     * Helper: Set loot with value (hasSetP)
+     */
+    private hasSetP(personId: number, lootId: number, value: number): void {
+        // Port of hasSetP macro - sets relation with property value
+        this.db.hasSet(personId, lootId);
+        
+        // TODO: Set the value property on the loot object
+        const loot = this.db.getObject(lootId);
+        if (loot && 'value' in loot) {
+            (loot as any).value = value;
+        }
+    }
+
+    /**
+     * Graphics stub: Show image
+     */
+    private gfxShow(imageId: number): void {
+        // TODO: Implement graphics display
+        console.log(`Show image ${imageId}`);
+    }
+
+    /**
+     * Graphics stub: Stop animation
+     */
+    private stopAnim(): void {
+        // TODO: Implement animation stop
+        console.log('Stop animation');
+    }
+
+    /**
+     * Graphics stub: Change colors/fade
+     */
+    private gfxChangeColors(): void {
+        // TODO: Implement color change/fade
+        console.log('Change colors');
     }
 
     /**

@@ -93,6 +93,13 @@ export class FilmService {
     }
 
     /**
+     * Get current minute (alias for C code compatibility)
+     */
+    getMinute(): number {
+        return this.film.currentMinute;
+    }
+
+    /**
      * Advance time by minutes
      */
     advanceTime(minutes: number): void {
@@ -102,6 +109,13 @@ export class FilmService {
             this.film.currentMinute -= 1440;
             this.film.currentDay++;
         }
+    }
+
+    /**
+     * Add minutes (alias for C code compatibility)
+     */
+    addMinutes(minutes: number): void {
+        this.advanceTime(minutes);
     }
 
     /**
