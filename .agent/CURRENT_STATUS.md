@@ -1,12 +1,12 @@
 # Der Clou! TypeScript Port - Current Status
 
-**Last Updated:** 2026-01-05 (Session 10)
+**Last Updated:** 2026-01-05 (Session 11)
 
 ## Overview
 
 Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundation with replay system, core architecture, and complete data/text/image systems.
 
-## Current Phase: Phase 3 - Scene and Story System (In Progress)
+## Current Phase: Phase 4 - Interaction System (In Progress)
 
 ### What Works ✅
 
@@ -162,7 +162,27 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - ⚠️ Southampton and Kaserne menu systems need full UI integration
    - ⚠️ Tower burglary initialization and execution need implementation
 
-12. **Test Scenes**
+12. **Interaction System** - In Progress ✅
+   - InteractionService for main action menu
+   - Port of StdDone() and StdHandle() from gp_app.c
+   - Action menu with 9 actions:
+     - GO: Navigate to other locations
+     - WAIT: Wait and advance time
+     - BUSINESS_TALK: Talk to people
+     - LOOK: Examine location
+     - INVESTIGATE: Special investigation
+     - PLAN: Plan burglaries
+     - CALL_TAXI: Call a taxi
+     - MAKE_CALL: Make phone calls
+     - INFO: View information menu
+   - Integration with UIService, SceneService, DialogService
+   - InteractionTestScene for testing
+   - ⚠️ Most actions are stubbed and need full implementation
+   - ⚠️ GO needs location navigation integration
+   - ⚠️ BUSINESS_TALK needs Talk() implementation
+   - ⚠️ PLAN needs planning system integration
+
+13. **Test Scenes**
    - ReplayTestScene (original)
    - DataLoaderTestScene
    - TextTestScene
@@ -171,6 +191,7 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - LivingTestScene
    - DialogTestScene
    - SceneTestScene
+   - InteractionTestScene
    - GameScene, MainMenuScene, LondonScene
 
 ### What Needs Work 🚧
@@ -187,10 +208,13 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - ⚠️ Tower burglary execution (plPlayer integration)
    - ⚠️ Menu navigation and input handling
 
-3. **Interaction System** (src/present/interac.c)
-   - Action menu (Go, Talk, Look, Wait, Think)
-   - Player interactions
-   - Scene integration
+3. **Action Implementation** - IN PROGRESS
+   - ⚠️ GO action needs full implementation
+   - ⚠️ BUSINESS_TALK needs Talk() function
+   - ⚠️ INVESTIGATE needs implementation
+   - ⚠️ MAKE_CALL needs phone system (tcTelefon)
+   - ⚠️ CALL_TAXI needs taxi scene integration
+   - ⚠️ PLAN needs planning system (tcOrganisation, tcBurglary)
 
 5. **Gameplay Systems**
    - Planning mechanics
@@ -228,7 +252,8 @@ src-js/src/game/
 │   ├── DialogService.ts     ✅ Dialog system
 │   ├── FilmService.ts       ✅ Story state
 │   ├── SceneService.ts      ✅ Scene functions
-│   ├── StoryService.ts      🚧 Story handlers
+│   ├── StoryService.ts      ✅ Story handlers (43/43)
+│   ├── InteractionService.ts 🚧 Action menu
 │   └── PresentationService.ts ✅ Object display
 └── scenes/
     ├── ReplayTestScene.ts   ✅ Replay testing
@@ -238,6 +263,7 @@ src-js/src/game/
     ├── LivingTestScene.ts   ✅ Living system test
     ├── DialogTestScene.ts   ✅ Dialog system test
     ├── SceneTestScene.ts    ✅ Scene system test
+    ├── InteractionTestScene.ts 🚧 Interaction test
     ├── GameScene.ts         ✅ Main scene
     ├── MainMenuScene.ts     ✅ Menu
     └── LondonScene.ts       ✅ Hub scene
@@ -256,14 +282,17 @@ src-js/src/game/
 8. ✅ Add scene constants
 9. ✅ Port all burglary handlers (1st-9th)
 10. ✅ Port complex scenes (Birthday, Southampton, Kaserne)
-11. ⚠️ Port interaction system
-12. ⚠️ Fix replay system screenshot generation
+11. ✅ Port interaction system (InteractionService)
+12. ✅ Create InteractionTestScene
+13. ⚠️ Implement action handlers (GO, BUSINESS_TALK, etc.)
+14. ⚠️ Fix replay system screenshot generation
 
 ### Short-term (Next 2-3 Sessions)
-1. Complete Living/Location System
-2. Port Dialog System (conversations, NPCs)
-3. Port Scene/Story System (game flow)
-4. Port Interaction System (action menu)
+1. Implement action handlers in InteractionService
+2. Port Talk() function for BUSINESS_TALK
+3. Port tcTelefon() for MAKE_CALL
+4. Integrate GO action with location navigation
+5. Port planning system (tcOrganisation, tcBurglary)
 
 ### Medium-term
 1. Port dialog system
