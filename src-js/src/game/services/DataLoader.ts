@@ -45,9 +45,55 @@ export class DataLoader {
             return false;
         }
 
+        // Load building-specific data files
+        await this.loadBuildingData();
+
         this.loaded = true;
         console.log(`Loaded ${db.getObjectCount()} objects and ${db.getRelationCount()} relations`);
         return true;
+    }
+
+    /**
+     * Load building-specific data files (*ETA0.DAT, *ETA1.DAT, etc.)
+     */
+    private async loadBuildingData(): Promise<void> {
+        const buildingPrefixes = [
+            'ANTIETA', 'AUNTETA', 'BAKEETA', 'BANKETA', 'BRITETA', 'BUCKETA',
+            'BULCETA', 'CHISETA', 'DOWNETA', 'HAMHETA', 'JUWEETA', 'KASEETA',
+            'KENWETA', 'MARXETA', 'NATIETA', 'NATUETA', 'OSTEETA', 'SENIETA',
+            'SOTHETA', 'TATEETA', 'TOBAETA', 'TOWEETA', 'TRAIETA', 'TRANETA',
+            'TUSSETA', 'VICTETA', 'VILLETA', 'WESTETA'
+        ];
+
+        console.log('Loading building-specific data files...');
+        let loadedCount = 0;
+
+        for (const prefix of buildingPrefixes) {
+            // Try loading multiple variants (0, 1, 2, etc.)
+            for (let i = 0; i < 5; i++) {
+                const name = `${prefix}${i}`;
+                const datPath = `${this.config.dataPath}/${name}.DAT`;
+                const relPath = `${this.config.dataPath}/${name}.REL`;
+
+                // Check if file exists by trying to load it
+                try {
+                    const objectsLoaded = await this.loadObjects(datPath);
+                    if (objectsLoaded) {
+                        loadedCount++;
+                        // Try to load relations too
+                        await this.loadRelations(relPath);
+                    } else {
+                        // If variant 0 doesn't exist, skip other variants
+                        if (i === 0) break;
+                    }
+                } catch (error) {
+                    // File doesn't exist, stop trying variants for this prefix
+                    break;
+                }
+            }
+        }
+
+        console.log(`Loaded ${loadedCount} building-specific data files`);
     }
 
     /**
