@@ -111,8 +111,7 @@ export class GameEngine {
         const tick = this.inputHandler.getSimulationTick();
         this.scene.game.renderer.snapshot((image: HTMLImageElement | any) => {
             if (image && image.src) {
-                const filename = `replay_tick_${tick}_screenshot.png`;
-                const result = ScreenshotService.saveScreenshot(image.src, filename);
+                const result = ScreenshotService.saveScreenshot(image.src);
                 if (!result.success) {
                     console.error('Screenshot failed:', result.message);
                 }

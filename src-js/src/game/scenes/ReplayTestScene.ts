@@ -156,7 +156,7 @@ export class ReplayTestScene extends Scene {
         const tick = this.inputHandler.getSimulationTick();
         this.game.renderer.snapshot((image: HTMLImageElement | any) => {
             if (image && image.src) {
-                ScreenshotService.saveScreenshot(image.src, `replay_tick_${tick}_screenshot.png`);
+                ScreenshotService.saveScreenshot(image.src);
             }
         });
     }
