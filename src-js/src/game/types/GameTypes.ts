@@ -14,22 +14,19 @@ export enum ObjectType {
     Person = 0,
     Player = 1,
     Car = 2,
-    Building = 3,
-    Tool = 4,
-    Loot = 5,
-    Evidence = 6,
+    Location = 3,
+    Ability = 4,
+    Item = 5,
+    Tool = 6,
     Environment = 7,
-    LSArea = 8,
-    LSObject = 9,
-    Ability = 10,
-    LSLock = 11,
-    LSPower = 12,
-    LSAlarm = 13,
-    Lso = 14,
-    CompleteLoot = 15,
-    Scene = 16,
-    Timer = 17,
-    Item = 18,
+    London = 8,
+    Evidence = 9,
+    Loot = 10,
+    CompleteLoot = 11,
+    LSLock = 12,
+    LSObject = 13,
+    LSRoom = 14,
+    Building = 15,
 }
 
 export interface Person extends GameObject {
@@ -135,10 +132,75 @@ export interface Environment extends GameObject {
     postzugDone: number;
 }
 
-export interface Scene extends GameObject {
-    type: ObjectType.Scene;
-    sceneId: number;
-    flags: number;
+export interface Location extends GameObject {
+    type: ObjectType.Location;
+    locationNr: number;
+    openFromMinute: number;
+    openToMinute: number;
+}
+
+export interface Ability extends GameObject {
+    type: ObjectType.Ability;
+    abilityName: number;
+    use: number;
+}
+
+export interface Item extends GameObject {
+    type: ObjectType.Item;
+    itemType: number;
+    offsetFact: number;
+    hExactXOffset: number;
+    hExactYOffset: number;
+    hExactWidth: number;
+    hExactHeight: number;
+    vExactXOffset: number;
+    vExactYOffset: number;
+    vExactWidth: number;
+    vExactHeight: number;
+}
+
+export interface London extends GameObject {
+    type: ObjectType.London;
+    useless: number;
+}
+
+export interface CompleteLoot extends GameObject {
+    type: ObjectType.CompleteLoot;
+    bild: number;
+    gold: number;
+    geld: number;
+    juwelen: number;
+    delikates: number;
+    statue: number;
+    kuriositaet: number;
+    histKunst: number;
+    gebrauchsArt: number;
+}
+
+export interface LSLock extends GameObject {
+    type: ObjectType.LSLock;
+    lockType: number;
+}
+
+export interface LSObject extends GameObject {
+    type: ObjectType.LSObject;
+    offsetFact: number;
+    destX: number;
+    destY: number;
+    exactX: number;
+    exactY: number;
+    exactX1: number;
+    exactY1: number;
+    size: number;
+    visible: number;
+    chained: number;
+    status: number;
+    lsType: number;
+}
+
+export interface LSRoom extends GameObject {
+    type: ObjectType.LSRoom;
+    // Structure not fully defined in tcdata.h, will add fields as needed
 }
 
 // Relations between objects (from tcdata.h)
