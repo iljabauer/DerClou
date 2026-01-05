@@ -110,14 +110,21 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - Scene constants (SCENE_*)
    - Player money management
    - Environment state management
-   - Story handlers ported:
+   - Story handlers ported (12 of 43):
      - tcDoneArrival (game opening)
      - tcDoneHotelReception (hotel room)
      - tcDoneCredits (receive money)
      - tcDoneMamiCalls (phone call)
      - tcDoneGludoMoney (get money from Gludo)
      - tcDoneDanner (get money from Danner)
-   - ⚠️ More story handlers needed
+     - tcDoneMeetBriggs (meet Briggs, job offer)
+     - tcDoneFreeTicket (meet Dan Stanford)
+     - tcDoneCallFromPooly (Pooly calls about ring)
+     - tcDoneGludoAsSailor (meet Gludo as sailor)
+     - tcDoneCallFromBriggs (Briggs calls)
+     - tcDonePrison (prison ending)
+   - Helper methods: time progression, location changes, graphics stubs
+   - ⚠️ 31 more story handlers needed
    - ⚠️ Environment needs database integration
 
 12. **Test Scenes**
