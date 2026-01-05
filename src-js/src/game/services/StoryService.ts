@@ -1046,6 +1046,33 @@ export class StoryService {
     }
 
     /**
+     * SOUTHHAMPTON WITHOUT SABIEN
+     * Port of tcDoneSouthhamptonWithoutSabien from story.c
+     * 
+     * Matt arrives in Southampton without Sabien
+     */
+    private tcDoneSouthhamptonWithoutSabien(): void {
+        this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST_20_OLD_0');
+
+        this.scene.sceneArgs.returnValue = SCENE_SOUTHHAMPTON;
+    }
+
+    /**
+     * SOUTHHAMPTON SABIEN UNKNOWN
+     * Port of tcDoneSouthhamptonSabienUnknown from story.c
+     * 
+     * Matt arrives in Southampton, Sabien unknown
+     */
+    private tcDoneSouthhamptonSabienUnknown(): void {
+        this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST_20W_OLD_0');
+
+        this.stopAnim();
+        this.gfxChangeColors(0, 'fade_out');
+
+        this.scene.sceneArgs.returnValue = SCENE_SOUTHHAMPTON;
+    }
+
+    /**
      * Helper: Play animation
      */
     private playAnim(animName: string, duration: number): void {
