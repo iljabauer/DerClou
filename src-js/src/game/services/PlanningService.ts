@@ -681,19 +681,120 @@ export class PlanningService {
     }
 
     /**
-     * Open action
+     * Open action - open doors, windows, safes, etc.
      */
     private async actionOpen(): Promise<void> {
-        // TODO: Implement open action
-        await this.ui.showBubble(['Open action not yet implemented'], 'think', 0);
+        await this.actionOpenClose(ActionType.OPEN);
     }
 
     /**
-     * Close action
+     * Close action - close doors, windows, safes, etc.
      */
     private async actionClose(): Promise<void> {
-        // TODO: Implement close action
-        await this.ui.showBubble(['Close action not yet implemented'], 'think', 0);
+        await this.actionOpenClose(ActionType.CLOSE);
+    }
+
+    /**
+     * Open/Close action implementation
+     * Port of plActionOpenClose() from planer.c
+     */
+    private async actionOpenClose(actionType: ActionType): Promise<void> {
+        if (!this.state) return;
+        
+        // Get objects in reach
+        const actionList = this.support.getObjectsList(this.currentPerson, false);
+        
+        if (actionList.length === 0) {
+            this.showMessage('NO_OBJECTS', true);
+            return;
+        }
+        
+        // Show message
+        if (actionType === ActionType.OPEN) {
+            this.showMessage('OPEN', true);
+        } else {
+            this.showMessage('CLOSE', true);
+        }
+        
+        // Show object selection
+        const objectChoice = await this.ui.showMenu(
+            actionList.map(obj => this.db.getObjectName(obj)),
+            actionType === ActionType.OPEN ? 'Open' : 'Close'
+        );
+        
+        if (objectChoice < 0 || objectChoice >= actionList.length) return;
+        
+        const objectId = actionList[objectChoice];
+        const objectState = this.landscape.getObjectState(objectId);
+        
+        // Check if in progress
+        if (this.currentPerson < this.state.team.length && (objectState & (1 << 3))) { // Const_tcIN_PROGRESS_BIT
+            this.showMessage('IN_PROGRESS', true);
+            return;
+        }
+        
+        // Check if locked
+        if (this.currentPerson < this.state.team.length && 
+            !this.support.ignoreLock(objectId) && 
+            !(objectState & (1 << 2))) { // Const_tcLOCK_UNLOCK_BIT
+            this.showMessage('LOCKED', true);
+            return;
+        }
+        
+        // Check current state
+        const isOpen = (objectState & (1 << 0)) !== 0; // Const_tcOPEN_CLOSE_BIT
+        
+        if ((actionType === ActionType.OPEN && isOpen) || 
+            (actionType === ActionType.CLOSE && !isOpen)) {
+            // Already in desired state
+            if (actionType === ActionType.OPEN) {
+                this.showMessage('OPEN_OPENED', true);
+            } else {
+                this.showMessage('CLOSE_CLOSED', true);
+            }
+            return;
+        }
+        
+        // Calculate time (using hand tool)
+        // TODO: Use opensGet() to get actual time
+        const time = 30 * 60; // Placeholder
+        
+        const action = this.planningSystem.initAction(
+            actionType,
+            objectId,
+            0,
+            time
+        );
+        
+        if (action) {
+            this.planChanged = true;
+            
+            if (this.currentPerson < this.state.team.length) {
+                await this.support.work(this.currentPerson);
+            }
+            
+            await this.sync(false, this.planningSystem.getMaxTimer(), time, true);
+            
+            // Update object state
+            this.landscape.setObjectState(
+                objectId,
+                1 << 0, // Const_tcOPEN_CLOSE_BIT
+                actionType === ActionType.OPEN ? 1 : 0
+            );
+            
+            // Correct opened state
+            const lsObject = this.db.getObject(objectId);
+            if (actionType === ActionType.OPEN) {
+                this.support.correctOpened(lsObject, true);
+            } else {
+                this.support.correctOpened(lsObject, false);
+            }
+            
+            this.landscape.refresh(objectId);
+            this.living.refreshAll();
+        } else {
+            await this.say('PLANING_END', this.currentPerson);
+        }
     }
 
     /**
