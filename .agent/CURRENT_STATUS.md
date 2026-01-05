@@ -90,13 +90,22 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - ⚠️ Talk() requires location system
    - ⚠️ Character portrait display (future)
 
-9. **Foundation Systems** - In Progress 🚧
+9. **Foundation Systems** - Complete ✅
    - Database relation queries (hasAll, knowsAll, livesIn)
-   - FilmService for story state (stub)
+   - FilmService for story state
    - GameConstants for key IDs
-   - ⚠️ Scene system requires more foundation work
+   - SceneService for scene management
 
-10. **Test Scenes**
+10. **Scene System** - Complete ✅
+   - SceneService with core functions
+   - go() - Location navigation with menu
+   - information() - Info menu for possessions
+   - look() - Examine location and people
+   - wait() - Time progression system
+   - Taxi location management
+   - SceneTestScene for testing
+
+11. **Test Scenes**
    - ReplayTestScene (original)
    - DataLoaderTestScene
    - TextTestScene
@@ -104,6 +113,7 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - ImageTestScene
    - LivingTestScene
    - DialogTestScene
+   - SceneTestScene
    - GameScene, MainMenuScene, LondonScene
 
 ### What Needs Work 🚧
@@ -113,28 +123,23 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - ⚠️ Visual regression testing blocked
    - ⚠️ Need to debug NW.js screenshot capture
 
-2. **Scene/Story System** (src/scenes/, src/story/) - COMPLEX
-   - ⚠️ Requires Film system (story state)
-   - ⚠️ Requires Location system (GetLocation, GetObjNrOfLocation)
-   - ⚠️ Requires Present system (object display)
-   - ⚠️ Requires Relation queries (hasAll, knowsAll, livesIn)
-   - See SCENE_SYSTEM_ANALYSIS.md for details
+2. **Story System** (src/story/) - IN PROGRESS
+   - ✅ SceneService with core functions complete
+   - ⚠️ Need StoryService for story handlers (tcDone* functions)
+   - ⚠️ Need scene constants (SCENE_*)
+   - ⚠️ Need story state management
+   - See SCENE_STORY_ANALYSIS.md for details
 
-3. **Foundation Progress** - BUILDING
-   - ✅ Relation query methods added to Database
-   - ✅ FilmService stub created
-   - ✅ GameConstants added
-   - ⚠️ Need Present system for object display
-   - ⚠️ Need more story/scene infrastructure
+3. **Story Handlers** (src/story/)
+   - Port tcDone* functions (story scene handlers)
+   - Scene constants (SCENE_*)
+   - Story progression logic
+   - Event triggers
 
-3. **Data Verification**
-   - Load object names from text files (OBJECTS.TXT)
-   - Verify data integrity against C version
-
-4. **Dialog System**
-   - Conversation trees
-   - NPC interactions
-   - Choice menus
+4. **Interaction System** (src/present/interac.c)
+   - Action menu (Go, Talk, Look, Wait, Think)
+   - Player interactions
+   - Scene integration
 
 5. **Gameplay Systems**
    - Planning mechanics
@@ -169,7 +174,10 @@ src-js/src/game/
 │   ├── UIService.ts         ✅ Menus & bubbles
 │   ├── LivingService.ts     ✅ Character management
 │   ├── BackgroundService.ts ✅ Background display
-│   └── DialogService.ts     🚧 Dialog system
+│   ├── DialogService.ts     ✅ Dialog system
+│   ├── FilmService.ts       ✅ Story state
+│   ├── SceneService.ts      ✅ Scene functions
+│   └── PresentationService.ts ✅ Object display
 └── scenes/
     ├── ReplayTestScene.ts   ✅ Replay testing
     ├── DataLoaderTestScene.ts ✅ Data loading test
@@ -177,6 +185,7 @@ src-js/src/game/
     ├── UITestScene.ts       ✅ UI system test
     ├── LivingTestScene.ts   ✅ Living system test
     ├── DialogTestScene.ts   ✅ Dialog system test
+    ├── SceneTestScene.ts    ✅ Scene system test
     ├── GameScene.ts         ✅ Main scene
     ├── MainMenuScene.ts     ✅ Menu
     └── LondonScene.ts       ✅ Hub scene
@@ -187,18 +196,13 @@ src-js/src/game/
 ### Immediate (This Session)
 1. ✅ Create comprehensive porting plan
 2. ✅ Complete Phase 1: Living/Location System
-3. ✅ Port LivingService (character management)
-4. ✅ Port BackgroundService (location backgrounds)
-5. ✅ Create LivingTestScene
-6. ✅ Load animation templates from TEMPLATE.LST
-7. ✅ Load character sprites from ALLMAXI
-8. ✅ Implement frame-based animation system
-9. ✅ Start Phase 2: Dialog System
-10. ✅ Port Say() function
-11. ✅ Create DialogService
-12. ✅ Create DialogTestScene
-13. ⚠️ Fix replay system screenshot generation
-14. ⚠️ Complete DynamicTalk() implementation
+3. ✅ Complete Phase 2: Dialog System
+4. ✅ Start Phase 3: Scene/Story System
+5. ✅ Port SceneService (Go, Information, Look, Wait)
+6. ✅ Create SceneTestScene
+7. ⚠️ Port StoryService (story handlers)
+8. ⚠️ Add scene constants
+9. ⚠️ Fix replay system screenshot generation
 
 ### Short-term (Next 2-3 Sessions)
 1. Complete Living/Location System

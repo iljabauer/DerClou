@@ -4,24 +4,27 @@
 
 ## Current Sprint: Phase 3 - Scene/Story System
 
-### High Priority 🔴 (Phase 3: Scene/Story System)
+### High Priority 🔴 (Phase 3: Scene/Story System - In Progress)
 
-- [ ] Port scene system (src/scenes/)
-  - [ ] Go() - Location navigation
-  - [ ] Information() - Info menu
-  - [ ] Look() - Examine objects
-  - [ ] Wait() - Time progression
+- [x] Port scene system (src/scenes/)
+  - [x] Go() - Location navigation
+  - [x] Information() - Info menu
+  - [x] Look() - Examine objects
+  - [x] Wait() - Time progression
+  - [x] Create SceneService.ts
+  - [x] Create SceneTestScene.ts
 
 - [ ] Port story system (src/story/)
-  - [ ] Story scene handlers
-  - [ ] Event triggers
+  - [ ] Create StoryService.ts
+  - [ ] Add scene constants (SCENE_*)
+  - [ ] Port key story handlers (tcDone* functions)
   - [ ] Story state management
+  - [ ] Event triggers
 
-- [ ] Port location system (src/present/)
-  - [ ] GetLocation() - Get current location
-  - [ ] hasAll() - Get all persons at location
-  - [ ] PersonWorksHere() - Check if person works at location
-  - [ ] Complete Talk() function
+- [ ] Port interaction system (src/present/interac.c)
+  - [ ] Action menu (Go, Talk, Look, Wait, Think)
+  - [ ] Player interaction handling
+  - [ ] Integration with SceneService
 
 ### Medium Priority 🟡 (Replay System Fix)
 
@@ -96,7 +99,7 @@
 - [x] Character positioning and visibility
 - [x] Animation state management
 
-### Phase 2: Dialog System (Complete)
+### Phase 2: Dialog System (Complete ✅)
 - [x] Port Say() function from dialog.c
 - [x] Create DialogService.ts
 - [x] Add text file ID constants (BUSINESS_TXT, TALK_0_TXT, TALK_1_TXT)
@@ -110,6 +113,15 @@
 - [x] Dialog tree navigation
 - [x] Standard question handlers
 - [x] Add DynamicTalk test to DialogTestScene
+
+### Phase 3: Scene System (Partial ✅)
+- [x] Port SceneService.ts
+- [x] Port Go() - Location navigation
+- [x] Port Information() - Info menu
+- [x] Port Look() - Examine location
+- [x] Port Wait() - Time progression
+- [x] Taxi location management
+- [x] Create SceneTestScene for testing
 
 ## Blocked ⛔
 
