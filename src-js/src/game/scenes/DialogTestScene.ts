@@ -3,10 +3,12 @@
  */
 
 import { Scene } from 'phaser';
-import { DialogService, BUSINESS_TXT, MATT_PICTID } from '../services/DialogService';
+import { DialogService, BUSINESS_TXT, MATT_PICTID, DLG_TALKMODE_STANDARD } from '../services/DialogService';
 import { TextService } from '../services/TextService';
 import { UIService } from '../services/UIService';
 import { ImageService } from '../services/ImageService';
+import { db } from '../core/Database';
+import { Person, ObjectType } from '../types/GameTypes';
 
 export class DialogTestScene extends Scene {
     private dialogService!: DialogService;
@@ -34,7 +36,7 @@ export class DialogTestScene extends Scene {
         await this.imageService.init();
         
         this.uiService = new UIService(this);
-        this.dialogService = new DialogService(this, this.textService, this.uiService, this.imageService);
+        this.dialogService = new DialogService(this, this.textService, this.uiService, this.imageService, db);
 
         this.statusText.setText('Status: Dialog system initialized');
 
@@ -62,6 +64,12 @@ export class DialogTestScene extends Scene {
         })
             .setInteractive({ useHandCursor: true })
             .on('pointerdown', () => this.testTextKeys());
+
+        this.add.text(200, 150, 'Test DynamicTalk()', {
+            backgroundColor: '#440000', padding: { x: 10, y: 5 }, ...style
+        })
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => this.testDynamicTalk());
 
         this.add.text(10, 200, 'Instructions:', { fontSize: '14px', color: '#ffff00' });
         this.add.text(10, 220, 'Click buttons to test dialog system functionality', style);
@@ -151,6 +159,75 @@ export class DialogTestScene extends Scene {
         } catch (error) {
             this.statusText.setText(`Status: Text key test error - ${error}`);
             console.error('Text key test error:', error);
+        }
+    }
+
+    private async testDynamicTalk(): Promise<void> {
+        this.statusText.setText('Status: Testing DynamicTalk()...');
+        
+        try {
+            // Create two test persons
+            const matt: Person = {
+                id: 1,
+                name: 'Matt',
+                type: ObjectType.Person,
+                pictId: MATT_PICTID,
+                job: 0,
+                sex: 0,
+                age: 30,
+                health: 100,
+                mood: 100,
+                intelligence: 100,
+                strength: 100,
+                stamina: 100,
+                loyalty: 100,
+                skill: 100,
+                known: 0,
+                popularity: 50,
+                avarice: 50,
+                panic: 0,
+                knownToPolice: 0,
+                talkBits: 0,
+                talkFileId: 0,
+                oldHealth: 100
+            };
+
+            const npc: Person = {
+                id: 2,
+                name: 'TestNPC',
+                type: ObjectType.Person,
+                pictId: 1,
+                job: 0,
+                sex: 0,
+                age: 35,
+                health: 100,
+                mood: 100,
+                intelligence: 80,
+                strength: 80,
+                stamina: 80,
+                loyalty: 80,
+                skill: 80,
+                known: 0,
+                popularity: 50,
+                avarice: 50,
+                panic: 0,
+                knownToPolice: 0,
+                talkBits: 0,
+                talkFileId: 0,
+                oldHealth: 100
+            };
+
+            // Add to database
+            db.addObject(matt);
+            db.addObject(npc);
+
+            // Test conversation
+            await this.dialogService.dynamicTalk(matt.id, npc.id, DLG_TALKMODE_STANDARD);
+            
+            this.statusText.setText('Status: DynamicTalk() test complete');
+        } catch (error) {
+            this.statusText.setText(`Status: DynamicTalk() error - ${error}`);
+            console.error('DynamicTalk() test error:', error);
         }
     }
 }
