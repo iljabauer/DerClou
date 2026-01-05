@@ -8,7 +8,7 @@
 import { Database } from '../core/Database';
 import { Loot, CompleteLoot } from '../types/GameTypes';
 import { TextService } from './TextService';
-import { GameConstants } from '../core/GameConstants';
+import { CompleteLoot_LastLoot } from '../types/GameConstants';
 
 export interface LootSummary {
     bild: number;
@@ -49,7 +49,7 @@ export class LootService {
     makeLootList(containerId: number, relationId: string): LootSummary {
         // Get CompleteLoot object for tracking
         const completeLoot = this.database.getObject(
-            GameConstants.CompleteLoot_LastLoot
+            CompleteLoot_LastLoot
         ) as CompleteLoot;
 
         if (!completeLoot) {

@@ -12,7 +12,7 @@ import { DialogService } from '../services/DialogService';
 import { PlanningService } from '../services/PlanningService';
 import { FilmService } from '../services/FilmService';
 import { OrganisationService } from '../services/OrganisationService';
-import { GameConstants } from '../types/GameConstants';
+import { Person_Matt_Stuvysunt, Ability_Autos } from '../types/GameConstants';
 
 export class OrganisationTestScene extends Scene {
     private database!: Database;
@@ -137,7 +137,7 @@ export class OrganisationTestScene extends Scene {
             // Add first 3 buildings to Matt's "has" relation
             for (let i = 0; i < Math.min(3, buildings.length); i++) {
                 this.database.addRelation(
-                    GameConstants.Person_Matt_Stuvysunt,
+                    Person_Matt_Stuvysunt,
                     'has',
                     buildings[i].id
                 );
@@ -151,7 +151,7 @@ export class OrganisationTestScene extends Scene {
             // Add first 2 cars to Matt's "has" relation
             for (let i = 0; i < Math.min(2, cars.length); i++) {
                 this.database.addRelation(
-                    GameConstants.Person_Matt_Stuvysunt,
+                    Person_Matt_Stuvysunt,
                     'has',
                     cars[i].id
                 );
@@ -165,9 +165,9 @@ export class OrganisationTestScene extends Scene {
             // Add first 5 persons (excluding Matt) to "join" relation
             let added = 0;
             for (const person of persons) {
-                if (person.id !== GameConstants.Person_Matt_Stuvysunt && added < 5) {
+                if (person.id !== Person_Matt_Stuvysunt && added < 5) {
                     this.database.addRelation(
-                        GameConstants.Person_Matt_Stuvysunt,
+                        Person_Matt_Stuvysunt,
                         'join',
                         person.id
                     );
@@ -178,10 +178,10 @@ export class OrganisationTestScene extends Scene {
         }
 
         // Give some persons the driving ability
-        const drivingAbility = GameConstants.Ability_Autos;
+        const drivingAbility = Ability_Autos;
         let driversAdded = 0;
         for (const person of persons) {
-            if (person.id !== GameConstants.Person_Matt_Stuvysunt && driversAdded < 3) {
+            if (person.id !== Person_Matt_Stuvysunt && driversAdded < 3) {
                 this.database.addRelation(
                     person.id,
                     'has',

@@ -13,7 +13,7 @@ import { UIService } from './UIService';
 import { DialogService } from './DialogService';
 import { PlanningService } from './PlanningService';
 import { FilmService } from './FilmService';
-import { GameConstants } from '../types/GameConstants';
+import { Person_Matt_Stuvysunt } from '../types/GameConstants';
 
 export interface OrganisationState {
     buildingId: number;
@@ -173,7 +173,7 @@ export class OrganisationService {
     private initializeBuilding(): void {
         // Get all buildings Matt has
         const buildings = this.database.getRelatedObjects(
-            GameConstants.Person_Matt_Stuvysunt,
+            Person_Matt_Stuvysunt,
             'has',
             'Building'
         );
@@ -191,7 +191,7 @@ export class OrganisationService {
     private initializeCar(): void {
         // Get all cars Matt has
         const cars = this.database.getRelatedObjects(
-            GameConstants.Person_Matt_Stuvysunt,
+            Person_Matt_Stuvysunt,
             'has',
             'Car'
         );
@@ -213,7 +213,7 @@ export class OrganisationService {
     private initializeDriver(): void {
         // Get all persons Matt knows
         const persons = this.database.getRelatedObjects(
-            GameConstants.Person_Matt_Stuvysunt,
+            Person_Matt_Stuvysunt,
             'joined_by',
             'Person'
         );
@@ -228,7 +228,7 @@ export class OrganisationService {
      */
     private setBuilding(): void {
         const buildings = this.database.getRelatedObjects(
-            GameConstants.Person_Matt_Stuvysunt,
+            Person_Matt_Stuvysunt,
             'has',
             'Building'
         );
@@ -243,7 +243,7 @@ export class OrganisationService {
      */
     private setCar(): void {
         const cars = this.database.getRelatedObjects(
-            GameConstants.Person_Matt_Stuvysunt,
+            Person_Matt_Stuvysunt,
             'has',
             'Car'
         );
@@ -262,7 +262,7 @@ export class OrganisationService {
      */
     private async makeCarOk(): Promise<boolean> {
         const teamMembers = this.database.getRelatedObjects(
-            GameConstants.Person_Matt_Stuvysunt,
+            Person_Matt_Stuvysunt,
             'joined_by',
             'Person'
         );
@@ -273,7 +273,7 @@ export class OrganisationService {
             // Remove team members until car fits
             while (teamMembers.length > this.state.placesInCar) {
                 const choices = teamMembers
-                    .filter(p => p.id !== GameConstants.Person_Matt_Stuvysunt)
+                    .filter(p => p.id !== Person_Matt_Stuvysunt)
                     .map(p => {
                         const person = this.database.getObject(p.id) as Person;
                         return person ? person.name : 'Unknown';
@@ -291,7 +291,7 @@ export class OrganisationService {
 
                 const personToRemove = teamMembers[result];
                 this.database.removeRelation(
-                    GameConstants.Person_Matt_Stuvysunt,
+                    Person_Matt_Stuvysunt,
                     'joined_by',
                     personToRemove.id
                 );
@@ -309,7 +309,7 @@ export class OrganisationService {
      */
     private async chooseDestBuilding(currentBuildingId: number): Promise<number> {
         const buildings = this.database.getRelatedObjects(
-            GameConstants.Person_Matt_Stuvysunt,
+            Person_Matt_Stuvysunt,
             'has',
             'Building'
         );
@@ -344,7 +344,7 @@ export class OrganisationService {
      */
     private async chooseEscapeCar(currentCarId: number): Promise<number> {
         const cars = this.database.getRelatedObjects(
-            GameConstants.Person_Matt_Stuvysunt,
+            Person_Matt_Stuvysunt,
             'has',
             'Car'
         );
@@ -355,7 +355,7 @@ export class OrganisationService {
         }
 
         const teamMembers = this.database.getRelatedObjects(
-            GameConstants.Person_Matt_Stuvysunt,
+            Person_Matt_Stuvysunt,
             'joined_by',
             'Person'
         );
@@ -398,7 +398,7 @@ export class OrganisationService {
      */
     private async chooseDriver(currentDriverId: number): Promise<number> {
         const teamMembers = this.database.getRelatedObjects(
-            GameConstants.Person_Matt_Stuvysunt,
+            Person_Matt_Stuvysunt,
             'joined_by',
             'Person'
         );
@@ -454,7 +454,7 @@ export class OrganisationService {
      */
     private async chooseGuys(): Promise<void> {
         const availablePersons = this.database.getRelatedObjects(
-            GameConstants.Person_Matt_Stuvysunt,
+            Person_Matt_Stuvysunt,
             'join',
             'Person'
         );
@@ -501,7 +501,7 @@ export class OrganisationService {
      */
     private async addGuyToParty(): Promise<void> {
         const teamMembers = this.database.getRelatedObjects(
-            GameConstants.Person_Matt_Stuvysunt,
+            Person_Matt_Stuvysunt,
             'joined_by',
             'Person'
         );
@@ -512,7 +512,7 @@ export class OrganisationService {
         }
 
         const availablePersons = this.database.getRelatedObjects(
-            GameConstants.Person_Matt_Stuvysunt,
+            Person_Matt_Stuvysunt,
             'join',
             'Person'
         );
@@ -547,7 +547,7 @@ export class OrganisationService {
 
         const selectedPerson = notInTeam[result];
         this.database.addRelation(
-            GameConstants.Person_Matt_Stuvysunt,
+            Person_Matt_Stuvysunt,
             'joined_by',
             selectedPerson.id
         );
@@ -560,14 +560,14 @@ export class OrganisationService {
      */
     private async removeGuyFromParty(): Promise<void> {
         const teamMembers = this.database.getRelatedObjects(
-            GameConstants.Person_Matt_Stuvysunt,
+            Person_Matt_Stuvysunt,
             'joined_by',
             'Person'
         );
 
         // Filter out Matt
         const removableMembers = teamMembers.filter(
-            p => p.id !== GameConstants.Person_Matt_Stuvysunt
+            p => p.id !== Person_Matt_Stuvysunt
         );
 
         if (removableMembers.length === 0) {
@@ -595,7 +595,7 @@ export class OrganisationService {
 
         const personToRemove = removableMembers[result];
         this.database.removeRelation(
-            GameConstants.Person_Matt_Stuvysunt,
+            Person_Matt_Stuvysunt,
             'joined_by',
             personToRemove.id
         );
