@@ -1,35 +1,16 @@
 # Der Clou! Port - TODO List
 
-**Last Updated:** 2026-01-05 (Session 4)
+**Last Updated:** 2026-01-05 (Session 5)
 
-## Current Sprint: Phase 1 - Living/Location System
+## Current Sprint: Phase 2 - Dialog System
 
-### High Priority 🔴 (Phase 1: Living/Location System)
+### High Priority 🔴 (Replay System Fix)
 
-- [ ] Port living.c - Location and character management
-  - [ ] livInit() - Initialize living system
-  - [ ] livDone() - Cleanup
-  - [ ] livRefreshAll() - Redraw all characters
-  - [ ] livSetAllInvisible() - Hide all characters
-  - [ ] livShowLocation() - Display location background
-  
-- [ ] Port bob.c - Character (bob) management
-  - [ ] bobInit() - Initialize character system
-  - [ ] bobSet() - Position character
-  - [ ] bobWait() - Character idle animation
-  - [ ] bobAnimate() - Play character animation
-
-- [ ] Create TypeScript services
-  - [ ] LivingService.ts - Location and character management
-  - [ ] BobService.ts - Character animation and positioning
-  - [ ] AnimationService.ts - Frame-based animations
-
-- [ ] Integration and testing
-  - [ ] Update GameScene to use LivingService
-  - [ ] Load location backgrounds via ImageService
-  - [ ] Position characters in scenes
-  - [ ] Test with replay system
-  - [ ] Visual regression testing
+- [ ] Debug replay system screenshot generation
+  - [ ] Check NW.js screenshot capture in headless mode
+  - [ ] Verify ScreenshotService integration
+  - [ ] Test with simple replay file
+  - [ ] Fix visual regression testing
 
 ### Medium Priority 🟡 (Phase 2: Dialog System)
 
@@ -82,6 +63,19 @@
 - [x] Load TCMAIN.DAT and TCBUILD.DAT
 - [x] Load all building-specific files (*ETA*.DAT, *ETA*.REL)
 - [x] Create DataLoaderTestScene for testing
+
+### Phase 1: Living/Location System (Complete)
+- [x] Port living.c - Location and character management
+- [x] Port bob.c functionality into LivingService
+- [x] Create LivingService.ts - Character management
+- [x] Create BackgroundService.ts - Location backgrounds
+- [x] Load animation templates from TEMPLATE.LST
+- [x] Load character data from LIVINGS.LST
+- [x] Load ALLMAXI sprite sheet (Collection ID 137)
+- [x] Implement frame-based animation with cropping
+- [x] Create LivingTestScene for testing
+- [x] Character positioning and visibility
+- [x] Animation state management
 
 ## Blocked ⛔
 

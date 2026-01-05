@@ -1,12 +1,12 @@
 # Der Clou! TypeScript Port - Current Status
 
-**Last Updated:** 2026-01-05 (Session 4)
+**Last Updated:** 2026-01-05 (Session 5)
 
 ## Overview
 
 Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundation with replay system, core architecture, and complete data/text/image systems.
 
-## Current Phase: Living/Location System (Phase 1)
+## Current Phase: Dialog System (Phase 2)
 
 ### What Works ✅
 
@@ -63,12 +63,16 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - Disabled item handling
    - UITestScene for testing
 
-7. **Living/Location System** - In Progress 🚧
+7. **Living/Location System** - Complete ✅
    - LivingService for character management
    - Character positioning and animation
    - Visibility and area tracking
    - BackgroundService for location backgrounds
    - Background display and management
+   - Animation template loading from TEMPLATE.LST
+   - Character data loading from LIVINGS.LST
+   - ALLMAXI sprite sheet loading and rendering
+   - Frame-based animation with proper cropping
    - LivingTestScene for testing
 
 8. **Test Scenes**
@@ -82,13 +86,10 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
 
 ### What Needs Work 🚧
 
-1. **Living/Location System** (src/living/) - IN PROGRESS
-   - ✅ Basic character management (LivingService)
-   - ✅ Background display (BackgroundService)
-   - ⚠️ Animation templates loading
-   - ⚠️ Character sprite loading
-   - ⚠️ Full animation system
-   - ⚠️ Integration with game scenes
+1. **Replay System Integration** - NEEDS ATTENTION
+   - ⚠️ Screenshot generation not working in headless mode
+   - ⚠️ Visual regression testing blocked
+   - ⚠️ Need to debug NW.js screenshot capture
 
 2. **Dialog System** (src/dialog/)
    - Conversation trees
@@ -153,13 +154,15 @@ src-js/src/game/
 
 ### Immediate (This Session)
 1. ✅ Create comprehensive porting plan
-2. ✅ Start Phase 1: Living/Location System
+2. ✅ Complete Phase 1: Living/Location System
 3. ✅ Port LivingService (character management)
 4. ✅ Port BackgroundService (location backgrounds)
 5. ✅ Create LivingTestScene
-6. ⚠️ Load animation templates from data
-7. ⚠️ Load character sprites
-8. ⚠️ Implement full animation system
+6. ✅ Load animation templates from TEMPLATE.LST
+7. ✅ Load character sprites from ALLMAXI
+8. ✅ Implement frame-based animation system
+9. ⚠️ Fix replay system screenshot generation
+10. ⚠️ Start Phase 2: Dialog System
 
 ### Short-term (Next 2-3 Sessions)
 1. Complete Living/Location System
@@ -218,7 +221,7 @@ npm run dev
 
 ## Notes
 
-- 38 TypeScript files, ~6600 lines of code
+- 38 TypeScript files, ~7000 lines of code
 - 72 C source files to port (~35k lines)
 - TCMAIN.DAT and TCBUILD.DAT are main data files
 - Building-specific files: *ETA0.DAT, *ETA1.DAT, etc.
