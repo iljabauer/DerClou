@@ -13,6 +13,7 @@ import { DialogService } from './DialogService';
 import { FilmService } from './FilmService';
 import { InvestigationService } from './InvestigationService';
 import { PlanningService } from './PlanningService';
+import { OrganisationService } from './OrganisationService';
 import {
     GO, WAIT, BUSINESS_TALK, LOOK, INVESTIGATE, PLAN, CALL_TAXI, MAKE_CALL, INFO,
     MENU_TXT, THECLOU_TXT, BUSINESS_TXT,
@@ -56,6 +57,7 @@ export class InteractionService {
     private film: FilmService;
     private investigation: InvestigationService;
     private planning: PlanningService | null = null;
+    private organisation: OrganisationService | null = null;
 
     constructor(
         scene: Phaser.Scene,
@@ -82,6 +84,13 @@ export class InteractionService {
      */
     setPlanningService(planning: PlanningService): void {
         this.planning = planning;
+    }
+
+    /**
+     * Set organisation service (optional dependency)
+     */
+    setOrganisationService(organisation: OrganisationService): void {
+        this.organisation = organisation;
     }
 
     /**
@@ -450,6 +459,15 @@ export class InteractionService {
      * Handle PLAN action
      */
     private async handlePlan(): Promise<number> {
+        if (!this.organisation) {
+            await this.ui.showBubble(
+                ['Organisation system not available.'],
+                'think',
+                0
+            );
+            return 0;
+        }
+
         if (!this.planning) {
             await this.ui.showBubble(
                 ['Planning system not available.'],
@@ -459,13 +477,15 @@ export class InteractionService {
             return 0;
         }
 
-        // TODO: Implement building selection
-        // For now, show a message
-        await this.ui.showBubble(
-            ['Select a building to plan a burglary.', 'This feature is not yet fully implemented.'],
-            'think',
-            0
-        );
+        // Call organisation menu (team/car/driver selection)
+        const buildingId = await this.organisation.tcOrganisation();
+
+        if (buildingId) {
+            // If organisation successful, proceed to burglary
+            // TODO: Call tcBurglary when implemented
+            // For now, just return success
+            return buildingId;
+        }
 
         return 0;
     }
