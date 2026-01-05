@@ -220,49 +220,77 @@ export class InteractionService {
      * Port of GO case from StdHandle() in gp_app.c
      */
     private async handleGo(): Promise<number> {
-        // TODO: Get current scene's standard successors from Film/Scene system
-        // For now, create a stub list of locations
-        const successors = [
-            { eventNr: 1, name: 'Hotel Room' },
-            { eventNr: 8, name: 'Taxi' },
-            { eventNr: 143, name: 'The Walrus' }
-        ];
+        // Get current scene's standard successors
+        const currentScene = this.film.getCurrentSceneObject();
+        
+        if (!currentScene || !currentScene.stdSucc || currentScene.stdSucc.length === 0) {
+            // No successors defined - use stub list for testing
+            const successors = [
+                { eventNr: 1, name: 'Hotel Room' },
+                { eventNr: 8, name: 'Taxi' },
+                { eventNr: 143, name: 'The Walrus' }
+            ];
+            
+            const nextScene = await this.sceneService.go(successors);
+            return nextScene || 0;
+        }
+
+        // Build successor list from scene data
+        const successors = currentScene.stdSucc.map(eventNr => {
+            const scene = this.film.getScene(eventNr);
+            if (scene) {
+                // Get location name from film service
+                const locationName = this.film.getLocationName(scene.locationNr) || `Location ${scene.locationNr}`;
+                return { eventNr, name: locationName };
+            }
+            return { eventNr, name: `Scene ${eventNr}` };
+        });
 
         // Call sceneService.go() with successors
-        const nextScene = await this.sceneService.go(successors);
+        const succEventNr = await this.sceneService.go(successors);
 
-        if (nextScene === 0) {
+        if (succEventNr === 0) {
             // User cancelled
             return 0;
         }
 
+        // Get the selected scene
+        const nextScene = this.film.getScene(succEventNr);
+        if (!nextScene) {
+            console.error(`Scene ${succEventNr} not found`);
+            return 0;
+        }
+
         // Check location opening hours
-        // TODO: Get scene from nextScene and extract locationNr
-        // For now, assume nextScene is the location ID
-        const locationId = nextScene;
-        const location = this.db.getObject(locationId) as any;
+        const locNr = nextScene.locationNr;
+        if (locNr !== -1) {
+            // Get location object from database
+            // TODO: Need to map location number to object ID
+            // For now, assume location number IS the object ID
+            const location = this.db.getObject(locNr) as any;
 
-        if (location && location.openFromMinute !== undefined && location.openToMinute !== undefined) {
-            const currentMinute = this.film.getCurrentMinute();
-            
-            if (currentMinute < location.openFromMinute || currentMinute > location.openToMinute) {
-                // Location is closed
-                const noEntryText = this.text.getFirstLine(THECLOU_TXT, 'No_Entry');
+            if (location && location.openFromMinute !== undefined && location.openToMinute !== undefined) {
+                const currentMinute = this.film.getCurrentMinute();
                 
-                // Show "closed" message
-                await this.ui.showBubble({
-                    text: noEntryText || 'This location is closed.',
-                    bubbleType: 1  // THINK_BUBBLE
-                });
+                if (currentMinute < location.openFromMinute || currentMinute > location.openToMinute) {
+                    // Location is closed
+                    const noEntryText = this.text.getFirstLine(THECLOU_TXT, 'No_Entry');
+                    
+                    // Show "closed" message
+                    await this.ui.showBubble({
+                        text: noEntryText || 'This location is closed.',
+                        bubbleType: 1  // THINK_BUBBLE
+                    });
 
-                return 0;  // Stay in current scene
+                    return 0;  // Stay in current scene
+                }
             }
         }
 
         // TODO: Stop animation if moving
         // TODO: Call StopAnim()
 
-        return nextScene;
+        return succEventNr;
     }
 
     /**
