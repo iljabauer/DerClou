@@ -13,6 +13,8 @@ import { SceneService } from '../services/SceneService';
 import { DialogService } from '../services/DialogService';
 import { FilmService } from '../services/FilmService';
 import { InteractionService } from '../services/InteractionService';
+import { BackgroundService, BackgroundId } from '../services/BackgroundService';
+import { ImageService } from '../services/ImageService';
 import {
     GO, WAIT, BUSINESS_TALK, LOOK, INFO,
     Person_Matt_Stuvysunt,
@@ -28,6 +30,8 @@ export class InteractionTestScene extends Phaser.Scene {
     private dialog!: DialogService;
     private film!: FilmService;
     private interaction!: InteractionService;
+    private background!: BackgroundService;
+    private image!: ImageService;
 
     constructor() {
         super({ key: 'InteractionTestScene' });
@@ -40,8 +44,10 @@ export class InteractionTestScene extends Phaser.Scene {
         this.db = new Database();
         this.ui = new UIService(this);
         this.text = new TextService();
+        this.image = new ImageService();
         this.dataLoader = new DataLoader(this.db, this.text);
         this.film = new FilmService(this.db);
+        this.background = new BackgroundService(this, this.image);
         this.sceneService = new SceneService(this, this.db, this.ui, this.text, this.film);
         this.dialog = new DialogService(this, this.db, this.ui, this.text);
         this.interaction = new InteractionService(
@@ -58,6 +64,11 @@ export class InteractionTestScene extends Phaser.Scene {
         console.log('Loading game data...');
         await this.dataLoader.loadAllData();
         console.log('Data loaded successfully');
+
+        // Load images
+        console.log('Loading images...');
+        await this.image.loadCollectionList();
+        console.log('Images loaded successfully');
 
         // Initialize film service
         this.film.initialize();
@@ -120,20 +131,26 @@ export class InteractionTestScene extends Phaser.Scene {
         // Clear screen
         this.children.removeAll();
 
-        // Display location
+        // Show London background
+        this.background.setCurrentBackground(BackgroundId.LONDON);
+        this.background.showMenuBackground();
+
+        // Display location (with semi-transparent background for readability)
+        this.add.rectangle(400, 50, 300, 40, 0x000000, 0.7);
         this.add.text(400, 50, 'Hotel Room', {
             fontFamily: 'Arial',
             fontSize: '24px',
-            color: '#ffffff'
+            color: '#ffff00'
         }).setOrigin(0.5);
 
         // Display time
         const env = this.db.getObject(Environment_TheClou) as any;
         const timeStr = `Day ${env?.CurrDay || 1}, ${this.formatTime(env?.CurrMinute || 480)}`;
+        this.add.rectangle(400, 90, 250, 30, 0x000000, 0.7);
         this.add.text(400, 90, timeStr, {
             fontFamily: 'Arial',
             fontSize: '16px',
-            color: '#cccccc'
+            color: '#ffffff'
         }).setOrigin(0.5);
 
         try {
