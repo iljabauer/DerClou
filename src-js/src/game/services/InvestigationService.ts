@@ -8,7 +8,7 @@ import { GameState } from '../core/GameState';
 import { TextService } from './TextService';
 import { UIService } from './UIService';
 import { Building } from '../types/GameTypes';
-import { GameConstants } from './GameConstants';
+import { Person_Matt_Stuvysunt } from '../types/GameConstants';
 
 // Text file IDs
 const INVESTIGATIONS_TXT = 5;
@@ -80,7 +80,7 @@ export class InvestigationService {
         const raise = Math.floor(255 / (patrolsPerDay + events.length + 1)) + 3;
 
         // Mark that Matt has investigated this building
-        this.db.addRelation(GameConstants.Person_Matt_Stuvysunt, buildingId, 'has');
+        this.db.addRelation(Person_Matt_Stuvysunt, buildingId, 'has');
 
         // Get investigation UI texts
         const cancelText = this.textService.getFirstLine(INVESTIGATIONS_TXT, 'Abbrechen');
