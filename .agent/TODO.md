@@ -2,22 +2,25 @@
 
 **Last Updated:** 2026-01-05
 
-## Current Sprint: Port Text System
+## Current Sprint: Image Conversion & Basic UI
 
 ### High Priority 🔴
 
-- [x] Test current data loading with TCMAIN.DAT and TCBUILD.DAT
-- [x] Add parsers for all object types in DatFileParser.ts (18 types complete)
-- [x] Load building-specific data files (*ETA*.DAT, *ETA*.REL)
-- [x] Add Police and LSArea types
-- [ ] Port text system (src/text/)
-  - [ ] Create TextService.ts with XOR decryption
-  - [ ] Load TEXTS.LST (text file list)
-  - [ ] Load individual text files with language support
-  - [ ] Implement key-based text lookup
-  - [ ] Add text formatting support
-- [ ] Verify object counts match C version
-- [ ] Load object names from text files (OBJECTS.TXT)
+- [x] Port text system (src/text/) - COMPLETE
+  - [x] Create TextService.ts with XOR decryption
+  - [x] Load TEXTS.LST (text file list)
+  - [x] Load individual text files with language support
+  - [x] Implement key-based text lookup
+  - [x] Add text formatting support
+- [x] Port image system structure (src/gfx/) - PARTIAL
+  - [x] Create ImageService.ts
+  - [x] Load COLL.LST (collection list)
+  - [ ] Convert IFF ILBM images to PNG/WebP OR implement ILBM decoder
+- [ ] Create image conversion tool/script
+- [ ] Port basic UI system (src/present/interac.c)
+  - [ ] Menu system
+  - [ ] Bubble/dialog display
+  - [ ] Choice handling
 
 ### Medium Priority 🟡
 
