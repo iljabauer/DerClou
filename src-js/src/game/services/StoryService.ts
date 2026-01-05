@@ -1155,6 +1155,19 @@ export class StoryService {
     }
 
     /**
+     * 8TH BURGLARY
+     * Port of tcDone8thBurglary from story.c
+     * 
+     * After 8th burglary - unlock villa location
+     */
+    private tcDone8thBurglary(): void {
+        this.scene.addTaxiLocation(25); // villa
+
+        // TODO: GetScene(SCENE_FAHNDUNG)->Geschehen = 0;
+        this.scene.sceneArgs.returnValue = this.getLocSceneEventNr(this.film.getLocation());
+    }
+
+    /**
      * Helper: Play animation
      */
     private playAnim(animName: string, duration: number): void {
