@@ -189,11 +189,19 @@ export class MainMenuScene implements GameScene {
             avarice: 30,
             panic: 0,
             knownToPolice: 0,
+            talkBits: 0,
+            talkFileId: 0,
+            oldHealth: 100,
             money: 5000,
             stolenMoney: 0,
+            myStolenMoney: 0,
             nrOfBurglaries: 0,
+            jobOfferCount: 0,
+            mattsPart: 0,
             currScene: 0,
             currDay: 1,
+            currMinute: 0,
+            currLocation: 0,
         };
 
         const playerId = db.addObject(player);

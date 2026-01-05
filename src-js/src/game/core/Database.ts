@@ -57,6 +57,22 @@ export class Database {
         this.relations = [];
         this.nextId = 1;
     }
+
+    getObjectCount(): number {
+        return this.objects.size;
+    }
+
+    getRelationCount(): number {
+        return this.relations.length;
+    }
+
+    getAllObjects(): GameObject[] {
+        return Array.from(this.objects.values());
+    }
+
+    getAllRelations(): Relation[] {
+        return [...this.relations];
+    }
 }
 
 export const db = new Database();

@@ -17,21 +17,34 @@
 - [x] All code compiles without errors
 - [x] Build succeeds
 
-## 📋 Phase 1: Data Loading (HIGH PRIORITY)
+## 📋 Phase 1: Data Loading (HIGH PRIORITY) - IN PROGRESS 🚧
 
 ### Binary File Parsing
-- [ ] Create binary file reader utility
-- [ ] Parse .dat file header
-- [ ] Parse object records
-- [ ] Handle endianness conversion
-- [ ] Load MAIN.DAT
-- [ ] Load BUILD.DAT
+- [x] Create binary file reader utility
+- [x] Parse .dat file header
+- [x] Parse object records
+- [x] Handle endianness conversion
+- [x] Load MAIN.DAT
+- [x] Load BUILD.DAT
 
 ### Relation Loading
-- [ ] Parse .rel file format
-- [ ] Load MAIN.REL
-- [ ] Load BUILD.REL
-- [ ] Populate database relations
+- [x] Parse .rel file format
+- [x] Load MAIN.REL
+- [x] Load BUILD.REL
+- [x] Populate database relations
+
+### Object Type Support
+- [x] Person objects
+- [x] Player objects
+- [x] Car objects
+- [x] Building objects
+- [x] Tool objects
+- [ ] Loot objects
+- [ ] Evidence objects
+- [ ] Environment objects
+- [ ] LSArea, LSObject, Ability objects
+- [ ] LSLock, LSPower, LSAlarm objects
+- [ ] Location, Scene, Timer, Item objects
 
 ### Text Loading
 - [ ] Detect language (E/D/F/S)
@@ -39,6 +52,7 @@
 - [ ] Parse text format
 - [ ] Create text lookup system
 - [ ] Support multi-language
+- [ ] Load object names from text files
 
 ### Asset Loading
 - [ ] Convert images to PNG/WebP
@@ -48,6 +62,7 @@
 - [ ] Implement asset loader
 
 ### Testing
+- [x] Create data loader test scene
 - [ ] Verify object counts match C version
 - [ ] Verify relations match C version
 - [ ] Test text retrieval

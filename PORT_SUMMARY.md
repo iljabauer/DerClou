@@ -2,7 +2,7 @@
 
 ## What Was Done
 
-I've created a **foundation architecture** for porting Der Clou! from C to TypeScript. This is not a complete port (which would take weeks/months), but a solid starting point that demonstrates the approach and preserves the critical replay mechanism.
+I've created a **foundation architecture** for porting Der Clou! from C to TypeScript and begun implementing **Phase 1: Data Loading**. This includes the core systems needed to load game data from binary files and populate the database.
 
 ## Completed Work
 
@@ -104,7 +104,21 @@ All scenes support both replay and interactive modes.
 - State display
 - Database usage
 
-### 10. Documentation ✅
+### 10. Data Loading System ✅ (NEW)
+
+**Binary file loading and parsing:**
+- **BinaryReader**: Read binary files with endianness support (little-endian)
+- **DatFileParser**: Parse .dat files containing game objects
+- **RelFileParser**: Parse .rel files containing object relations
+- **DataLoader**: Service to load TCMAIN.DAT, TCBUILD.DAT and their relations
+- **DataLoaderTestScene**: Interactive test scene for data loading
+
+Supports loading:
+- Person, Player, Car, Building, Tool objects
+- All relation types (Has, Knows, LivesIn, etc.)
+- Proper endianness conversion (matches C EndianW/EndianL)
+
+### 11. Documentation ✅
 
 Comprehensive documentation:
 - `PORT_README.md` - Complete port documentation and API reference (532 lines)
@@ -118,7 +132,8 @@ Comprehensive documentation:
 
 ## What's NOT Done
 
-### Major Systems (Not Ported)
+### Major Systems (Not Ported or Partial)
+- 🚧 **Data loading** (partial - basic objects work, need more types)
 - ❌ Graphics system (sprites, images, palettes)
 - ❌ Animation system (frame-based animations)
 - ❌ Text system (multi-language, text files)
@@ -126,7 +141,6 @@ Comprehensive documentation:
 - ❌ Planning system (burglary planning)
 - ❌ Burglary mechanics (actual gameplay)
 - ❌ Story system (progression, conditions)
-- ❌ Data loading (binary .dat files)
 - ❌ Audio (excluded by design)
 
 ### Why Not Complete?
@@ -153,6 +167,11 @@ cd src-js
 npm install
 npm run build
 
+# Test data loading (interactive)
+npx nw .
+# The DataLoaderTestScene will start automatically
+# Click "Load Data" to test loading game files
+
 # Test with replay
 npx nw . --replay-path=../gamedata/test_long.rec --screenshot-path=./test --headless
 
@@ -161,7 +180,24 @@ cd ..
 ./tools/compare_screenshots.sh ./gamedata/test_long.rec ./test_screenshots 1000
 ```
 
-### 2. Port Additional Systems
+### 2. Complete Data Loading
+
+The data loading system is partially complete. Next steps:
+
+```typescript
+// 1. Add more object type parsers in DatFileParser.ts
+private readLoot(header: ObjectHeader): Loot {
+    // Parse loot object fields
+}
+
+// 2. Load object names from text files
+// Parse OBJECTS.TXT to get proper names
+
+// 3. Verify data integrity
+// Compare object counts with C version
+```
+
+### 3. Port Additional Systems
 
 Follow this pattern for each C system:
 
@@ -186,14 +222,16 @@ export class MyScene extends Scene {
 sceneManager.registerScene(myScene);
 ```
 
-### 3. Priority Order
+### 4. Priority Order
 
 Recommended porting order:
 
-1. **Data Loading** (highest priority)
-   - Parse .dat files
-   - Load objects into database
-   - Load relations
+1. **Data Loading** (in progress - 60% complete)
+   - ✅ Parse .dat files
+   - ✅ Load objects into database
+   - ✅ Load relations
+   - ⚠️ Complete remaining object types
+   - ⚠️ Load object names from text files
    
 2. **Text System**
    - Load text files

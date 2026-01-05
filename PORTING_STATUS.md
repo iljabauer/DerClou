@@ -3,9 +3,32 @@
 ## Overview
 This document tracks the progress of porting Der Clou! from C to TypeScript.
 
-## Current Status: Foundation Complete ✅
+## Current Status: Phase 1 (Data Loading) In Progress 🚧
 
 ### Completed Components
+
+#### Phase 1: Data Loading (Partial) 🚧
+- ✅ **Binary File Reader** (`src-js/src/game/services/BinaryReader.ts`)
+  - Read binary files with endianness support
+  - Matches C implementation (dskRead/EndianW/EndianL)
+  
+- ✅ **DAT File Parser** (`src-js/src/game/services/DatFileParser.ts`)
+  - Parse .dat files (game object database)
+  - Support for Person, Player, Car, Building, Tool objects
+  - Extensible for additional object types
+  
+- ✅ **REL File Parser** (`src-js/src/game/services/RelFileParser.ts`)
+  - Parse .rel files (object relations)
+  - Text-based format (RELF/RTAB markers)
+  
+- ✅ **Data Loader Service** (`src-js/src/game/services/DataLoader.ts`)
+  - Load TCMAIN.DAT and TCBUILD.DAT
+  - Load TCMAIN.REL and TCBUILD.REL
+  - Populate database with objects and relations
+  
+- ✅ **Data Loader Test Scene** (`src-js/src/game/scenes/DataLoaderTestScene.ts`)
+  - Interactive testing of data loading
+  - Display statistics and sample objects
 
 #### Core Systems
 - ✅ **Type System** (`src-js/src/game/types/`)
@@ -84,6 +107,14 @@ src-js/src/game/
 ```
 
 ## What's NOT Ported Yet
+
+### Phase 1: Data Loading (Remaining)
+- ⚠️ **Object Name Loading** - Need to load object names from text files
+- ⚠️ **Additional Object Types** - Need parsers for remaining object types:
+  - Loot, Evidence, Environment, LSArea, LSObject, Ability
+  - LSLock, LSPower, LSAlarm, Lso, CompleteLoot
+  - Scene, Timer, Item, Location, London, Police, LSRoom
+- ⚠️ **Data Validation** - Verify loaded data matches C version
 
 ### Major Systems
 - ❌ **Graphics System** (gfx.c, display.c)

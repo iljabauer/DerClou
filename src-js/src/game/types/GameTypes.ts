@@ -50,15 +50,23 @@ export interface Person extends GameObject {
     avarice: number;
     panic: number;
     knownToPolice: number;
+    talkBits: number;
+    talkFileId: number;
+    oldHealth: number;
 }
 
 export interface Player extends Person {
     type: ObjectType.Player;
     money: number;
     stolenMoney: number;
+    myStolenMoney: number;
     nrOfBurglaries: number;
+    jobOfferCount: number;
+    mattsPart: number;
     currScene: number;
     currDay: number;
+    currMinute: number;
+    currLocation: number;
 }
 
 export interface Car extends GameObject {
@@ -106,17 +114,27 @@ export interface Scene extends GameObject {
     flags: number;
 }
 
-// Relations between objects
+// Relations between objects (from tcdata.h)
 export enum RelationType {
+    HasClock = 1,
+    ClockTimer = 2,
+    StairConnects = 3,
     Has = 4,
     Knows = 5,
-    LivesIn = 6,
+    LikesToBe = 6,
+    Join = 7,
     JoinedBy = 8,
+    Uses = 9,
+    LivesIn = 10,
+    Break = 11,
     Hurt = 12,
     Sound = 13,
+    Opens = 14,
+    ToolRequires = 15,
     Taxi = 16,
     Learned = 17,
     Remember = 18,
+    HasLootBag = 19,
     PersonWorksHere = 20,
 }
 
