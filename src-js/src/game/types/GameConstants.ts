@@ -14,6 +14,7 @@ export const Person_Dan_Stanford = 9821;
 export const Person_John_Gludo = 9822;
 export const Person_Eric_Pooly = 9825;
 export const Person_Sabien_Pardo = 9846;
+export const Person_Red_Stanson = 9847;
 export const Person_Pater_James = 9848;
 
 // Key Location IDs
