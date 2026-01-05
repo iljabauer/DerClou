@@ -5,19 +5,56 @@
 // Key Person IDs
 export const Person_Matt_Stuvysunt = 9801;
 export const Person_Player_1 = 9800;
-export const Person_Ben_Riggley = 9802;
+export const Person_Paul_O_Conner = 9802;
+export const Person_Ken_Addison = 9803;
+export const Person_Frank_Meier = 9804;
 export const Person_Herbert_Briggs = 9805;
+export const Person_Tony_Allen = 9806;
+export const Person_Mathew_Black = 9808;
+export const Person_Miguel_Garcia = 9809;
+export const Person_Mike_Seeger = 9810;
+export const Person_Albert_Liet = 9811;
+export const Person_Mohammed_Abdula = 9812;
+export const Person_Serge_Fontane = 9813;
 export const Person_Frank_Maloya = 9814;
+export const Person_Neil_Grey = 9815;
+export const Person_Mark_Hart = 9816;
 export const Person_Jim_Danner = 9817;
+export const Person_Robert_Bull = 9818;
+export const Person_Thomas_Groul = 9819;
 export const Person_Helen_Parker = 9820;
 export const Person_Dan_Stanford = 9821;
 export const Person_John_Gludo = 9822;
 export const Person_Miles_Chickenwing = 9823;
+export const Person_Mary_Bolton = 9824;
 export const Person_Eric_Pooly = 9825;
+export const Person_Prof_Emil_Schmitt = 9826;
+export const Person_Margrete_Briggs = 9828;
+export const Person_Peter_Brook = 9829;
+export const Person_Samuel_Rosenblatt = 9830;
 export const Person_Lucas_Grull = 9831;
+export const Person_Marc_Smith = 9832;
+export const Person_Jiri_Poulin = 9833;
+export const Person_Garry_Stevenson = 9834;
+export const Person_Al_Mel = 9835;
+export const Person_Kevin_Smith = 9837;
+export const Person_Mike_Kahn = 9838;
+export const Person_Frank_De_Silva = 9839;
+export const Person_John_O_Keef = 9841;
+export const Person_Luthmilla_Nervesaw = 9842;
+export const Person_Thomas_Smith = 9843;
+export const Person_Ben_Riggley = 9844;
 export const Person_Sabien_Pardo = 9846;
 export const Person_Red_Stanson = 9847;
 export const Person_Pater_James = 9848;
+export const Person_Tom_Cooler = 9849;
+export const Person_Sid_Palmer = 9850;
+export const Person_Prof_Marcus_Green = 9852;
+export const Person_Melanie_Morgan = 9853;
+export const Person_Rod_Masterson = 9855;
+export const Person_Tina_Olavson = 9856;
+export const Person_Phil_Ciggy = 9857;
+export const Person_Pere_Ubu = 9858;
 
 // Key Location IDs
 export const London_London_1 = 1;
@@ -25,14 +62,74 @@ export const Location_Nirvana = 151;
 
 // Key Building IDs
 export const Building_Kiosk = 509000;
+export const Building_Tower_of_London = 509018;
+export const Building_Starford_Kaserne = 509019;
+export const Building_Buckingham_Palace = 509107;
 
 // Key Car IDs
+export const Car_Jeep_1945 = 2;
+export const Car_Triumph_Roadstar_1949 = 4;
+export const Car_Cadillac_Club_1952 = 5;
+export const Car_Standard_Vanguard_1950 = 7;
+export const Car_Standard_Vanguard_1951 = 8;
+export const Car_Standard_Vanguard_1953 = 9;
 export const Car_Jaguar_XK_1950 = 10;
+export const Car_Pontiac_Streamliner_1944 = 11;
+export const Car_Pontiac_Streamliner_1946 = 12;
+export const Car_Pontiac_Streamliner_1949 = 13;
 export const Car_Fiat_Topolino_1940 = 15;
+export const Car_Fiat_Topolino_1942 = 16;
+export const Car_Morris_Minor_1950 = 17;
+export const Car_Rover_75_1950 = 21;
+export const Car_Rover_75_1952 = 22;
+export const Car_Ford_Model_T__1926 = 23;
+export const Car_Bentley_Continental_Typ_R_1952 = 24;
+export const Car_Bentley_Continental_Typ_R_1953 = 25;
+export const Car_Fiat_634_N_1943 = 27;
+
+// Key Tool IDs
+export const Tool_Hand = 9501;
+export const Tool_Dietrich = 9502;
+export const Tool_Hammer = 9503;
+export const Tool_Axt = 9504;
+export const Tool_Kernbohrer = 9505;
+export const Tool_Handschuhe = 9506;
+export const Tool_Schuhe = 9507;
+export const Tool_Maske = 9508;
+export const Tool_Chloroform = 9509;
+export const Tool_Brecheisen = 9510;
+export const Tool_Winkelschleifer = 9511;
+export const Tool_Bohrmaschine = 9512;
+export const Tool_Bohrwinde = 9513;
+export const Tool_Schloszstecher = 9514;
+export const Tool_Schneidbrenner = 9515;
+export const Tool_Sauerstofflanze = 9516;
+export const Tool_Stethoskop = 9517;
+export const Tool_Batterie = 9518;
+export const Tool_Stromgenerator = 9519;
+export const Tool_Elektroset = 9520;
+export const Tool_Schutzanzug = 9521;
+export const Tool_Dynamit = 9522;
+export const Tool_Elektrohammer = 9523;
+export const Tool_Glasschneider = 9524;
+export const Tool_Strickleiter = 9526;
+export const Tool_Funkgeraet = 9527;
 
 // Key Loot IDs
 export const Loot_Ring_des_Abtes = 9634;
 export const Loot_Koffer = 9635;
+export const Loot_Dokument = 9636;
+export const Loot_Gebeine = 9618;
+export const Loot_Kronjuwelen = 9633;
+
+// Key Ability IDs (enum values, not object IDs)
+export const Ability_Autos = 0;
+export const Ability_Schloesser = 1;
+export const Ability_Sprengstoff = 2;
+export const Ability_Safes = 3;
+export const Ability_Elektronik = 4;
+export const Ability_Aufpassen = 5;
+export const Ability_Kampf = 6;
 
 // Text file IDs (from theclou.h)
 export const THECLOU_TXT = 0;
