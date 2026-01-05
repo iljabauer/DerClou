@@ -41,7 +41,7 @@ export const ScreenshotService = {
         }
     },
 
-    saveScreenshot(base64Data: string, preferredFilename?: string): ScreenshotResult {
+    saveScreenshot(base64Data: string): ScreenshotResult {
         if (this.isNwjsEnvironment()) {
             const path = this.getScreenshotPathFromArgs();
             if (!path) {
@@ -82,27 +82,25 @@ export const ScreenshotService = {
 
                 let fullPath = '';
 
-                if (preferredFilename) {
-                    fullPath = pathModule.join(path, preferredFilename);
-                } else {
-                    // Find next available filename
-                    let index = 1;
-                    let fileName = '';
+                
+                // Find next available filename
+                let index = 1;
+                let fileName = '';
 
-                    do {
-                        const indexStr = index.toString().padStart(4, '0');
-                        fileName = `screenshot_${indexStr}.png`;
-                        fullPath = pathModule.join(path, fileName);
-                        index++;
-                        // Safety break to prevent infinite loops in weird cases
-                        if (index > 10000) {
-                            return {
-                                success: false,
-                                message: 'Too many screenshots in directory'
-                            };
-                        }
-                    } while (fs.existsSync(fullPath));
-                }
+                do {
+                    const indexStr = index.toString().padStart(4, '0');
+                    fileName = `screenshot_${indexStr}.png`;
+                    fullPath = pathModule.join(path, fileName);
+                    index++;
+                    // Safety break to prevent infinite loops in weird cases
+                    if (index > 10000) {
+                        return {
+                            success: false,
+                            message: 'Too many screenshots in directory'
+                        };
+                    }
+                } while (fs.existsSync(fullPath));
+                
 
                 fs.writeFileSync(fullPath, base64Image, { encoding: 'base64' });
                 return {
