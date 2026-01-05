@@ -6,7 +6,6 @@ export const TICKS_PER_SECOND = 60;
 
 export class InputHandler {
     private simulationTick: number = 0;
-    private waitTicks: number = 0;
     private replayService: ReplayService | null = null;
 
     init(): void {
@@ -23,10 +22,6 @@ export class InputHandler {
 
     incrementTick(): void {
         this.simulationTick++;
-    }
-
-    setWaitTicks(ticks: number): void {
-        this.waitTicks = ticks;
     }
 
     // Simulate one tick and return action if one occurred
