@@ -71,13 +71,37 @@ export class FilmService {
         this.film.currentMinute = 543;  // 09:03
         this.film.currentLocation = header.startOrt;
 
-        // TODO: InitLocations() - load location names from LOCATIONS.LST
+        // Load location names
+        await this.initLocations();
+
         // TODO: LinkScenes() - link scene successors
         // TODO: PatchStory() - apply game-specific patches
 
         this.storyLoaded = true;
         console.log(`Story initialized: ${scenes.length} scenes loaded`);
         return true;
+    }
+
+    /**
+     * Load location names from LOCATION.LST
+     * Port of InitLocations() from gp.c
+     */
+    private async initLocations(): Promise<void> {
+        try {
+            const response = await fetch('gamedata/TEXTS/LOCATION.LST');
+            if (!response.ok) {
+                console.error('Failed to load LOCATION.LST');
+                return;
+            }
+
+            const text = await response.text();
+            const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
+            
+            this.film.locationNames = lines;
+            console.log(`Loaded ${lines.length} location names`);
+        } catch (error) {
+            console.error('Error loading location names:', error);
+        }
     }
 
     /**
@@ -206,6 +230,24 @@ export class FilmService {
      */
     getAllScenes(): Scene[] {
         return this.film.scenes;
+    }
+
+    /**
+     * Get location name by location number
+     * Port of GetLocationName() from gp.c
+     */
+    getLocationName(locNr: number): string {
+        if (locNr >= 0 && locNr < this.film.locationNames.length) {
+            return this.film.locationNames[locNr];
+        }
+        return `Location ${locNr}`;
+    }
+
+    /**
+     * Get all location names
+     */
+    getLocationNames(): string[] {
+        return this.film.locationNames;
     }
 
     /**
