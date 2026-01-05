@@ -1,12 +1,12 @@
 # Der Clou! TypeScript Port - Current Status
 
-**Last Updated:** 2026-01-05 (Session 2)
+**Last Updated:** 2026-01-05 (Session 4)
 
 ## Overview
 
-Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundation with replay system, core architecture, and partial data loading.
+Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundation with replay system, core architecture, and complete data/text/image systems.
 
-## Current Phase: Text & Graphics Systems
+## Current Phase: Living/Location System (Phase 1)
 
 ### What Works ✅
 
@@ -63,24 +63,34 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - Disabled item handling
    - UITestScene for testing
 
-4. **Test Scenes**
+7. **Living/Location System** - In Progress 🚧
+   - LivingService for character management
+   - Character positioning and animation
+   - Visibility and area tracking
+   - BackgroundService for location backgrounds
+   - Background display and management
+   - LivingTestScene for testing
+
+8. **Test Scenes**
    - ReplayTestScene (original)
    - DataLoaderTestScene
    - TextTestScene
    - UITestScene
-   - ImageTestScene (new)
+   - ImageTestScene
+   - LivingTestScene (new)
    - GameScene, MainMenuScene, LondonScene
 
 ### What Needs Work 🚧
 
-1. **Presentation Layer** (src/present/)
-   - Menu display and interaction
-   - Bubble/dialog display
-   - Character portraits
-   - Background rendering
-   - Integration with game scenes
+1. **Living/Location System** (src/living/) - IN PROGRESS
+   - ✅ Basic character management (LivingService)
+   - ✅ Background display (BackgroundService)
+   - ⚠️ Animation templates loading
+   - ⚠️ Character sprite loading
+   - ⚠️ Full animation system
+   - ⚠️ Integration with game scenes
 
-2. **Dialog System**
+2. **Dialog System** (src/dialog/)
    - Conversation trees
    - NPC interactions
    - Dynamic text insertion
@@ -124,13 +134,16 @@ src-js/src/game/
 │   ├── RelFileParser.ts     ✅ Relation parsing
 │   ├── DataLoader.ts        ✅ All data files
 │   ├── TextService.ts       ✅ Text loading & lookup
-│   ├── ImageService.ts      ⚠️ Image loading (needs ILBM)
-│   └── UIService.ts         ✅ Menus & bubbles
+│   ├── ImageService.ts      ✅ Image loading (ILBM)
+│   ├── UIService.ts         ✅ Menus & bubbles
+│   ├── LivingService.ts     🚧 Character management
+│   └── BackgroundService.ts ✅ Background display
 └── scenes/
     ├── ReplayTestScene.ts   ✅ Replay testing
     ├── DataLoaderTestScene.ts ✅ Data loading test
     ├── TextTestScene.ts     ✅ Text system test
     ├── UITestScene.ts       ✅ UI system test
+    ├── LivingTestScene.ts   ✅ Living system test
     ├── GameScene.ts         ✅ Main scene
     ├── MainMenuScene.ts     ✅ Menu
     └── LondonScene.ts       ✅ Hub scene
@@ -139,17 +152,20 @@ src-js/src/game/
 ## Next Steps (Priority Order)
 
 ### Immediate (This Session)
-1. ✅ Organize documentation in .agent/
-2. ✅ Test current data loading implementation
-3. ✅ Add parsers for remaining object types (all 18 types complete)
-4. ✅ Load building-specific data files (all *ETA*.DAT files)
-5. ⚠️ Verify loaded data matches C version (needs manual testing)
+1. ✅ Create comprehensive porting plan
+2. ✅ Start Phase 1: Living/Location System
+3. ✅ Port LivingService (character management)
+4. ✅ Port BackgroundService (location backgrounds)
+5. ✅ Create LivingTestScene
+6. ⚠️ Load animation templates from data
+7. ⚠️ Load character sprites
+8. ⚠️ Implement full animation system
 
-### Short-term (Next Few Sessions)
-1. Complete data loading system
-2. Load text files and implement text system
-3. Load and display images
-4. Implement basic UI with real game data
+### Short-term (Next 2-3 Sessions)
+1. Complete Living/Location System
+2. Port Dialog System (conversations, NPCs)
+3. Port Scene/Story System (game flow)
+4. Port Interaction System (action menu)
 
 ### Medium-term
 1. Port dialog system
@@ -202,8 +218,8 @@ npm run dev
 
 ## Notes
 
-- 35 TypeScript files, ~5700 lines of code
-- 131 C source files to port
+- 38 TypeScript files, ~6600 lines of code
+- 72 C source files to port (~35k lines)
 - TCMAIN.DAT and TCBUILD.DAT are main data files
 - Building-specific files: *ETA0.DAT, *ETA1.DAT, etc.
 - Relations in .REL files (text format)
