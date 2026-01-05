@@ -1,50 +1,59 @@
 # Der Clou! Port - TODO List
 
-**Last Updated:** 2026-01-05
+**Last Updated:** 2026-01-05 (Session 4)
 
-## Current Sprint: Image Conversion & Basic UI
+## Current Sprint: Phase 1 - Living/Location System
 
-### High Priority 🔴
+### High Priority 🔴 (Phase 1: Living/Location System)
 
-- [x] Port text system (src/text/) - COMPLETE
-  - [x] Create TextService.ts with XOR decryption
-  - [x] Load TEXTS.LST (text file list)
-  - [x] Load individual text files with language support
-  - [x] Implement key-based text lookup
-  - [x] Add text formatting support
-- [x] Port image system structure (src/gfx/) - PARTIAL
-  - [x] Create ImageService.ts
-  - [x] Load COLL.LST (collection list)
-  - [ ] Convert IFF ILBM images to PNG/WebP OR implement ILBM decoder
-- [ ] Create image conversion tool/script
-- [ ] Port basic UI system (src/present/interac.c)
-  - [ ] Menu system
-  - [ ] Bubble/dialog display
-  - [ ] Choice handling
+- [ ] Port living.c - Location and character management
+  - [ ] livInit() - Initialize living system
+  - [ ] livDone() - Cleanup
+  - [ ] livRefreshAll() - Redraw all characters
+  - [ ] livSetAllInvisible() - Hide all characters
+  - [ ] livShowLocation() - Display location background
+  
+- [ ] Port bob.c - Character (bob) management
+  - [ ] bobInit() - Initialize character system
+  - [ ] bobSet() - Position character
+  - [ ] bobWait() - Character idle animation
+  - [ ] bobAnimate() - Play character animation
 
-### Medium Priority 🟡
+- [ ] Create TypeScript services
+  - [ ] LivingService.ts - Location and character management
+  - [ ] BobService.ts - Character animation and positioning
+  - [ ] AnimationService.ts - Frame-based animations
 
-- [ ] Port text system (src/text/)
-  - [ ] Load text files from gamedata/TEXTS/
-  - [ ] Multi-language support
-  - [ ] Text rendering with formatting
-- [ ] Port graphics system (src/gfx/)
-  - [ ] Load images from gamedata/PICTURES/
-  - [ ] Convert to web formats
-  - [ ] Sprite management
-  - [ ] Background rendering
-- [ ] Port dialog system (src/dialog/)
-  - [ ] Conversation trees
-  - [ ] NPC interactions
-  - [ ] Choice menus
+- [ ] Integration and testing
+  - [ ] Update GameScene to use LivingService
+  - [ ] Load location backgrounds via ImageService
+  - [ ] Position characters in scenes
+  - [ ] Test with replay system
+  - [ ] Visual regression testing
 
-### Low Priority 🟢
+### Medium Priority 🟡 (Phase 2: Dialog System)
 
-- [ ] Port planning system (src/planing/)
-- [ ] Port burglary mechanics (src/gameplay/)
-- [ ] Port story system (src/story/)
-- [ ] Save/load system
-- [ ] UI polish and optimization
+- [ ] Port dialog.c - Core dialog system
+  - [ ] Say() - Display dialog with choices
+  - [ ] Bubble() - Show bubble with text
+  - [ ] SetBubbleType() - Set bubble style
+  
+- [ ] Port talkappl.c - Dialog application logic
+  - [ ] Dialog tree navigation
+  - [ ] Choice evaluation
+  - [ ] State management
+
+- [ ] Create DialogService.ts and ConversationService.ts
+- [ ] Integration with TextService and UIService
+
+### Low Priority 🟢 (Future Phases)
+
+- [ ] Phase 3: Scene/Story System (src/story/, src/scenes/)
+- [ ] Phase 4: Interaction System (src/present/interac.c)
+- [ ] Phase 5: Landscape System (src/landscap/)
+- [ ] Phase 6: Planning System (src/planing/)
+- [ ] Phase 7: Gameplay Systems (src/gameplay/)
+- [ ] Phase 8: Polish & Optimization
 
 ## Completed ✅
 
