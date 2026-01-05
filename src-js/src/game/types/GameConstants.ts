@@ -6,9 +6,23 @@
 export const Person_Matt_Stuvysunt = 9801;
 export const Person_Player_1 = 9800;
 export const Person_Ben_Riggley = 9802;
+export const Person_Herbert_Briggs = 9805;
+export const Person_Jim_Danner = 9817;
+export const Person_Dan_Stanford = 9821;
+export const Person_John_Gludo = 9822;
+export const Person_Pater_James = 9848;
 
 // Key Location IDs
 export const London_London_1 = 1;
+
+// Key Building IDs
+export const Building_Kiosk = 509000;
+
+// Key Car IDs
+export const Car_Fiat_Topolino_1940 = 15;
+
+// Key Loot IDs
+export const Loot_Ring_des_Abtes = 9634;
 
 // Text file IDs (from theclou.h)
 export const THECLOU_TXT = 0;
@@ -176,3 +190,6 @@ export const STORY_0_TXT = 18; // TODO: Verify this value
 
 // Game costs
 export const tcCOSTS_FOR_HOTEL = 100; // TODO: Find actual value
+
+// Game values
+export const tcVALUE_OF_RING_OF_PATER = 320;
