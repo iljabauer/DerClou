@@ -67,7 +67,9 @@ src-js/src/game/
 - `core/GameEngine.ts` - Main engine
 - `core/Database.ts` - Object storage
 - `core/GameState.ts` - Global state
-- `scenes/TestGameScene.ts` - Example scene
+- `scenes/GameScene.ts` - Main Phaser scene
+- `scenes/MainMenuScene.ts` - Main menu
+- `scenes/LondonScene.ts` - London hub
 - `types/GameTypes.ts` - Game object types
 
 ## Common Tasks
@@ -133,9 +135,14 @@ Target: 60 FPS (16.67ms per frame)
 
 ## Documentation
 
-- `PORT_SUMMARY.md` - Overview of what was done
+- `PORT_README.md` - Complete port documentation (532 lines)
+- `TESTING_INSTRUCTIONS.md` - Comprehensive testing guide (340 lines)
+- `COMPLETION_SUMMARY.md` - Delivery summary (416 lines)
+- `PORT_SUMMARY.md` - Executive overview
 - `PORTING_STATUS.md` - Detailed status
-- `TESTING_GUIDE.md` - Testing instructions
+- `ARCHITECTURE.md` - System design
+- `CHECKLIST.md` - Development roadmap
+- `DOCS_INDEX.md` - Documentation index
 - `src-js/README_PORT.md` - Architecture guide
 
 ## Help
@@ -148,19 +155,23 @@ If something doesn't work:
 
 ## What Works Now
 
-✅ Replay system
-✅ Scene management
+✅ Replay system with deterministic RNG
+✅ Scene management (MainMenu, London, GameScene)
 ✅ Database and relations
-✅ Game state
-✅ Basic rendering
-✅ Screenshot capture
+✅ Game state with time tracking
+✅ UI rendering (text, shapes, menus)
+✅ Screenshot capture and comparison
+✅ Visual regression testing
+✅ Headless mode for CI/CD
+✅ Full documentation (~1500 lines)
 
 ## What Doesn't Work Yet
 
-❌ Game content (no data loaded)
-❌ Graphics/sprites
-❌ Dialogs
-❌ Gameplay mechanics
+❌ Data loading (binary .dat files)
+❌ Graphics/sprites/animations
+❌ Text system (multi-language)
+❌ Dialog system
+❌ Gameplay mechanics (planning, burglary)
 ❌ Story progression
 
-See `PORTING_STATUS.md` for details.
+See `PORTING_STATUS.md` for complete details.

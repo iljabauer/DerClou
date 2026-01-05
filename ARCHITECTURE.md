@@ -5,7 +5,7 @@
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                      Phaser Scene                           │
-│                   (TestGameScene.ts)                        │
+│                     (GameScene.ts)                          │
 └────────────────────────┬────────────────────────────────────┘
                          │
                          ▼
@@ -249,11 +249,13 @@ GameObject (base)
 ## Module Dependencies
 
 ```
-TestGameScene
+GameScene (Main Phaser Scene)
     └── GameEngine
             ├── Database
             ├── GameState
             ├── SceneManager
+            │       ├── MainMenuScene
+            │       └── LondonScene
             ├── Renderer
             └── InputHandler
                     └── ReplayService
@@ -285,7 +287,9 @@ src-js/src/game/
 │   └── ScreenshotService.ts
 │
 ├── scenes/                  # Phaser scenes
-│   ├── TestGameScene.ts    # Main test scene
+│   ├── GameScene.ts        # Main Phaser scene
+│   ├── MainMenuScene.ts    # Main menu
+│   ├── LondonScene.ts      # London hub
 │   └── ReplayTestScene.ts  # Original replay test
 │
 └── utils/                   # Helper functions

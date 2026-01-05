@@ -47,9 +47,16 @@ This document tracks the progress of porting Der Clou! from C to TypeScript.
 - ✅ **ScreenshotService** - Screenshot capture and comparison
 - ✅ **Integration** - Full replay support in game engine
 
+#### Game Scenes
+- ✅ **GameScene** - Main Phaser scene integrating all systems
+- ✅ **MainMenuScene** - Main menu with game options
+- ✅ **LondonScene** - London hub with navigation menu
+- ✅ **ReplayTestScene** - Original replay testing scene (preserved)
+
 #### Test Infrastructure
-- ✅ **TestGameScene** - Demonstrates the architecture
 - ✅ **Visual Regression Testing** - compare_screenshots.sh script
+- ✅ **Screenshot Comparison** - Automated baseline comparison
+- ✅ **Headless Mode** - CI/CD support
 
 ### Architecture
 
@@ -70,7 +77,9 @@ src-js/src/game/
 │   ├── Random.ts         # Deterministic RNG
 │   └── ScreenshotService.ts
 └── scenes/
-    ├── TestGameScene.ts  # Test/demo scene
+    ├── GameScene.ts      # Main Phaser scene
+    ├── MainMenuScene.ts  # Main menu
+    ├── LondonScene.ts    # London hub
     └── ReplayTestScene.ts # Original replay test
 ```
 

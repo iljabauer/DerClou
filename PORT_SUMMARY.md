@@ -92,22 +92,29 @@ Unified engine that:
 - Headless mode support
 - Visual regression testing
 
-### 9. Test Scene ✅
+### 9. Game Scenes ✅
 
-`TestGameScene` demonstrates:
-- Replay mode integration
-- Normal mode with interactive menus
-- Scene transitions
+Implemented functional game scenes:
+- **GameScene**: Main Phaser scene integrating all systems
+- **MainMenuScene**: Main menu with game options (New Game, Continue, Load, Options, Credits, Quit)
+- **LondonScene**: London hub with navigation menu (Go, Talk, Wait, Information)
+- **ReplayTestScene**: Original replay testing scene (preserved)
+
+All scenes support both replay and interactive modes.
 - State display
 - Database usage
 
 ### 10. Documentation ✅
 
 Comprehensive documentation:
+- `PORT_README.md` - Complete port documentation and API reference (532 lines)
+- `TESTING_INSTRUCTIONS.md` - Comprehensive testing guide (340 lines)
+- `COMPLETION_SUMMARY.md` - Delivery summary and technical highlights (416 lines)
 - `PORTING_STATUS.md` - What's done and what's not
-- `TESTING_GUIDE.md` - How to test everything
+- `TESTING_GUIDE.md` - Additional testing information
 - `src-js/README_PORT.md` - Architecture and usage guide
-- Inline code comments
+- `DOCS_INDEX.md` - Documentation index
+- Inline code comments throughout
 
 ## What's NOT Done
 
