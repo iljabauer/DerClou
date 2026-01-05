@@ -97,7 +97,7 @@ export class LivingService {
     /**
      * Initialize the living system
      */
-    init(
+    async init(
         visLScapeX: number,
         visLScapeY: number,
         visLScapeWidth: number,
@@ -106,7 +106,7 @@ export class LivingService {
         totalLScapeHeight: number,
         frameCount: number,
         startArea: number
-    ): void {
+    ): Promise<void> {
         this.sc = {
             livings: new Map(),
             templates: new Map(),
@@ -124,8 +124,8 @@ export class LivingService {
             playDirection: 1
         };
 
-        this.loadTemplates();
-        this.loadLivings();
+        await this.loadTemplates();
+        await this.loadLivings();
         this.setPlayMode(PlayMode.NORMAL);
     }
 
@@ -402,34 +402,67 @@ export class LivingService {
     }
 
     /**
-     * Load animation templates
+     * Load animation templates from TEMPLATE.LST
      */
-    private loadTemplates(): void {
+    private async loadTemplates(): Promise<void> {
         if (!this.sc) return;
 
-        // TODO: Load animation templates from data files
-        // For now, create placeholder templates
-        
-        // Example template for Matt
-        this.sc.templates.set('matt', {
-            name: 'matt',
-            width: 14,
-            height: 14,
-            frameOffsetNr: 0
-        });
+        try {
+            const response = await fetch('../gamedata/TEXTS/TEMPLATE.LST');
+            const text = await response.text();
+            const lines = text.split('\n').filter(line => line.trim() && !line.startsWith(';'));
+
+            for (const line of lines) {
+                const parts = line.split(',').map(p => p.trim());
+                if (parts.length >= 4) {
+                    const name = parts[0];
+                    const width = parseInt(parts[1]);
+                    const height = parseInt(parts[2]);
+                    const frameOffsetNr = parseInt(parts[3]);
+
+                    this.sc.templates.set(name, {
+                        name,
+                        width,
+                        height,
+                        frameOffsetNr
+                    });
+
+                    console.log(`Loaded animation template: ${name} (${width}x${height}, offset: ${frameOffsetNr})`);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to load animation templates:', error);
+        }
     }
 
     /**
-     * Load livings (characters)
+     * Load livings (characters) from LIVINGS.LST
      */
-    private loadLivings(): void {
+    private async loadLivings(): Promise<void> {
         if (!this.sc) return;
 
-        // TODO: Load livings from data files
-        // For now, create placeholder livings
-        
-        // Example: Matt Stuvysunt
-        this.addLiving('Matt', 'matt', 14, 14, 0, 0);
+        try {
+            const response = await fetch('../gamedata/TEXTS/LIVINGS.LST');
+            const text = await response.text();
+            const lines = text.split('\n').filter(line => line.trim() && !line.startsWith(';'));
+
+            for (const line of lines) {
+                const parts = line.split(',').map(p => p.trim());
+                if (parts.length >= 6) {
+                    const name = parts[0];
+                    const templateName = parts[1];
+                    const xSize = parseInt(parts[2]);
+                    const ySize = parseInt(parts[3]);
+                    const xSpeed = parseInt(parts[4]);
+                    const ySpeed = parseInt(parts[5]);
+
+                    this.addLiving(name, templateName, xSize, ySize, xSpeed, ySpeed);
+                    console.log(`Loaded living: ${name} using template ${templateName}`);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to load livings:', error);
+        }
     }
 
     /**

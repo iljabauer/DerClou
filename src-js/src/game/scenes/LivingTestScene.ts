@@ -32,7 +32,7 @@ export class LivingTestScene extends Scene {
         this.livingService = new LivingService(this, this.imageService);
 
         // Initialize living system
-        this.livingService.init(
+        await this.livingService.init(
             0,      // visLScapeX
             0,      // visLScapeY
             1024,   // visLScapeWidth
