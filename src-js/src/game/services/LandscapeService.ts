@@ -540,14 +540,167 @@ export class LandscapeService {
     /**
      * Initialize scroll in a direction
      * Port of lsInitScrollLandScape() from scroll.c
+     * 
+     * Calculates scroll deltas and checks for collision
+     * Returns true if collision detected
      */
     initScrollLandscape(direction: number, mode: number): boolean {
         if (!this.state) return false;
 
-        // TODO: Implement scrolling
-        console.log(`[LandscapeService] Init scroll direction ${direction}, mode ${mode}`);
+        let dx = 0;
+        let dy = 0;
+        let px = 0;
+        let py = 0;
+        const speed = this.state.scrollSpeed;
+        
+        // Calculate scroll deltas based on direction
+        if (direction & LS_SCROLL_LEFT) {
+            if (this.state.windowXPos >= speed && this.state.personXPos <= LS_CENTER_X) {
+                // Scroll window left
+                dx = -1;
+                this.state.livingXSpeed = dx;
+                this.state.livingYSpeed = 0;
+                this.state.livingAction = 2; // ANM_MOVE_LEFT
+            } else if (this.state.personXPos > speed) {
+                // Move person left
+                px = -1;
+                this.state.livingXSpeed = px;
+                this.state.livingYSpeed = 0;
+                this.state.livingAction = 2; // ANM_MOVE_LEFT
+            }
+        }
+        
+        if (direction & LS_SCROLL_RIGHT) {
+            if (
+                this.state.windowXPos <= LS_MAX_AREA_WIDTH - LS_VISIBLE_X_SIZE - speed &&
+                this.state.personXPos >= LS_CENTER_X
+            ) {
+                // Scroll window right
+                dx = 1;
+                this.state.livingXSpeed = dx;
+                this.state.livingYSpeed = 0;
+                this.state.livingAction = 3; // ANM_MOVE_RIGHT
+            } else if (this.state.personXPos < LS_VISIBLE_X_SIZE - speed) {
+                // Move person right
+                px = 1;
+                this.state.livingXSpeed = px;
+                this.state.livingYSpeed = 0;
+                this.state.livingAction = 3; // ANM_MOVE_RIGHT
+            }
+        }
+        
+        if (direction & LS_SCROLL_UP) {
+            if (this.state.windowYPos >= speed && this.state.personYPos <= LS_CENTER_Y) {
+                // Scroll window up
+                dy = -1;
+                this.state.livingXSpeed = 0;
+                this.state.livingYSpeed = dy;
+                this.state.livingAction = 0; // ANM_MOVE_UP
+            } else if (this.state.personYPos > speed) {
+                // Move person up
+                py = -1;
+                this.state.livingXSpeed = 0;
+                this.state.livingYSpeed = py;
+                this.state.livingAction = 0; // ANM_MOVE_UP
+            }
+        }
+        
+        if (direction & LS_SCROLL_DOWN) {
+            if (
+                this.state.windowYPos <= LS_MAX_AREA_HEIGHT - LS_VISIBLE_Y_SIZE - speed &&
+                this.state.personYPos >= LS_CENTER_Y
+            ) {
+                // Scroll window down
+                dy = 1;
+                this.state.livingXSpeed = 0;
+                this.state.livingYSpeed = dy;
+                this.state.livingAction = 1; // ANM_MOVE_DOWN
+            } else if (this.state.personYPos < LS_VISIBLE_Y_SIZE - speed) {
+                // Move person down
+                py = 1;
+                this.state.livingXSpeed = 0;
+                this.state.livingYSpeed = py;
+                this.state.livingAction = 1; // ANM_MOVE_DOWN
+            }
+        }
+        
+        // Calculate target position
+        let tx = this.state.personXPos + (px + dx) * speed;
+        let ty = this.state.personYPos + (py + dy) * speed;
+        
+        // Check for collision
+        const collis = this.isCollision(tx, ty, direction);
+        
+        // Store deltas for scrolling
+        if (mode & 1) { // LS_SCROLL_PREPARE
+            this.scrollDX = dx;
+            this.scrollDY = dy;
+            this.scrollPX = px;
+            this.scrollPY = py;
+        }
+        
+        return collis;
+    }
+    
+    // Scroll deltas (stored between initScrollLandscape and scrollLandscape)
+    private scrollDX = 0;
+    private scrollDY = 0;
+    private scrollPX = 0;
+    private scrollPY = 0;
 
-        return true;
+    /**
+     * Scroll landscape
+     * Port of lsScrollLandScape() from scroll.c
+     * 
+     * Performs the actual scrolling based on direction
+     * Returns the direction scrolled, or 0 if collision
+     */
+    scrollLandscape(direction: number): number {
+        if (!this.state) return 0;
+        
+        // Initialize scroll and check collision
+        const collis = this.initScrollLandscape(direction, 1); // LS_SCROLL_PREPARE
+        
+        if (!collis) {
+            // No collision, perform scroll
+            const speed = this.state.scrollSpeed;
+            
+            // Scroll window
+            this.scrollCorrectData(this.scrollDX * speed, this.scrollDY * speed);
+            
+            // Move person
+            this.state.personXPos += this.scrollPX * speed;
+            this.state.personYPos += this.scrollPY * speed;
+            
+            return direction;
+        }
+        
+        return 0; // Collision, no scroll
+    }
+    
+    /**
+     * Scroll correct data
+     * Port of lsScrollCorrectData() from scroll.c
+     * 
+     * Updates window position and viewport
+     */
+    scrollCorrectData(dx: number, dy: number): void {
+        if (!this.state) return;
+        
+        // Update window position
+        this.state.windowXPos += dx;
+        this.state.windowYPos += dy;
+        
+        // Update viewport
+        // TODO: Update Phaser camera/viewport
+        
+        // Update living visibility
+        if (this.livingService) {
+            this.livingService.setVisibleLandscape(
+                this.state.windowXPos,
+                this.state.windowYPos
+            );
+        }
     }
 
     /**
@@ -558,6 +711,7 @@ export class LandscapeService {
         if (!this.state) return;
 
         // TODO: Implement scrolling animation
+        // This would be called each frame to animate scrolling
     }
 
     /**
