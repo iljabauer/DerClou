@@ -12,7 +12,7 @@ import { DialogService } from '../services/DialogService';
 import { PlanningService } from '../services/PlanningService';
 import { FilmService } from '../services/FilmService';
 import { OrganisationService } from '../services/OrganisationService';
-import { GameConstants } from '../core/GameConstants';
+import { GameConstants } from '../types/GameConstants';
 
 export class OrganisationTestScene extends Scene {
     private database!: Database;
