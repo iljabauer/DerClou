@@ -1,119 +1,132 @@
 /**
- * Test scene for ILBM image loading
+ * Test scene for ILBM image loading via ImageService
  */
 
 import { Scene } from 'phaser';
-import { decodeILBM, ilbmToRGBA } from '../services/ILBMDecoder';
+import { ImageService } from '../services/ImageService';
 
 export class ImageTestScene extends Scene {
     private statusText!: Phaser.GameObjects.Text;
-    private testImages: string[] = ['BUBBLE', 'ACTION', 'BIRTHDAY'];
-    private currentImageIndex: number = 0;
-    private currentTexture: Phaser.Textures.Texture | null = null;
+    private imageService!: ImageService;
 
     constructor() {
         super('ImageTestScene');
     }
 
-    create() {
+    async create() {
         const style = { fontFamily: 'Arial', fontSize: '16px', color: '#ffffff' };
 
         this.add.text(10, 10, 'ILBM Image Test Scene', { fontSize: '24px', color: '#00ff00' });
 
-        this.statusText = this.add.text(10, 50, 'Status: Ready', style);
+        this.statusText = this.add.text(10, 50, 'Status: Initializing...', style);
 
-        // Test buttons
-        this.add.text(10, 100, 'Load BUBBLE', {
+        // Initialize ImageService
+        this.imageService = new ImageService();
+        const success = await this.imageService.init();
+        
+        if (!success) {
+            this.statusText.setText('Status: Failed to initialize ImageService');
+            return;
+        }
+
+        const stats = this.imageService.getStats();
+        this.statusText.setText(`Status: Ready (${stats.total} collections available)`);
+
+        // Test buttons - use collection IDs from COLL.LST
+        this.add.text(10, 100, 'Load Collection 1', {
             backgroundColor: '#004400', padding: { x: 10, y: 5 }, ...style
         })
             .setInteractive({ useHandCursor: true })
-            .on('pointerdown', () => this.loadImage('BUBBLE'));
+            .on('pointerdown', () => this.loadCollection(1));
 
-        this.add.text(150, 100, 'Load ACTION', {
+        this.add.text(180, 100, 'Load Collection 2', {
             backgroundColor: '#000044', padding: { x: 10, y: 5 }, ...style
         })
             .setInteractive({ useHandCursor: true })
-            .on('pointerdown', () => this.loadImage('ACTION'));
+            .on('pointerdown', () => this.loadCollection(2));
 
-        this.add.text(290, 100, 'Load BIRTHDAY', {
+        this.add.text(350, 100, 'Load Collection 3', {
             backgroundColor: '#440044', padding: { x: 10, y: 5 }, ...style
         })
             .setInteractive({ useHandCursor: true })
-            .on('pointerdown', () => this.loadImage('BIRTHDAY'));
+            .on('pointerdown', () => this.loadCollection(3));
 
-        this.add.text(10, 150, 'Instructions:', { fontSize: '14px', color: '#ffff00' });
-        this.add.text(10, 170, 'Click buttons to load and display ILBM images', style);
+        this.add.text(10, 150, 'Show All Collections', {
+            backgroundColor: '#444400', padding: { x: 10, y: 5 }, ...style
+        })
+            .setInteractive({ useHandCursor: true })
+            .on('pointerdown', () => this.showAllCollections());
+
+        this.add.text(10, 200, 'Instructions:', { fontSize: '14px', color: '#ffff00' });
+        this.add.text(10, 220, 'Click buttons to load and display ILBM images via ImageService', style);
     }
 
-    private async loadImage(filename: string): Promise<void> {
-        this.statusText.setText(`Loading ${filename}...`);
+    private async loadCollection(collId: number): Promise<void> {
+        this.statusText.setText(`Loading collection ${collId}...`);
 
         try {
-            // Load file from gamedata/PICTURES/
-            const path = `gamedata/PICTURES/${filename}`;
-            const response = await fetch(path);
-            
-            if (!response.ok) {
-                throw new Error(`Failed to load ${filename}: ${response.statusText}`);
+            const coll = this.imageService.getCollection(collId);
+            if (!coll) {
+                this.statusText.setText(`Collection ${collId} not found`);
+                return;
             }
 
-            const arrayBuffer = await response.arrayBuffer();
-            const buffer = new Uint8Array(arrayBuffer);
-
-            // Decode ILBM
-            const ilbm = decodeILBM(buffer);
-            if (!ilbm) {
-                throw new Error('Failed to decode ILBM');
+            const success = await this.imageService.loadCollection(collId);
+            if (!success) {
+                this.statusText.setText(`Failed to load collection ${collId}`);
+                return;
             }
 
             this.statusText.setText(
-                `Loaded ${filename}: ${ilbm.width}x${ilbm.height}, ${ilbm.palette.length / 3} colors`
+                `Loaded collection ${collId}: ${coll.filename} (${coll.width}x${coll.height})`
             );
 
-            // Convert to RGBA
-            const rgba = ilbmToRGBA(ilbm);
-
-            // Create Phaser texture
-            const textureName = `ilbm_${filename}`;
-            
-            // Remove old texture if exists
-            if (this.textures.exists(textureName)) {
-                this.textures.remove(textureName);
-            }
-
-            // Create texture from RGBA data
-            const texture = this.textures.createCanvas(textureName, ilbm.width, ilbm.height);
-            if (texture) {
-                const canvas = texture.getSourceImage() as HTMLCanvasElement;
-                const ctx = canvas.getContext('2d');
-                if (ctx) {
-                    const imageData = ctx.createImageData(ilbm.width, ilbm.height);
-                    imageData.data.set(rgba);
-                    ctx.putImageData(imageData, 0, 0);
-                    texture.refresh();
-
-                    // Display image
-                    this.displayImage(textureName, ilbm.width, ilbm.height);
-                }
+            // Display image
+            if (coll.image) {
+                this.displayCanvas(coll.image, coll.width, coll.height, coll.filename);
             }
 
         } catch (error) {
-            console.error('Error loading image:', error);
+            console.error('Error loading collection:', error);
             this.statusText.setText(`Error: ${error}`);
         }
     }
 
-    private displayImage(textureName: string, width: number, height: number): void {
+    private showAllCollections(): void {
+        const collections = this.imageService.getAllCollections();
+        console.log('All collections:');
+        collections.slice(0, 20).forEach(coll => {
+            console.log(`  ${coll.id}: ${coll.filename} (${coll.width}x${coll.height}) - ${coll.loaded ? 'loaded' : 'not loaded'}`);
+        });
+        this.statusText.setText(`Listed ${Math.min(collections.length, 20)} collections in console`);
+    }
+
+    private displayCanvas(canvas: HTMLCanvasElement, width: number, height: number, name: string): void {
         // Clear previous image
         this.children.list
             .filter(child => child.getData('isTestImage'))
             .forEach(child => child.destroy());
 
+        // Create Phaser texture from canvas
+        const textureName = `coll_${name}`;
+        
+        // Remove old texture if exists
+        if (this.textures.exists(textureName)) {
+            this.textures.remove(textureName);
+        }
+
+        // Create texture from canvas
+        const texture = this.textures.addCanvas(textureName, canvas);
+        if (!texture) {
+            console.error('Failed to create texture from canvas');
+            return;
+        }
+
         // Display new image
         const x = 10;
-        const y = 220;
+        const y = 270;
         const maxWidth = 1000;
-        const maxHeight = 500;
+        const maxHeight = 450;
 
         let scale = 1;
         if (width > maxWidth || height > maxHeight) {
