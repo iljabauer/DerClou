@@ -1288,6 +1288,25 @@ export class StoryService {
     }
 
     /**
+     * Helper: Move a person to a new location
+     * Port of tcMoveAPerson from gp_app.c
+     */
+    private moveAPerson(persId: number, newLocId: number): void {
+        // Get all locations the person is currently at
+        const locations = this.db.getRelatedObjects(persId, 'Has', 'Location');
+        
+        // Remove person from old locations
+        for (const loc of locations) {
+            this.db.hasUnSet(persId, loc.id);
+            this.db.hasUnSet(loc.id, persId);
+        }
+        
+        // Add person to new location
+        this.db.hasSet(persId, newLocId);
+        this.db.hasSet(newLocId, persId);
+    }
+
+    /**
      * Graphics stub: Show image
      */
     private gfxShow(imageId: number): void {
