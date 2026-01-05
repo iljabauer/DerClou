@@ -28,6 +28,12 @@ export const INP_MOUSE = 1 << 15;
 export const INP_MOUSEWHEEL = 1 << 16;
 export const INP_QUIT = 1 << 17;
 
+export enum ReplayMode {
+    IDLE = 0,
+    PLAYING = 1,
+    RECORDING = 2
+}
+
 export interface ReplayHeader {
     magic: string;      // 4 bytes: "DREC"
     version: number;    // 4 bytes: uint32
@@ -45,15 +51,42 @@ export interface ReplayData {
     records: ReplayRecord[];
 }
 
+declare const nw: any;
+
 export class ReplayService {
     private records: ReplayRecord[] = [];
     private currentIndex: number = 0;
     private header: ReplayHeader | null = null;
+    private mode: ReplayMode = ReplayMode.IDLE;
+    private recordFilePath: string = "";
+
+    isPlaybackActive(): boolean {
+        return this.mode === ReplayMode.PLAYING;
+    }
+
+    isRecording(): boolean {
+        return this.mode === ReplayMode.RECORDING;
+    }
+
+    setRecording(filePath: string, seed: number) {
+        this.mode = ReplayMode.RECORDING;
+        this.recordFilePath = filePath;
+        this.records = [];
+        this.header = {
+            magic: REPLAY_MAGIC,
+            version: REPLAY_VERSION,
+            rngSeed: seed
+        };
+    }
 
     async loadReplay(filePath: string): Promise<ReplayData | null> {
         try {
             // Use nw.js fs module to read binary file
-            // @ts-ignore
+            if (typeof nw === 'undefined') {
+                console.warn("Replay loading only supported in NW.js environment currently.");
+                return null;
+            }
+
             const fs = nw.require('fs');
             if (!fs.existsSync(filePath)) {
                 console.error(`Replay file not found: ${filePath}`);
@@ -112,12 +145,15 @@ export class ReplayService {
         this.header = data.header;
         this.records = data.records;
         this.currentIndex = 0;
+        this.mode = ReplayMode.PLAYING;
 
         // Seed RNG
         rndInitWithSeed(data.header.rngSeed);
     }
 
     getInput(currentTick: number, expectedChecksum: number): ReplayRecord | null {
+        if (this.mode !== ReplayMode.PLAYING) return null;
+
         if (this.currentIndex >= this.records.length) {
             return null;
         }
@@ -140,8 +176,14 @@ export class ReplayService {
         return null;
     }
 
+    recordInput(action: number, rngChecksum: number) {
+        // TODO: Implement recording logic
+        // Push to this.records
+        // Write to file if needed
+    }
+
     isComplete(): boolean {
-        return this.currentIndex >= this.records.length;
+        return this.mode === ReplayMode.PLAYING && this.currentIndex >= this.records.length;
     }
 
     getCurrentRecordIndex(): number {
