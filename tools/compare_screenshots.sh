@@ -1,13 +1,14 @@
 #!/bin/bash
 set -e
 
-# Usage: ./compare_screenshots.sh <replay-path> <screenshot-path>
+# Usage: ./compare_screenshots.sh <replay-path> <screenshot-path> [simulate-to-tick]
 
 REPLAY_PATH="$1"
 SCREENSHOT_PATH="$2"
+SIMULATE_TO_TICK="$3"
 
 if [ -z "$REPLAY_PATH" ] || [ -z "$SCREENSHOT_PATH" ]; then
-  echo "Usage: $0 <replay-path> <screenshot-path>"
+  echo "Usage: $0 <replay-path> <screenshot-path> [simulate-to-tick]"
   exit 1
 fi
 
@@ -36,6 +37,9 @@ BASELINE_DIR="$REPO_ROOT/screenshots/1"
 echo "Replay Path: $ABS_REPLAY_PATH"
 echo "Screenshot Path: $ABS_SCREENSHOT_PATH"
 echo "Repo Root: $REPO_ROOT"
+if [ -n "$SIMULATE_TO_TICK" ]; then
+  echo "Simulating to tick: $SIMULATE_TO_TICK"
+fi
 
 # 1. Build
 echo "Building web client..."
@@ -45,7 +49,22 @@ npm run build
 # 2. Run NW.js with replay
 echo "Running Replay..."
 # Note: we use 'nw .' so we must be in src-js
-npx nw . --replay-path="$ABS_REPLAY_PATH" --screenshot-path="$ABS_SCREENSHOT_PATH" --headless
+CMD_ARGS="--replay-path=\"$ABS_REPLAY_PATH\" --screenshot-path=\"$ABS_SCREENSHOT_PATH\" --headless"
+
+if [ -n "$SIMULATE_TO_TICK" ]; then
+  CMD_ARGS="$CMD_ARGS --simulate-to-tick=$SIMULATE_TO_TICK"
+fi
+
+# Use eval to handle quoted arguments correctly or just pass them if no spaces (paths might have spaces)
+# For safety with spaces in paths, it's better to verify array handling or be careful.
+# Simplest way given bash limitations with string appending vs arrays:
+# Construct the command line.
+
+if [ -n "$SIMULATE_TO_TICK" ]; then
+  npx nw . --replay-path="$ABS_REPLAY_PATH" --screenshot-path="$ABS_SCREENSHOT_PATH" --headless --simulate-to-tick="$SIMULATE_TO_TICK"
+else
+  npx nw . --replay-path="$ABS_REPLAY_PATH" --screenshot-path="$ABS_SCREENSHOT_PATH" --headless
+fi
 
 # 3. Compare screenshots
 echo "Comparing screenshots..."

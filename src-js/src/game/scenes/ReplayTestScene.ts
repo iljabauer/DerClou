@@ -15,6 +15,7 @@ export class ReplayTestScene extends Scene {
     private progressText!: Phaser.GameObjects.Text;
     private statusText!: Phaser.GameObjects.Text;
 
+    private simulateToTick: number | null = null;
     private isPlaying: boolean = false;
     private hasLoaded: boolean = false;
 
@@ -71,6 +72,12 @@ export class ReplayTestScene extends Scene {
                 }
             }
 
+            // Check for simulate-to-tick exit
+            if (this.simulateToTick !== null && this.inputHandler.getSimulationTick() >= this.simulateToTick) {
+                console.log(`Simulate-to-tick target ${this.simulateToTick} reached. Exiting...`);
+                ScreenshotService.exitApp();
+            }
+
             if (this.replayService.isComplete()) {
                 this.isPlaying = false;
                 this.statusText.setText('Status: Completed');
@@ -111,7 +118,8 @@ export class ReplayTestScene extends Scene {
             for (const arg of argv) {
                 if (arg.startsWith('--replay-path=')) {
                     replayPath = arg.split('=')[1];
-                    break;
+                } else if (arg.startsWith('--simulate-to-tick=')) {
+                    this.simulateToTick = parseInt(arg.split('=')[1], 10);
                 }
             }
         }
@@ -135,8 +143,8 @@ export class ReplayTestScene extends Scene {
             this.updateDisplay(null);
             console.log(`Loaded replay with ${data.records.length} records`);
 
-            if (ScreenshotService.isHeadlessMode()) {
-                console.log('Headless mode detected. Auto-playing...');
+            if (ScreenshotService.isHeadlessMode() || this.simulateToTick !== null) {
+                console.log('Auto-playing (Headless or Simulate-To-Tick)...');
                 this.togglePlayback();
             }
         } else {
