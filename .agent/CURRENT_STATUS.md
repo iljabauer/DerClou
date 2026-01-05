@@ -371,9 +371,9 @@ npm run dev
 
 ## Notes
 
-- 49 TypeScript files, ~12,000 lines of code (up from ~8,900)
+- 49 TypeScript files, ~12,227 lines of code (up from ~8,900)
 - 72 C source files to port (~35k lines)
-- Progress: ~34% complete (estimated)
+- Progress: ~35% complete (estimated)
 - TCMAIN.DAT and TCBUILD.DAT are main data files
 - Building-specific files: *ETA0.DAT, *ETA1.DAT, etc.
 - Relations in .REL files (text format)
@@ -382,3 +382,4 @@ npm run dev
 - ILBM decoder successfully ported from C
 - UI system ready for integration with game scenes
 - Story file system fully functional with event tracking
+- Story scene triggering system implemented
