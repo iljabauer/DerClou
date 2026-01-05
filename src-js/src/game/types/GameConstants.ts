@@ -170,8 +170,6 @@ export const Location_Holland_Street = 95;
 export const Location_Policestation = 102;
 export const Location_Hotel = 142;
 export const Location_Hotel_Room = 98;
-export const Location_Walrus = 143;
-export const Location_Nirvana = 151;
 
 // Action/Choice flags (from gp.h)
 export const GO = 1 << 0;
