@@ -73,6 +73,82 @@ export class Database {
     getAllRelations(): Relation[] {
         return [...this.relations];
     }
+
+    /**
+     * Get all objects of a specific type that have a relation with the given object
+     * Port of hasAll() from C
+     * 
+     * @param ownerId - Owner object ID
+     * @param relationType - Type of relation (e.g., Has, Knows)
+     * @param objectType - Type of objects to find
+     * @returns Array of objects
+     */
+    getRelatedObjects(
+        ownerId: ObjectId,
+        relationType: RelationType,
+        objectType?: ObjectType
+    ): GameObject[] {
+        const relatedIds = this.getRelations(ownerId, relationType)
+            .map(rel => rel.rightId);
+        
+        const objects = relatedIds
+            .map(id => this.getObject(id))
+            .filter((obj): obj is GameObject => obj !== undefined);
+
+        if (objectType !== undefined) {
+            return objects.filter(obj => obj.type === objectType);
+        }
+
+        return objects;
+    }
+
+    /**
+     * Get all objects that owner "has"
+     * Convenience wrapper for getRelatedObjects with Has relation
+     */
+    hasAll(ownerId: ObjectId, objectType?: ObjectType): GameObject[] {
+        return this.getRelatedObjects(ownerId, RelationType.Has, objectType);
+    }
+
+    /**
+     * Get all objects that person "knows"
+     * Convenience wrapper for getRelatedObjects with Knows relation
+     */
+    knowsAll(personId: ObjectId, objectType?: ObjectType): GameObject[] {
+        return this.getRelatedObjects(personId, RelationType.Knows, objectType);
+    }
+
+    /**
+     * Check if person lives in location
+     * Port of livesIn() from C
+     */
+    livesIn(locationId: ObjectId, personId: ObjectId): boolean {
+        return this.hasRelation(personId, locationId, RelationType.LivesIn);
+    }
+
+    /**
+     * Get object by name
+     * Useful for looking up objects by their name
+     */
+    getObjectByName(name: string): GameObject | undefined {
+        return Array.from(this.objects.values()).find(obj => obj.name === name);
+    }
+
+    /**
+     * Get objects by name pattern (case-insensitive)
+     */
+    getObjectsByNamePattern(pattern: string): GameObject[] {
+        const lowerPattern = pattern.toLowerCase();
+        return Array.from(this.objects.values())
+            .filter(obj => obj.name.toLowerCase().includes(lowerPattern));
+    }
+
+    /**
+     * Sort objects by name (for display lists)
+     */
+    sortObjectsByName(objects: GameObject[]): GameObject[] {
+        return [...objects].sort((a, b) => a.name.localeCompare(b.name));
+    }
 }
 
 export const db = new Database();
