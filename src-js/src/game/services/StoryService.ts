@@ -45,8 +45,11 @@ import {
     SCENE_SOUTHHAMPTON,
     SCENE_TOWER_OUT,
     SCENE_KASERNE_OUTSIDE,
+    SCENE_KASERNE_INSIDE,
     Building_Tower_of_London,
+    Building_Starford_Kaserne,
     Environment_TheClou,
+    Person_Ken_Addison,
     STORY_0_TXT,
     STORY_1_TXT,
     OLD_MATT_PICTID,
@@ -227,6 +230,7 @@ export class StoryService {
         this.handlers.set(SCENE_7TH_BURG, () => this.tcDone7thBurglary());
         this.handlers.set(SCENE_BIRTHDAY, () => this.tcDoneBirthday());
         this.handlers.set(SCENE_SOUTHHAMPTON, () => this.tcDoneSouthhampton());
+        this.handlers.set(SCENE_KASERNE_INSIDE, () => this.tcDoneKaserne());
         // More handlers will be added as they are ported
     }
 
@@ -1672,6 +1676,94 @@ export class StoryService {
         // - Show appropriate dialog
         console.log('Execute Tower burglary - not yet implemented');
         return false;
+    }
+
+    /**
+     * KASERNE (BARRACKS)
+     * Port of tcDoneKaserne from story.c
+     * 
+     * Kaserne menu scene - final burglary setup and execution
+     * TODO: This is a complex menu-based scene that needs full UI integration
+     */
+    private tcDoneKaserne(): void {
+        const Env = this.db.getObject(Environment_TheClou) as any;
+        const car = this.db.getObject(Car_Cadillac_Club_1952) as any;
+
+        // Set up team
+        this.db.joined_bySet(Person_Matt_Stuvysunt, Person_Matt_Stuvysunt);
+        this.db.joined_bySet(Person_Matt_Stuvysunt, Person_Herbert_Briggs);
+        this.db.joined_bySet(Person_Matt_Stuvysunt, Person_Marc_Smith);
+        this.db.joined_bySet(Person_Matt_Stuvysunt, Person_Ken_Addison);
+
+        this.db.joined_byUnSet(Person_Matt_Stuvysunt, Person_Mohammed_Abdula);
+
+        this.db.joinSet(Person_Matt_Stuvysunt, Person_Ken_Addison);
+        this.db.knowsSet(Person_Matt_Stuvysunt, Person_Ken_Addison);
+
+        // Set building exactness
+        const building = this.db.getObject(Building_Starford_Kaserne) as any;
+        if (building) {
+            building.Exactlyness = 255;
+        }
+
+        this.db.hasSet(Person_Matt_Stuvysunt, Building_Starford_Kaserne);
+
+        // Set up car
+        if (car) {
+            car.State = 255;
+            car.MotorState = 255;
+            car.BodyWorkState = 180;
+            car.TyreState = 255;
+            car.Strike = 80; // Very low for this car
+        }
+
+        // TODO: Set up Organisation
+        // Organisation.CarID = Car_Cadillac_Club_1952;
+        // Organisation.DriverID = Person_Marc_Smith;
+        // Organisation.GuyCount = 4;
+
+        // TODO: Implement menu loop
+        // For now, just stub the scene
+        console.log('Kaserne scene - menu system not yet implemented');
+
+        // TODO: Menu options:
+        // 0. Go inside (SetLocation(65), DoneInsideHouse(), tcMattGoesTo(66))
+        // 1. Information - call Information()
+        // 2. Plan - call plPlaner(Building_Starford_Kaserne)
+        // 3. Execute burglary - call plPlayer(Building_Starford_Kaserne)
+
+        // Stub: Show ending dialog
+        this.stopAnim();
+
+        // Check if burglary was successful
+        const burglarySuccess = false; // TODO: Get from plPlayer result
+        const kaserneOk = false; // TODO: Get from Search.KaserneOk
+
+        if (burglarySuccess) {
+            if (kaserneOk) {
+                // TODO: sndPlaySound('end.bk', 0);
+
+                if (Env.MattIsInLove) {
+                    this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST_27_OLD_0');
+                } else {
+                    this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST_28_OLD_0');
+                }
+
+                this.gfxShow(224); // ending graphics
+                this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST_29_OLD_0');
+            } else {
+                this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST_28_OLD_1');
+                this.tcDonePrison();
+            }
+
+            this.scene.sceneArgs.returnValue = SCENE_NEW_GAME;
+        } else {
+            // Return to current scene
+            this.scene.sceneArgs.returnValue = this.getLocSceneEventNr(this.film.getLocation());
+        }
+
+        this.stopAnim();
+        this.gfxChangeColors();
     }
 
     /**
