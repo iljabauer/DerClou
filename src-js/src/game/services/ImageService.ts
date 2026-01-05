@@ -4,7 +4,13 @@
  * Handles loading and managing images/collections.
  * Original game uses IFF ILBM format, which needs conversion for web.
  * 
- * TODO: Implement ILBM decoder or convert images offline to PNG/WebP
+ * TODO: Convert images offline using:
+ * 1. C version with SDL_image (can load ILBM)
+ * 2. Python with Pillow (pip install pillow)
+ * 3. Online ILBM converter
+ * 4. Or implement ILBM decoder in JavaScript
+ * 
+ * For now, this service expects PNG versions in gamedata/PICTURES_PNG/
  */
 
 export interface Collection {
@@ -36,7 +42,7 @@ export class ImageService {
     private dataPath: string;
     private texturesPath: string;
 
-    constructor(dataPath: string = '../gamedata/TEXTS', texturesPath: string = '../gamedata/PICTURES') {
+    constructor(dataPath: string = '../gamedata/TEXTS', texturesPath: string = '../gamedata/PICTURES_PNG') {
         this.dataPath = dataPath;
         this.texturesPath = texturesPath;
     }
@@ -111,8 +117,10 @@ export class ImageService {
         }
 
         try {
-            // Try to load PNG version first (if converted)
-            const pngPath = `${this.texturesPath}/${coll.filename.toUpperCase()}.png`;
+            // Load PNG version (images must be converted from ILBM first)
+            // Original filename may have extension, remove it
+            const baseName = coll.filename.replace(/\.(ani|obj|car|fnt)$/i, '');
+            const pngPath = `${this.texturesPath}/${baseName.toUpperCase()}.png`;
             
             return new Promise((resolve) => {
                 const img = new Image();
@@ -123,7 +131,8 @@ export class ImageService {
                     resolve(true);
                 };
                 img.onerror = () => {
-                    console.warn(`Failed to load ${pngPath} - image may need conversion from ILBM format`);
+                    console.warn(`Failed to load ${pngPath} - image needs conversion from ILBM format`);
+                    console.warn(`Run image conversion tool to convert gamedata/PICTURES/* to PNG`);
                     resolve(false);
                 };
                 img.src = pngPath;
