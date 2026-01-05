@@ -91,7 +91,15 @@ import {
     Tool_Elektroset,
     Person_Margrete_Briggs,
     Person_Paul_O_Conner,
-    Person_Tony_Allen
+    Person_Tony_Allen,
+    Tool_Schneidbrenner,
+    Tool_Stethoskop,
+    Tool_Stromgenerator,
+    Tool_Maske,
+    Person_Miguel_Garcia,
+    Person_John_O_Keef,
+    Person_Samuel_Rosenblatt,
+    FACE_GLUDO_MAGIC
 } from '../types/GameConstants';
 import { ObjectType, Building } from '../types/GameTypes';
 import { PresentationService } from './PresentationService';
@@ -169,6 +177,7 @@ export class StoryService {
         this.handlers.set(SCENE_MISSED_DATE_1, () => this.tcDoneMissedDate());
         this.handlers.set(SCENE_1ST_BURG, () => this.tcDone1stBurglary());
         this.handlers.set(SCENE_2ND_BURG, () => this.tcDone2ndBurglary());
+        this.handlers.set(SCENE_3RD_BURG, () => this.tcDone3rdBurglary());
         // More handlers will be added as they are ported
     }
 
@@ -1287,6 +1296,48 @@ export class StoryService {
         this.db.livesInSet(London_London_1, Person_Margrete_Briggs);
         this.db.livesInSet(London_London_1, Person_Paul_O_Conner);
         this.db.livesInSet(London_London_1, Person_Tony_Allen);
+
+        // TODO: GetScene(SCENE_FAHNDUNG)-\u003eGeschehen = 0;
+        this.scene.sceneArgs.returnValue = this.getLocSceneEventNr(this.film.getLocation());
+    }
+
+    /**
+     * 3RD BURGLARY
+     * Port of tcDone3rdBurglary from story.c
+     * 
+     * After 3rd burglary - unlock locations, add tools/persons, show graphics
+     */
+    private tcDone3rdBurglary(): void {
+        this.scene.addTaxiLocation(35); // sotherbys
+        this.scene.addTaxiLocation(33); // chiswick
+
+        // TODO: if (bProfidisk) this.scene.addTaxiLocation(74); // downing
+
+        this.db.knowsSet(Person_Matt_Stuvysunt, Person_John_Gludo);
+
+        // Add tools to Mary Bolton
+        this.db.hasSet(Person_Mary_Bolton, Tool_Schneidbrenner);
+        this.db.hasSet(Person_Mary_Bolton, Tool_Stethoskop);
+        this.db.hasSet(Person_Mary_Bolton, Tool_Stromgenerator);
+        this.db.hasSet(Person_Mary_Bolton, Tool_Maske);
+
+        // Add persons to London
+        this.db.livesInSet(London_London_1, Person_Miguel_Garcia);
+        this.db.livesInSet(London_London_1, Person_John_O_Keef);
+        this.db.livesInSet(London_London_1, Person_Samuel_Rosenblatt);
+
+        this.gfxShow(166); // graphics
+
+        this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, 'READ_TIMES_0');
+
+        // TODO: sndPlaySound('gludo.bk', 0);
+
+        this.dialog.say(STORY_0_TXT, 0, FACE_GLUDO_MAGIC, 'READ_TIMES_GLUDO');
+        this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, 'READ_TIMES_1');
+
+        // TODO: sndPlaySound('street1.bk', 0);
+
+        this.gfxShow(150); // graphics
 
         // TODO: GetScene(SCENE_FAHNDUNG)-\u003eGeschehen = 0;
         this.scene.sceneArgs.returnValue = this.getLocSceneEventNr(this.film.getLocation());
