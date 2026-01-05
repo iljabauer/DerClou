@@ -1073,6 +1073,39 @@ export class StoryService {
     }
 
     /**
+     * TERROR
+     * Port of tcDoneTerror from story.c
+     * 
+     * Matt's Jaguar explodes
+     */
+    private tcDoneTerror(): void {
+        this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST_17_OLD_0');
+
+        // TODO: gfxPrepareColl(211);
+        // TODO: gfxPrepareColl(210);
+        // TODO: gfxPrepareColl(209);
+
+        this.gfxShow(176);
+        // TODO: inpDelay(150);
+
+        // TODO: sndPlayFX("explosio.voc");
+
+        this.playAnim('Explo1', 1);
+        // TODO: inpDelay(200);
+        this.playAnim('Explo2', 50);
+        // TODO: inpDelay(260);
+
+        this.stopAnim();
+
+        this.db.hasUnSet(Person_Matt_Stuvysunt, Car_Jaguar_XK_1950);
+
+        this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST_17_OLD_1');
+        this.gfxChangeColors(0, 'fade_out');
+
+        this.scene.sceneArgs.returnValue = SCENE_CARS_VANS;
+    }
+
+    /**
      * Helper: Play animation
      */
     private playAnim(animName: string, duration: number): void {
