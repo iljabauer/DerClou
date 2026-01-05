@@ -111,7 +111,24 @@ import {
     Person_Jiri_Poulin,
     Person_Prof_Emil_Schmitt,
     Person_Melanie_Morgan,
-    Person_Sid_Palmer
+    Person_Sid_Palmer,
+    Car_Standard_Vanguard_1951,
+    Car_Rover_75_1952,
+    Car_Bentley_Continental_Typ_R_1953,
+    Tool_Schuhe,
+    Tool_Elektrohammer,
+    Person_Thomas_Smith,
+    Person_Albert_Liet,
+    Person_Frank_Meier,
+    Person_Mike_Kahn,
+    Person_Mark_Hart,
+    Person_Frank_De_Silva,
+    Person_Neil_Grey,
+    Person_Serge_Fontane,
+    Person_Mike_Seeger,
+    Person_Mathew_Black,
+    Person_Prof_Marcus_Green,
+    Person_Pere_Ubu
 } from '../types/GameConstants';
 import { ObjectType, Building } from '../types/GameTypes';
 import { PresentationService } from './PresentationService';
@@ -191,6 +208,7 @@ export class StoryService {
         this.handlers.set(SCENE_2ND_BURG, () => this.tcDone2ndBurglary());
         this.handlers.set(SCENE_3RD_BURG, () => this.tcDone3rdBurglary());
         this.handlers.set(SCENE_4TH_BURG, () => this.tcDone4thBurglary());
+        this.handlers.set(SCENE_5TH_BURG, () => this.tcDone5thBurglary());
         // More handlers will be added as they are ported
     }
 
@@ -1405,6 +1423,53 @@ export class StoryService {
 
         // TODO: GetScene(SCENE_FAHNDUNG)-\u003eGeschehen = 0;
         this.scene.sceneArgs.returnValue = this.getLocSceneEventNr(7); // Police
+    }
+
+    /**
+     * 5TH BURGLARY
+     * Port of tcDone5thBurglary from story.c
+     * 
+     * After 5th burglary - unlock locations, add cars/tools/persons
+     */
+    private tcDone5thBurglary(): void {
+        this.scene.addTaxiLocation(27); // kenw
+        this.scene.addTaxiLocation(39); // natural museum
+
+        // TODO: if (bProfidisk) this.scene.addTaxiLocation(77); // tate
+
+        this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, '5TH_OLD_0');
+
+        // Add cars to Marc Smith
+        this.db.hasSet(Person_Marc_Smith, Car_Standard_Vanguard_1951);
+
+        // TODO: if (bProfidisk) {
+        //     this.db.hasSet(Person_Marc_Smith, Car_Rover_75_1952);
+        //     this.db.hasSet(Person_Marc_Smith, Car_Bentley_Continental_Typ_R_1953);
+        // }
+
+        // Add tools to Mary Bolton
+        this.db.hasSet(Person_Mary_Bolton, Tool_Schuhe);
+        this.db.hasSet(Person_Mary_Bolton, Tool_Elektrohammer);
+
+        // Add persons to London
+        this.db.livesInSet(London_London_1, Person_Thomas_Smith);
+        this.db.livesInSet(London_London_1, Person_Albert_Liet);
+        this.db.livesInSet(London_London_1, Person_Frank_Meier);
+        this.db.livesInSet(London_London_1, Person_Mike_Kahn);
+        this.db.livesInSet(London_London_1, Person_Mark_Hart);
+        this.db.livesInSet(London_London_1, Person_Frank_De_Silva);
+        this.db.livesInSet(London_London_1, Person_Neil_Grey);
+        this.db.livesInSet(London_London_1, Person_Serge_Fontane);
+        this.db.livesInSet(London_London_1, Person_Mike_Seeger);
+        this.db.livesInSet(London_London_1, Person_Mathew_Black);
+
+        // TODO: if (bProfidisk) {
+        //     this.db.livesInSet(London_London_1, Person_Prof_Marcus_Green);
+        //     this.db.livesInSet(London_London_1, Person_Pere_Ubu);
+        // }
+
+        // TODO: GetScene(SCENE_FAHNDUNG)-\u003eGeschehen = 0;
+        this.scene.sceneArgs.returnValue = this.getLocSceneEventNr(this.film.getLocation());
     }
 
     /**
