@@ -213,6 +213,7 @@ export class InteractionService {
 
     /**
      * Handle GO action
+     * Port of GO case from StdHandle() in gp_app.c
      */
     private async handleGo(): Promise<number> {
         // TODO: Get current scene's standard successors from Film/Scene system
@@ -231,9 +232,28 @@ export class InteractionService {
             return 0;
         }
 
-        // TODO: Check location opening hours
-        // TODO: Get location object and check OpenFromMinute/OpenToMinute
-        // TODO: If closed, show "No_Entry" message and return 0
+        // Check location opening hours
+        // TODO: Get scene from nextScene and extract locationNr
+        // For now, assume nextScene is the location ID
+        const locationId = nextScene;
+        const location = this.db.getObject(locationId) as any;
+
+        if (location && location.openFromMinute !== undefined && location.openToMinute !== undefined) {
+            const currentMinute = this.film.getCurrentMinute();
+            
+            if (currentMinute < location.openFromMinute || currentMinute > location.openToMinute) {
+                // Location is closed
+                const noEntryText = this.text.getFirstLine(THECLOU_TXT, 'No_Entry');
+                
+                // Show "closed" message
+                await this.ui.showBubble({
+                    text: noEntryText || 'This location is closed.',
+                    bubbleType: 1  // THINK_BUBBLE
+                });
+
+                return 0;  // Stay in current scene
+            }
+        }
 
         // TODO: Stop animation if moving
         // TODO: Call StopAnim()
