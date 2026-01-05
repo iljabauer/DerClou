@@ -819,6 +819,41 @@ export class StoryService {
     }
 
     /**
+     * RAID IN WALRUS
+     * Port of tcDoneRaidInWalrus from story.c
+     * 
+     * Police raid at the Walrus pub
+     */
+    private tcDoneRaidInWalrus(): void {
+        const Red = this.db.getObject(Person_Red_Stanson) as any;
+        const Env = this.db.getObject(Environment_TheClou) as any;
+
+        this.db.knowsSet(Person_Matt_Stuvysunt, Person_Red_Stanson);
+        // TODO: sndPlaySound("gludo.bk", 0);
+
+        this.dialog.say(STORY_0_TXT, 0, Red.PictID, 'RAID_POLICE_0');
+        this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, 'RAID_OLD_MATT_0');
+
+        this.dialog.say(STORY_0_TXT, 0, MATT_PICTID, 'RAID_MATT_0');
+        this.dialog.say(STORY_0_TXT, 0, Red.PictID, 'RAID_POLICE_1');
+
+        if (Env.MattHasIdentityCard) {
+            this.dialog.say(STORY_0_TXT, 0, MATT_PICTID, 'RAID_MATT_1');
+            this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, 'RAID_OLD_MATT_1');
+
+            this.scene.sceneArgs.returnValue = SCENE_HOTEL_ROOM;
+        } else {
+            this.dialog.say(STORY_0_TXT, 0, MATT_PICTID, 'RAID_MATT_2');
+            this.dialog.say(STORY_0_TXT, 0, OLD_MATT_PICTID, 'RAID_OLD_MATT_2');
+
+            this.scene.sceneArgs.returnValue = SCENE_POLICE;
+        }
+
+        this.stopAnim();
+        this.gfxChangeColors(0, 'fade_out');
+    }
+
+    /**
      * Helper: Play animation
      */
     private playAnim(animName: string, duration: number): void {
