@@ -185,6 +185,7 @@ export const PHONE_PICTID = 144;
 export const LETTER_PICTID = 151;
 export const OLD_MATT_PICTID = 0; // TODO: Find actual value
 export const MATT_PICTID = 7; // TODO: Verify this value
+export const FACE_GLUDO_SAILOR = 126;
 
 // Story text file
 export const STORY_0_TXT = 18; // TODO: Verify this value
