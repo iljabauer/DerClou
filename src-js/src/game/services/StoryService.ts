@@ -1106,6 +1106,55 @@ export class StoryService {
     }
 
     /**
+     * CONFESSING SABIEN
+     * Port of tcDoneConfessingSabien from story.c
+     * 
+     * Matt confesses to Sabien - major story branch
+     */
+    private tcDoneConfessingSabien(): void {
+        const Sabien = this.db.getObject(Person_Sabien_Pardo) as any;
+        const Env = this.db.getObject(Environment_TheClou) as any;
+
+        this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST_18_OLD_0');
+        this.dialog.say(STORY_1_TXT, 0, Sabien.PictID, 'ST_18_SABIEN_0');
+        this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST_18_OLD_1');
+        this.dialog.say(STORY_1_TXT, 0, Sabien.PictID, 'ST_18_SABIEN_1');
+
+        Env.WithOrWithoutYou = this.dialog.say(STORY_1_TXT, 0, MATT_PICTID, 'ST_18_MATT_0');
+
+        this.stopAnim();
+
+        if (Env.WithOrWithoutYou) {
+            // Matt stays with Sabien - happy ending
+            this.gfxChangeColors(3, 'fade_out');
+            // TODO: ShowMenuBackground();
+
+            this.gfxShow(163); // south 1
+            this.gfxShow(152); // family
+
+            // TODO: sndPlaySound("sabien.bk", 0);
+
+            this.dialog.say(STORY_1_TXT, 0, OLD_MATT_PICTID, 'ST_19_OLD_0');
+
+            this.gfxShow(164); // The End
+
+            // TODO: inpWaitFor(INP_LBUTTONP);
+            this.gfxChangeColors(3, 'fade_out');
+
+            this.scene.sceneArgs.returnValue = SCENE_NEW_GAME;
+        } else {
+            // Matt doesn't stay with Sabien
+            this.addVTime(2713);
+
+            this.gfxChangeColors(3, 'fade_out');
+
+            this.scene.sceneArgs.returnValue = SCENE_SOUTHHAMPTON;
+
+            this.film.setLocation(-1); // force fade in
+        }
+    }
+
+    /**
      * Helper: Play animation
      */
     private playAnim(animName: string, duration: number): void {
