@@ -1460,6 +1460,10 @@ export class PlanningService {
      * @param actionFunc Optional action callback
      * @returns Burglary result code
      */
+    /**
+     * Execute a planned burglary
+     * Port of plPlayer() from player.c
+     */
     async player(
         buildingId: number,
         actionTime: number = 0,
@@ -1467,27 +1471,149 @@ export class PlanningService {
     ): Promise<number> {
         console.log(`[PlanningService] Executing burglary for building ${buildingId}`);
 
-        // TODO: Full implementation
-        // This requires:
-        // 1. Load saved plan
-        // 2. Initialize landscape
-        // 3. Place team members
-        // 4. Execute actions in sequence
-        // 5. Handle guards
-        // 6. Handle alarms
-        // 7. Handle police
-        // 8. Track loot
-        // 9. Track time
-        // 10. Determine success/failure
+        // Initialize execution state
+        this.initializePlayerData(buildingId, actionTime, actionFunc);
+        this.initializeSearchData(buildingId);
 
-        // For now, show a placeholder message and return success
+        // Prepare systems (landscape, graphics, etc.)
+        await this.prepareExecution(buildingId);
+
+        // Load saved plan
+        const planLoaded = await this.loadPlanForExecution(buildingId);
+        if (!planLoaded) {
+            console.error('[PlanningService] Failed to load plan');
+            await this.ui.showBubble(['No plan found for this building.'], 'think', 0);
+            return BURGLARY_FAILURE;
+        }
+
+        // Start main execution loop
+        const result = await this.executionLoop();
+
+        // Cleanup
+        await this.cleanupExecution();
+
+        return result;
+    }
+
+    /**
+     * Initialize PlayerData structure
+     */
+    private initializePlayerData(
+        buildingId: number,
+        actionTime: number,
+        actionFunc: ((objId: number, time: number) => boolean) | null
+    ): void {
+        const building = this.db.getObject(buildingId) as Building;
+        const areaId = this.landscape.getActivAreaID();
+        const area = this.db.getObject(areaId);
+
+        this.playerData = {
+            action: null,
+            handlerEnded: [1, 1, 1, 1],
+            guardKO: [0, 0, 0, 0],
+            currLoudness: [0, 0, 0, 0],
+            unableToWork: [0, 0, 0, 0],
+            maxTimer: 0,
+            timer: 0,
+            realTime: 0,
+            ende: false,
+            badPlaning: false,
+            mood: this.getMood(0),
+            patrolCount: 0,
+            bldId: buildingId,
+            bldObj: building,
+            changeCount: 0,
+            totalCount: this.landscape.getObjectCount(),
+            alarmTimer: 0,
+            actionTime: actionTime,
+            actionFunc: actionFunc,
+            isItDark: (area as any).uch_Darkness || false,
+            sndState: true
+        };
+    }
+
+    /**
+     * Initialize SearchData structure
+     */
+    private initializeSearchData(buildingId: number): void {
+        this.search = {
+            guyXPos: [-1, -1, -1, -1],
+            guyYPos: [-1, -1, -1, -1],
+            exhaust: [0, 0, 0, 0],
+            walkTime: [0, 0, 0, 0],
+            waitTime: [0, 0, 0, 0],
+            workTime: [0, 0, 0, 0],
+            killTime: [0, 0, 0, 0],
+            deriTime: 0,
+            timeOfBurglary: 0,
+            timeOfAlarm: 0,
+            buildingId: buildingId,
+            lastAreaId: 0,
+            escapeBits: 0,
+            callValue: 0,
+            callCount: 0,
+            warningCount: 0,
+            spotTouchCount: [0, 0, 0, 0],
+            kaserneOk: false
+        };
+    }
+
+    /**
+     * Get team mood
+     * Port of plGetMood() from player.c
+     */
+    private getMood(time: number): number {
+        // TODO: Port tcGetTeamMood() from gp.c
+        // For now, return a default value
+        return 100;
+    }
+
+    /**
+     * Prepare systems for execution
+     */
+    private async prepareExecution(buildingId: number): Promise<void> {
+        // TODO: Port plPrepareSys(), plPrepareGfx(), plPrepareRel()
+        // For now, just log
+        console.log('[PlanningService] Preparing execution systems');
+    }
+
+    /**
+     * Load plan for execution
+     */
+    private async loadPlanForExecution(buildingId: number): Promise<boolean> {
+        // TODO: Port plOpen() and LoadSystem()
+        // For now, return true if we have a plan
+        console.log('[PlanningService] Loading plan for execution');
+        return true;
+    }
+
+    /**
+     * Main execution loop
+     * Port of main loop from plPlayer()
+     */
+    private async executionLoop(): Promise<number> {
+        console.log('[PlanningService] Starting execution loop');
+
+        // TODO: Implement main execution loop
+        // This will be the core of the burglary execution
+        // For now, just show a message and return success
         await this.ui.showBubble(
-            ['Burglary execution not yet implemented.', 'Assuming success for now.'],
+            ['Burglary execution loop not yet implemented.', 'Returning success for now.'],
             'think',
             0
         );
 
         return BURGLARY_SUCCESS;
+    }
+
+    /**
+     * Cleanup after execution
+     */
+    private async cleanupExecution(): Promise<void> {
+        // TODO: Port plUnprepareSys(), plUnprepareGfx(), plUnprepareRel()
+        console.log('[PlanningService] Cleaning up execution');
+        this.playerData = null;
+        this.search = null;
     }
 
     /**
