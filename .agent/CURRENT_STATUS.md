@@ -1,12 +1,12 @@
 # Der Clou! TypeScript Port - Current Status
 
-**Last Updated:** 2026-01-05 (Session 21)
+**Last Updated:** 2026-01-05 (Session 22)
 
 ## Overview
 
-Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundation with replay system, core architecture, complete data/text/image systems, story file loading, event tracking, and landscape rendering with textures.
+Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundation with replay system, core architecture, complete data/text/image systems, story file loading, event tracking, landscape rendering with textures, and planning actions.
 
-## Current Phase: Phase 6 - Landscape System (Complete) / Phase 7 - Planning Actions (Next)
+## Current Phase: Phase 7 - Planning Actions (Complete) / Phase 8 - Burglary Execution (Next)
 
 ### What Works ✅
 
@@ -257,7 +257,7 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - ⚠️ Collision detection needs implementation (complex, deferred)
    - ⚠️ Lighting/darkness rendering needs implementation
 
-15. **Planning System** - Partial ✅
+15. **Planning System** - Mostly Complete ✅
    - PlanningSystemService - Core system (COMPLETE)
      - System/Handler/Action/Signal management
      - Action types: GO, WAIT, SIGNAL, WAIT_SIGNAL, USE, TAKE, DROP, OPEN, CLOSE, CONTROL
@@ -266,7 +266,7 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
      - Signal communication between handlers
      - Save/load functionality
      - Timer management
-   - PlanningService - Main interface (PARTIAL)
+   - PlanningService - Main interface (MOSTLY COMPLETE) ✅
      - planner() - Planning interface with menu system ✅
      - Main planning loop ✅
      - Notebook menu (target, team, car, tools, loots) ✅
@@ -276,7 +276,21 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
      - Prepare/unprepare system and graphics ✅
      - Timer and info display ✅
      - player() - Burglary execution (stubbed)
-     - Action implementations (stubbed)
+     - Action implementations (COMPLETE) ✅
+       - actionWalk() - Movement with collision detection ✅
+       - actionUse() - Tool usage, stairs, guards ✅
+       - actionOpen() - Open doors/windows/safes ✅
+       - actionClose() - Close doors/windows/safes ✅
+       - actionTake() - Pick up loot ✅
+       - actionDrop() - Drop loot ✅
+       - actionWait() - Wait for time or radio signal ✅
+       - actionRadio() - Send radio signal ✅
+     - Helper methods ✅
+       - waitForInput() - Input handling
+       - removeLastAction() - Undo last action
+       - sync() - Animation synchronization
+       - showMessage() - Display messages
+       - say() - Character dialog
    - PlanningSupportService - Support functions (PARTIAL)
      - prepareData() - Initialize planning data ✅
      - getNextLoot() - Loot slot management ✅
@@ -355,15 +369,15 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - ⚠️ Door refresh system
    - ⚠️ Integration with LivingService for character display
 
-2. **Planning System Implementation** - HIGH PRIORITY
+2. **Planning System Implementation** - MOSTLY COMPLETE ✅
    - ✅ Core system (PlanningSystemService)
    - ✅ Menu system (planner interface)
    - ✅ Team selection UI (via OrganisationService)
    - ✅ Save/load system (basic structure)
    - ✅ Support functions (PlanningSupportService)
-   - ⚠️ Action implementations (walk, use, open, close, take, drop, wait, radio)
-   - ⚠️ Landscape integration for action planning (NOW POSSIBLE)
-   - ⚠️ Guard simulation
+   - ✅ Action implementations (walk, use, open, close, take, drop, wait, radio) - NEW Session 22
+   - ✅ Landscape integration for action planning
+   - ⚠️ Guard simulation (needs guards.c port)
    - ⚠️ Burglary execution (plPlayer)
    - ⚠️ Time tracking during execution
    - ⚠️ Loot tracking during execution
@@ -528,9 +542,9 @@ npm run dev
 
 ## Notes
 
-- 62 TypeScript files, ~18,900 lines of code (up from ~18,742 in Session 20)
+- 62 TypeScript files, ~19,780 lines of code (up from ~18,900 in Session 21)
 - 72 C source files to port (~35k lines)
-- Progress: ~50% complete (estimated, up from ~48%)
+- Progress: ~55% complete (estimated, up from ~50%)
 - TCMAIN.DAT and TCBUILD.DAT are main data files
 - Building-specific files: *ETA0.DAT, *ETA1.DAT, etc.
 - Relations in .REL files (text format)
