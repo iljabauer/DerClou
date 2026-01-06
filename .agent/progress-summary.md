@@ -1,6 +1,59 @@
 # Der Clou Porting Progress Summary
 
-## Completed (Session 3 - Current)
+## Completed (Session 4 - Current)
+
+### Graphics System ✅
+
+#### ILBM Image Loader
+- **File**: `src-js/src/game/services/ILBMLoader.ts`
+- **Status**: Complete
+- **Features**:
+  - Full ILBM (IFF Interleaved Bitmap) decoder
+  - RLE compression support
+  - Color palette handling (256 colors)
+  - Planar to chunky bitmap conversion
+  - Big-endian byte order handling
+  - Creates Phaser textures from ILBM data
+  - Ported from src/gfx/loadimage.c
+
+#### ImageCatalog
+- **File**: `src-js/src/game/services/ImageCatalog.ts`
+- **Status**: Complete
+- **Features**:
+  - Loads PICT.LST (picture definitions)
+  - Loads COLL.LST (collection definitions)
+  - Maps picture IDs to image files
+  - Loads collections on demand
+  - Extracts sub-regions from collections
+  - Creates textures for individual pictures
+  - Collection caching
+
+#### ImageService Update
+- **File**: `src-js/src/game/services/ImageService.ts`
+- **Status**: Updated to use ImageCatalog
+- **Features**:
+  - Dynamic loading from catalog files
+  - Loads actual images instead of placeholders
+  - Fallback to placeholders if needed
+
+### Scene Graphics ✅
+
+#### MainMenuScene
+- Loads actual MENU background (train station)
+- Scales from 320x120 to 1024x768
+- Test passing with 2% pixel difference
+
+#### StoryScene
+- Loads BAHNHOF background (collection 131)
+- Loads OLD_MATT portrait (picture 125)
+- Scales backgrounds and portraits appropriately
+- Fallback graphics if loading fails
+
+### Infrastructure ✅
+- Symlink to PICTURES directory in public folder
+- All ILBM images accessible to web app
+
+## Completed (Session 3)
 
 ### Core Data Structures ✅
 
@@ -118,10 +171,11 @@
 - **Menu Selection**: MainMenuScene needs to properly trigger StoryScene with replay
 
 ### Graphics System
-- **Placeholder Graphics**: Using solid colors instead of actual images
-- **IFF/ILBM Loading**: Need to port image loading from src/gfx/
-- **Background Images**: Train station, building scenes, etc.
-- **Character Portraits**: Need to load portrait images (OLD_MATT_PICTID, etc.)
+- ✅ ~~IFF/ILBM Loading~~ - DONE
+- ✅ ~~Background Images~~ - DONE (MENU, BAHNHOF)
+- ✅ ~~Character Portraits~~ - DONE (OLD_MATT)
+- **Speech Bubble Graphics**: Need to load BUBBLE collection
+- **Animation Support**: .ANI files not yet supported
 
 ### Font System
 - **Web Font**: Currently using Courier New
@@ -140,16 +194,17 @@
 
 ### Next Priority Systems
 
-1. **Shared Replay Service**
-   - Make replay work across scene transitions
-   - Global replay state management
-   - Scene data passing
+1. **Speech Bubble Graphics**
+   - Load BUBBLE collection (129)
+   - Extract speech/think bubble images
+   - Replace placeholder bubbles in DialogService
+   - Support different bubble types
    
-2. **Graphics Loading (IFF/ILBM)**
-   - Port image loading from src/gfx/
-   - Load background images
-   - Load character portraits
-   - Image catalog system
+2. **Bitmap Font System**
+   - Load bitmap font from PICTURES/FONT or MENU.FNT
+   - Replace web font with bitmap font
+   - Achieve pixel-perfect text rendering
+   - Reduce test pixel difference to <1%
 
 3. **Data Loading**
    - Port database loading from src/data/
