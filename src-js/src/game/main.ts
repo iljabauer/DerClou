@@ -1,3 +1,4 @@
+import { RouterScene } from './scenes/RouterScene';
 import { MainMenuScene } from './scenes/MainMenuScene';
 import { StoryScene } from './scenes/StoryScene';
 import { MonologueScene } from './scenes/MonologueScene';
@@ -17,6 +18,7 @@ const config: Types.Core.GameConfig = {
     },
     pixelArt: true,
     scene: [
+        RouterScene,
         MainMenuScene,
         StoryScene,
         MonologueScene
