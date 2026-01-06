@@ -11,7 +11,7 @@ test.beforeAll(() => {
     }
 });
 
-test('from-start-to-finish-first-burglary', async ({ page }) => {
+test('main-menu', async ({ page }) => {
     // 1. Setup the communication channel
     let sequenceComplete: (value?: unknown) => void;
     let sequenceFailed: (reason?: any) => void;
