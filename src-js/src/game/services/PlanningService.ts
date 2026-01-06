@@ -2309,16 +2309,45 @@ export class PlanningService {
      * Display timer
      */
     private displayTimer(time: number, refresh: boolean): void {
-        // TODO: Port plDisplayTimer()
-        console.log(`[PlanningService] Timer: ${time}s`);
+        if (!this.playerData) return;
+
+        // Convert time to hours and minutes
+        const hours = Math.floor(time / 60);
+        const minutes = time % 60;
+        const timeStr = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+
+        // TODO: Display on screen at fixed position
+        // For now, log periodically
+        if (refresh || time % 10 === 0) {
+            console.log(`[PlanningService] Time: ${timeStr} (${time}s)`);
+        }
     }
 
     /**
      * Display info
      */
     private displayInfo(): void {
-        // TODO: Port plDisplayInfo()
-        // Shows weight, volume, loudness, etc.
+        if (!this.playerData || !this.search || !this.state) return;
+
+        // Calculate total weight and volume
+        let totalWeight = 0;
+        let totalVolume = 0;
+        const burglarsNr = this.state.team.length;
+
+        for (let i = 0; i < burglarsNr; i++) {
+            // TODO: Get actual weight/volume from person
+            // totalWeight += Planing_Weight[i];
+            // totalVolume += Planing_Volume[i];
+        }
+
+        // Get current loudness
+        const currentLoudness = this.playerData.currLoudness[this.currentPerson];
+
+        // TODO: Display on screen at fixed position
+        // For now, log periodically
+        if (this.playerData.timer % 30 === 0) {
+            console.log(`[PlanningService] Info - Weight: ${totalWeight}, Volume: ${totalVolume}, Loudness: ${currentLoudness}`);
+        }
     }
 
     /**
