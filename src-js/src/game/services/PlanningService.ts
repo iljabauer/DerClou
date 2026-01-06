@@ -25,6 +25,7 @@ import {
 } from './PlanningSystemService';
 import { PlanningSupportService } from './PlanningSupportService';
 import { LivingService } from './LivingService';
+import { GameplayService } from './GameplayService';
 import { Building } from '../types/GameTypes';
 import { LS_COLL_PLAN } from './LandscapeService';
 
@@ -227,7 +228,8 @@ export class PlanningService {
         ui: UIService,
         text: TextService,
         landscape: LandscapeService,
-        living: LivingService
+        living: LivingService,
+        private gameplay: GameplayService
     ) {
         this.db = db;
         this.scene = scene;
@@ -1569,9 +1571,15 @@ export class PlanningService {
      * Port of plGetMood() from player.c
      */
     private getMood(time: number): number {
-        // TODO: Port tcGetTeamMood() from gp.c
-        // For now, return a default value
-        return 100;
+        if (!this.state) return 100;
+
+        // Get team member IDs
+        const guyIds = [...this.state.team];
+        while (guyIds.length < 4) {
+            guyIds.push(0);  // Pad with zeros
+        }
+
+        return this.gameplay.getTeamMood(guyIds, time);
     }
 
     /**
@@ -1802,8 +1810,7 @@ export class PlanningService {
 
         // Check time clock alarms (every 3 ticks)
         if (!(this.search.escapeBits & FAHN_ALARM_TIMECLOCK) && !(this.playerData.timer % 3)) {
-            // TODO: Port tcCheckTimeClocks(buildingId)
-            const timeClockAlarm = false;  // Stub for now
+            const timeClockAlarm = this.gameplay.checkTimeClocks(this.playerData.bldId);
             if (timeClockAlarm) {
                 this.search.escapeBits |= FAHN_ALARM | FAHN_ALARM_TIMECLOCK;
                 this.search.deriTime += Math.floor(this.playerData.realTime / this.randomNr(1, 3));
@@ -1813,10 +1820,13 @@ export class PlanningService {
 
         // Check loudness detection (every 15 ticks)
         if (!(this.playerData.timer % 15)) {
-            // TODO: Port tcAlarmByLoudness() and tcGetTotalLoudness()
-            const totalLoudness = this.playerData.currLoudness[0] + this.playerData.currLoudness[1] + 
-                                 this.playerData.currLoudness[2] + this.playerData.currLoudness[3];
-            const loudnessAlarm = false;  // Stub for now
+            const totalLoudness = this.gameplay.getTotalLoudness(
+                this.playerData.currLoudness[0],
+                this.playerData.currLoudness[1],
+                this.playerData.currLoudness[2],
+                this.playerData.currLoudness[3]
+            );
+            const loudnessAlarm = this.gameplay.alarmByLoudness(this.playerData.bldObj, totalLoudness);
             if (loudnessAlarm) {
                 this.search.escapeBits |= FAHN_QUIET_ALARM | FAHN_ALARM_LOUDN;
             }
@@ -1831,12 +1841,20 @@ export class PlanningService {
         }
 
         if (!(this.playerData.timer % patrolCounter)) {
-            // TODO: Port tcAlarmByPatrol()
-            const patrolAlarm = false;  // Stub for now
-            if (patrolAlarm) {
+            // Random chance based on guard rate
+            if (this.randomNr(0, 30 * (270 - (this.playerData.bldObj.GuardRate || 0) / 2 + 1)) === 0) {
                 await this.showMessage('PLAYER_PATROL', true);
                 this.playerData.patrolCount++;
-                this.search.escapeBits |= FAHN_QUIET_ALARM | FAHN_ALARM_PATRO;
+
+                const patrolAlarm = this.gameplay.alarmByPatrol(
+                    this.playerData.bldObj,
+                    this.playerData.changeCount,
+                    this.playerData.totalCount,
+                    this.playerData.patrolCount
+                );
+                if (patrolAlarm) {
+                    this.search.escapeBits |= FAHN_QUIET_ALARM | FAHN_ALARM_PATRO;
+                }
             }
         }
 
