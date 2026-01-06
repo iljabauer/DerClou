@@ -3,7 +3,7 @@ import { MainMenuScene } from './scenes/MainMenuScene';
 import { StoryScene } from './scenes/StoryScene';
 import { MonologueScene } from './scenes/MonologueScene';
 import { NavigationScene } from './scenes/NavigationScene';
-// import { LocationScene } from './scenes/LocationScene'; // TODO: Fix and re-enable
+import { LocationScene } from './scenes/LocationScene';
 import { AUTO, Game, Scale, Types } from 'phaser';
 
 // Find out more information about the Game Config at:
@@ -24,8 +24,8 @@ const config: Types.Core.GameConfig = {
         MainMenuScene,
         StoryScene,
         MonologueScene,
-        NavigationScene
-        // LocationScene // TODO: Fix and re-enable
+        NavigationScene,
+        LocationScene
     ]
 };
 
