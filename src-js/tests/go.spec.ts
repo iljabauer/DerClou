@@ -22,7 +22,7 @@ test('go', async ({ page }) => {
     let screenshotIndex = 1;
 
     // Increase timeout for long replays
-    test.setTimeout(500000);
+    test.setTimeout(30000);
 
     await page.exposeFunction('captureEvent', async (eventName: string) => {
         console.log(`📸 Capturing event: ${eventName}`);
