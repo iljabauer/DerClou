@@ -199,18 +199,90 @@ export class GameplayService {
     }
 
     /**
+     * Check alarm by microphone
+     * Port of tcAlarmByMicro() from dataappl.c
+     * 
+     * Checks if loudness at position triggers microphone alarm.
+     * Returns true if alarm should be triggered.
+     */
+    alarmByMicro(xPos: number, yPos: number, loudness: number): boolean {
+        // Get microphone sensitivity at this position
+        const micSensitivity = this.getLoudness(xPos, yPos);
+        
+        // Alarm if loudness exceeds microphone sensitivity
+        return loudness > micSensitivity;
+    }
+
+    /**
+     * Get loudness threshold at position (microphone sensitivity)
+     * Port of lsGetLoudness() from landscap.c
+     * 
+     * Returns the microphone sensitivity at the given position.
+     * Higher values mean less sensitive (more loudness allowed).
+     */
+    private getLoudness(xPos: number, yPos: number): number {
+        // TODO: Port full implementation from LandscapeService
+        // For now, return default value (no microphone = max loudness allowed)
+        return 255;
+    }
+
+    /**
+     * Check alarm by touch
+     * Port of tcAlarmByTouch() from dataappl.c
+     * 
+     * Checks if touching an object triggers an alarm.
+     * Returns true if alarm should be triggered.
+     */
+    alarmByTouch(lsoId: number): boolean {
+        const lso = this.db.getObject(lsoId) as LSObject;
+        if (!lso) return false;
+
+        // Check if object is chained to alarm
+        const CHAINED_TO_ALARM = 0x01;  // Const_tcCHAINED_TO_ALARM
+        if (lso.Chained & CHAINED_TO_ALARM) {
+            // Check if connected to enabled alarm
+            return this.isConnectedWithEnabledAlarm(lsoId);
+        }
+
+        return false;
+    }
+
+    /**
+     * Check if object is connected to an enabled alarm
+     * Port of tcIsConnectedWithEnabledAlarm() from dataappl.c
+     */
+    private isConnectedWithEnabledAlarm(lsoId: number): boolean {
+        // TODO: Port full implementation
+        // - Check alarm relations
+        // - Check if alarm is enabled
+        // For now, assume alarms are enabled
+        return true;
+    }
+
+    /**
      * Check alarm by power loss
-     * Port of tcAlarmByPowerLoss() from gp.c
+     * Port of tcAlarmByPowerLoss() from dataappl.c
      * 
      * Checks if power loss triggers an alarm.
      * Returns true if alarm should be triggered.
      */
-    alarmByPowerLoss(objectId: number): boolean {
-        // TODO: Port full implementation
-        // - Check if object is connected to alarm system
-        // - Check if power loss detection is active
-        // - Return true if alarm triggered
+    alarmByPowerLoss(powerId: number): boolean {
+        // Get all objects connected to this power source
+        const connectedObjects = this.db.getRelatedObjects(powerId, 'hasPower');
         
+        // Check if any connected object has alarm
+        for (const obj of connectedObjects) {
+            const lso = obj as LSObject;
+            if (!lso) continue;
+
+            const CHAINED_TO_ALARM = 0x01;  // Const_tcCHAINED_TO_ALARM
+            if (lso.Status & CHAINED_TO_ALARM) {
+                if (this.isConnectedWithEnabledAlarm(obj.id!)) {
+                    return true;
+                }
+            }
+        }
+
         return false;
     }
 
@@ -286,43 +358,159 @@ export class GameplayService {
 
     /**
      * Check watchdog warning
-     * Port of tcWatchDogWarning() from gp.c
+     * Port of tcWatchDogWarning() from dataappl.c
      * 
      * Checks if a person with watchdog ability detects danger.
-     * Returns warning level (0 = no warning).
+     * Called when there IS a neighbor alarm.
+     * Returns true if person detects something.
      */
-    watchDogWarning(personId: number): number {
-        // TODO: Port full implementation
-        // - Check if person has watchdog ability
-        // - Calculate detection probability
-        // - Return warning level
+    watchDogWarning(personId: number): boolean {
+        // Get watchdog ability (Aufpassen)
+        const watch = this.getAbilityValue(personId, 'Aufpassen');
         
-        return 0;
+        // Calculate random value (sum of 3 rolls for larger risk)
+        const random = this.randomNr(0, 200) + 
+                      this.randomNr(0, 200) + 
+                      this.randomNr(0, 200);
+        
+        // Check if watchdog detects (with additional random check)
+        if (watch > random && this.randomNr(0, 40) === 1) {
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Check wrong watchdog warning (false alarm)
+     * Port of tcWrongWatchDogWarning() from dataappl.c
+     * 
+     * Checks if a person with watchdog ability gives false alarm.
+     * Called when there is NO neighbor alarm.
+     * Returns true if person gives false alarm.
+     */
+    wrongWatchDogWarning(personId: number): boolean {
+        // Get watchdog ability
+        const watch = this.getAbilityValue(personId, 'Aufpassen');
+        
+        // Check if person makes a mistake
+        if (this.randomNr(0, 255) > watch) {
+            // Better ability = lower chance of false alarm
+            if (this.randomNr(0, watch * 50) === 1) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * Get ability value for person
+     * Helper to get ability value from database
+     */
+    private getAbilityValue(personId: number, abilityName: string): number {
+        // TODO: Port full implementation
+        // For now, return default value
+        return 127;
     }
 
     /**
      * Check if guard detects burglar
-     * Port of tcGuardDetectsGuy() from gp.c
+     * Port of tcGuardDetectsGuy() from dataappl.c
      * 
      * Checks if a guard detects a burglar.
+     * xPos, yPos = guard position
+     * direction = guard view direction
      * Returns true if detected.
      */
     guardDetectsGuy(
-        guardRoomList: any,
+        guardRoomList: any,  // LIST of rooms
         xPos: number,
         yPos: number,
         direction: number,
         guardName: string,
         burglarName: string
     ): boolean {
+        let detected = false;
+
+        // Get burglar position
+        const burglarXPos = this.getLivingXPos(burglarName);
+        const burglarYPos = this.getLivingYPos(burglarName);
+
+        // Check if in same area
+        if (this.getLivingArea(guardName) === this.getLivingArea(burglarName)) {
+            // Check if burglar is in guard's view direction
+            if (this.isPositionInViewDirection(xPos, yPos, burglarXPos, burglarYPos, direction)) {
+                // Check if in same room
+                const X_HOTSPOT = 8;  // tcX_HOTSPOT
+                if (this.insideSameRoom(guardRoomList, 
+                                       xPos + X_HOTSPOT, yPos,
+                                       burglarXPos + X_HOTSPOT, burglarYPos)) {
+                    detected = true;
+                }
+            }
+        }
+
+        return detected;
+    }
+
+    /**
+     * Get living X position
+     * Port of livGetXPos() from living.c
+     */
+    private getLivingXPos(name: string): number {
+        // TODO: Port from LivingService
+        return 0;
+    }
+
+    /**
+     * Get living Y position
+     * Port of livGetYPos() from living.c
+     */
+    private getLivingYPos(name: string): number {
+        // TODO: Port from LivingService
+        return 0;
+    }
+
+    /**
+     * Get living area
+     * Port of livWhereIs() from living.c
+     */
+    private getLivingArea(name: string): number {
+        // TODO: Port from LivingService
+        return 0;
+    }
+
+    /**
+     * Check if position is in view direction
+     * Port of livIsPositionInViewDirection() from living.c
+     */
+    private isPositionInViewDirection(
+        guardX: number, guardY: number,
+        targetX: number, targetY: number,
+        direction: number
+    ): boolean {
         // TODO: Port full implementation
-        // - Check line of sight
-        // - Check distance
-        // - Factor in lighting
-        // - Factor in guard abilities
-        // - Return true if detected
-        
-        return false;
+        // For now, simple distance check
+        const dx = Math.abs(targetX - guardX);
+        const dy = Math.abs(targetY - guardY);
+        return (dx < 100 && dy < 100);
+    }
+
+    /**
+     * Check if two positions are in same room
+     * Port of tcInsideSameRoom() from dataappl.c
+     */
+    private insideSameRoom(
+        roomsList: any,
+        x1: number, y1: number,
+        x2: number, y2: number
+    ): boolean {
+        // TODO: Port full implementation
+        // For now, assume same room if close
+        const dx = Math.abs(x2 - x1);
+        const dy = Math.abs(y2 - y1);
+        return (dx < 50 && dy < 50);
     }
 
     /**
