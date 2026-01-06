@@ -165,15 +165,15 @@ export class StoryScene extends Scene {
         }
 
         // Draw character portrait
+        const portraitX = 32;
+        const portraitY = 256;
+        const portraitWidth = 198; // 62 * 3.2
+        const portraitHeight = 214; // 67 * 3.2
+        
         if (dialog.portrait) {
             await this.loadAndShowPortrait(dialog.portrait);
         } else {
             // Fallback portrait placeholder
-            const portraitX = 10;
-            const portraitY = 80;
-            const portraitWidth = 230;
-            const portraitHeight = 250;
-            
             const graphics = this.add.graphics();
             graphics.lineStyle(4, 0xccaa66);
             graphics.strokeRect(portraitX, portraitY, portraitWidth, portraitHeight);
@@ -187,23 +187,26 @@ export class StoryScene extends Scene {
         const bubbleWidth = 760;
         const bubbleHeight = 220;
 
+        // Create graphics for bubble
+        const bubbleGraphics = this.add.graphics();
+        
         // Draw bubble background
-        graphics.fillStyle(0xdddddd, 1);
-        graphics.fillRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight);
+        bubbleGraphics.fillStyle(0xdddddd, 1);
+        bubbleGraphics.fillRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight);
         
         // Draw bubble border
-        graphics.lineStyle(2, 0x000000);
-        graphics.strokeRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight);
+        bubbleGraphics.lineStyle(2, 0x000000);
+        bubbleGraphics.strokeRect(bubbleX, bubbleY, bubbleWidth, bubbleHeight);
         
         // Draw pointer from bubble to portrait
-        graphics.fillStyle(0xdddddd, 1);
-        graphics.fillTriangle(
+        bubbleGraphics.fillStyle(0xdddddd, 1);
+        bubbleGraphics.fillTriangle(
             bubbleX, bubbleY + 50,
             bubbleX, bubbleY + 80,
             portraitX + portraitWidth, bubbleY + 65
         );
-        graphics.lineStyle(2, 0x000000);
-        graphics.strokeTriangle(
+        bubbleGraphics.lineStyle(2, 0x000000);
+        bubbleGraphics.strokeTriangle(
             bubbleX, bubbleY + 50,
             bubbleX, bubbleY + 80,
             portraitX + portraitWidth, bubbleY + 65
