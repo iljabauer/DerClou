@@ -15,8 +15,7 @@
  */
 
 import { Scene } from 'phaser';
-import { ReplayService } from '../services/ReplayService';
-import { InputHandler } from '../services/InputHandler';
+import { SharedReplayService } from '../services/SharedReplayService';
 import { TextService } from '../services/TextService';
 import { ImageCatalog } from '../services/ImageCatalog';
 
@@ -45,8 +44,7 @@ interface ActionMenuItem {
 }
 
 export class LocationScene extends Scene {
-    private replayService: ReplayService;
-    private inputHandler: InputHandler;
+    private sharedReplay: SharedReplayService | null = null;
     private textService: TextService;
     private imageCatalog: ImageCatalog;
     
@@ -61,9 +59,6 @@ export class LocationScene extends Scene {
 
     constructor() {
         super('LocationScene');
-        this.replayService = new ReplayService();
-        this.inputHandler = new InputHandler();
-        this.inputHandler.setReplayService(this.replayService);
         this.textService = new TextService();
         this.imageCatalog = new ImageCatalog(this);
     }
@@ -90,8 +85,26 @@ export class LocationScene extends Scene {
         // Create action menu
         this.createActionMenu();
         
-        // Setup replay
-        await this.setupReplay();
+        // Get shared replay service
+        this.sharedReplay = SharedReplayService.getInstance(this);
+        
+        // Check if replay is active
+        if (this.sharedReplay && this.sharedReplay.isReplayLoaded()) {
+            this.hasLoaded = true;
+            console.log('LocationScene: Using shared replay service');
+            
+            // Monitor for replay start
+            this.time.addEvent({
+                delay: 100,
+                loop: true,
+                callback: () => {
+                    if (this.sharedReplay && this.sharedReplay.isReplayPlaying() && !this.isPlaying) {
+                        console.log('LocationScene: Replay started');
+                        this.isPlaying = true;
+                    }
+                }
+            });
+        }
     }
     
     private setupLocationData() {
@@ -274,34 +287,7 @@ export class LocationScene extends Scene {
         }
     }
     
-    private async setupReplay() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const replayPath = urlParams.get('replay');
-        
-        if (!replayPath) {
-            console.log('LocationScene: No replay specified');
-            return;
-        }
-        
-        console.log(`LocationScene: Loading replay ${replayPath}`);
-        const replayData = await this.replayService.loadReplay(replayPath);
-        
-        if (!replayData) {
-            console.error('LocationScene: Failed to load replay');
-            return;
-        }
-        
-        this.hasLoaded = true;
-        
-        // Expose startReplay function to window
-        (window as any).startReplay = () => {
-            console.log('LocationScene: Starting replay');
-            this.isPlaying = true;
-        };
-        
-        console.log('LocationScene: Replay loaded, waiting for start signal');
-    }
-    
+
     private signalScreenshot(eventName: string) {
         this.waitingForScreenshot = true;
         
@@ -320,18 +306,22 @@ export class LocationScene extends Scene {
             return;
         }
         
-        if (this.isPlaying && this.hasLoaded && this.replayService.isComplete()) {
+        if (!this.sharedReplay) {
+            return;
+        }
+        
+        if (this.isPlaying && this.hasLoaded && this.sharedReplay.isReplayComplete()) {
             this.isPlaying = false;
             this.signalScreenshot('Finished');
             console.log('LocationScene: Replay complete');
         }
         
-        if (this.isPlaying && this.hasLoaded && !this.replayService.isComplete()) {
-            const action = this.inputHandler.simulateTick();
+        if (this.isPlaying && this.hasLoaded && !this.sharedReplay.isReplayComplete()) {
+            const action = this.sharedReplay.simulateTick();
             
             if (action !== null) {
-                const tick = this.inputHandler.getSimulationTick();
-                const actionStr = this.replayService.actionToString(action);
+                const tick = this.sharedReplay.getSimulationTick();
+                const actionStr = this.sharedReplay.actionToString(action);
                 console.log(`[Replay] Tick ${tick}: ${actionStr}`);
                 
                 // Handle replay actions
