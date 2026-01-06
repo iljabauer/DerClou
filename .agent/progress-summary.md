@@ -1,18 +1,40 @@
 # Der Clou Porting Progress Summary
 
-## Completed (Session 6 - Current)
+## Completed (Session 7 - Current)
 
-### LocationScene ✅
-- **File**: `src-js/src/game/scenes/LocationScene.ts`
-- **Status**: Complete and building
+### NavigationScene ✅
+- **File**: `src-js/src/game/scenes/NavigationScene.ts`
+- **Status**: Basic implementation complete
 - **Features**:
-  - Location background display (using ILBM loader)
-  - Action menu with 6 items (Gehen, Warten, Reden, Umsehen, Taxi rufen, Nachdenken)
-  - Navigation submenu for location selection
-  - Time display and advancement
-  - Keyboard navigation
-  - Replay system integration
+  - Handles GO action for location navigation
+  - Shows menu background (picture 128)
+  - Displays "Gehen" (Go) title from text files
+  - Lists available locations (hardcoded for now)
+  - Keyboard navigation (UP/DOWN)
+  - Mouse selection (CLICK)
+  - Integrated with replay system
+  - Screenshot capture at each action
   - Ported from src/scenes/scenes.c Go() function
+
+### Build System ✅
+- Fixed build errors by disabling incomplete LocationScene
+- LocationScene.ts renamed to .bak (was incomplete)
+- All TypeScript compilation passing
+- NavigationScene integrated into game config
+- RouterScene routes test_go to NavigationScene
+
+### Documentation ✅
+- Analyzed test_go.rec replay (71 records, RNG seed 12345)
+- Documented GO action implementation from C code
+- Created replay analysis Python script (.agent/analyze_replay.py)
+- Session 7 summary and plan documents
+
+## Completed (Session 6)
+
+### LocationScene (Incomplete - Disabled) ⚠️
+- **File**: `src-js/src/game/scenes/LocationScene.ts.bak`
+- **Status**: Incomplete, disabled to fix build
+- **Note**: Replaced by NavigationScene in Session 7
 
 ## Completed (Session 5)
 
@@ -24,10 +46,10 @@
   - Supports main_menu, monologue, go, and long replays
   - Integrated into game config as first scene
 
-### Test Status ✅
-- **main-menu.spec.ts**: 2% pixel diff (acceptable)
-- **monologue.spec.ts**: 2% pixel diff (acceptable)
-- **go.spec.ts**: 32% pixel diff (needs more work)
+### Test Status
+- **main-menu.spec.ts**: ✅ 2% pixel diff (acceptable)
+- **monologue.spec.ts**: ✅ 2% pixel diff (acceptable)
+- **go.spec.ts**: ⏳ Not yet tested with NavigationScene (was 32% with old setup)
 - **from-start-to-finish-first-burglary.spec.ts**: Not yet tested
 
 ## Completed (Session 4)
@@ -302,10 +324,12 @@ src/
 ## Next Session Goals
 
 ### High Priority
-1. **Create LocationScene / NavigationScene**
-   - Port basic location/landscape system from src/landscap/
-   - Implement navigation UI for moving between locations
-   - Get "go" test closer to passing (currently 32% diff)
+1. **Test and Improve NavigationScene**
+   - Run playwright test for test_go.rec
+   - Measure pixel difference
+   - Debug and fix any issues
+   - Load actual location data from game files
+   - Implement scene transitions
 
 2. **Improve Scene Transitions**
    - Better state management between scenes
