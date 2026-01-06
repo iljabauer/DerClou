@@ -24,14 +24,37 @@ The C code uses a scene-based system:
 - Scenes transition based on player choices
 - Locations are managed separately from scenes
 
-## What "test_go.rec" Likely Tests
+## What "test_go.rec" Actually Tests
 
-Based on the replay format and game structure:
-1. Starts from main menu or a specific scene
-2. Triggers the GO action
-3. Shows location selection/navigation UI
-4. Possibly moves to a location
-5. Takes screenshots at each step
+Analyzed replay file (71 records, RNG seed 12345):
+
+**Action Sequence:**
+1. **Tick 8-34**: TIME actions (waiting)
+2. **Tick 82**: LBUTTONP (click) - likely "New Game" on main menu
+3. **Tick 84-92**: TIME actions with RNG checksum changes (15)
+4. **Tick 138**: LBUTTONP - another click
+5. **Tick 187**: LBUTTONP - another click
+6. **Tick 254**: LBUTTONP - another click
+7. **Tick 380**: LBUTTONP - another click
+8. **Tick 624, 677**: RIGHT key - keyboard navigation
+9. **Tick 713**: DOWN key - keyboard navigation
+10. **Tick 755**: LBUTTONP - selection
+11. **Tick 847**: LBUTTONP - another selection
+12. **Tick 895**: RIGHT key
+13. **Tick 939**: LBUTTONP
+14. **Tick 1159**: LBUTTONP
+15. **Tick 1348**: INP_FUNCTION_KEY (0x00002000)
+16. **Tick 1421**: DOWN key
+17. **Tick 1487**: LBUTTONP - final click
+
+**Interpretation:**
+- Starts at main menu
+- Clicks through story/intro scenes
+- Reaches a location with action menu
+- Uses keyboard (RIGHT/DOWN) to navigate menu
+- Selects actions with mouse clicks
+- Likely tests the GO action and location navigation
+- Function key press suggests menu/UI interaction
 
 ## Current Status
 
