@@ -1583,21 +1583,129 @@ export class PlanningService {
     }
 
     /**
+     * Cleanup after execution
+     * Port of cleanup code from plPlayer()
+     */
+    private async cleanupExecution(): Promise<void> {
+        console.log('[PlanningService] Cleaning up execution');
+
+        if (!this.playerData || !this.search || !this.state) return;
+
+        // Save final positions
+        const burglarsNr = this.state.team.length;
+        for (let i = 0; i < burglarsNr; i++) {
+            // TODO: Get final positions from living service
+            // this.search.guyXPos[i] = livGetXPos(name);
+            // this.search.guyYPos[i] = livGetYPos(name);
+        }
+
+        // Transfer loot to Matt
+        for (let i = 0; i < burglarsNr; i++) {
+            // TODO: Port loot transfer logic
+            // Get all loot from person and transfer to Matt
+        }
+
+        // Check if car is too full
+        // TODO: Port plCarTooFull() check
+        // If too full, show menu to drop items
+
+        // Set escape bits if successful
+        if (!(this.search.escapeBits & FAHN_ALARM) && 
+            !(this.search.escapeBits & FAHN_QUIET_ALARM) && 
+            !(this.search.escapeBits & FAHN_ESCAPE)) {
+            this.search.escapeBits |= FAHN_STD_ESCAPE;
+        }
+
+        // TODO: Calculate escape time
+        // timeLeft = tcEscapeFromBuilding(escapeBits);
+
+        // Cleanup graphics
+        // TODO: Port plUnprepareGfx()
+        // TODO: Port plUnprepareRel()
+        // TODO: Port plUnprepareSys()
+    }
+
+    /**
      * Prepare systems for execution
+     * Port of plPrepareSys(), plPrepareGfx(), plPrepareRel() from prepare.c
      */
     private async prepareExecution(buildingId: number): Promise<void> {
-        // TODO: Port plPrepareSys(), plPrepareGfx(), plPrepareRel()
-        // For now, just log
         console.log('[PlanningService] Preparing execution systems');
+
+        // plPrepareSys - Initialize person lists and handlers
+        // TODO: Port full person list initialization
+        // For now, use team from state
+        if (!this.state) {
+            console.error('[PlanningService] No state available for execution');
+            return;
+        }
+
+        // plPrepareGfx - Initialize landscape and sprites
+        // Initialize landscape for the building
+        await this.landscape.init(buildingId, LS_COLL_PLAN);
+        
+        // TODO: Initialize sprites for team members
+        // TODO: Set active living
+        
+        // plPrepareRel - Clone loot relations
+        // TODO: Port relation cloning for loot tracking
+        // This creates temporary relations for tracking loot during burglary
     }
 
     /**
      * Load plan for execution
+     * Port of plOpen() and LoadSystem() from player.c
      */
     private async loadPlanForExecution(buildingId: number): Promise<boolean> {
-        // TODO: Port plOpen() and LoadSystem()
-        // For now, return true if we have a plan
         console.log('[PlanningService] Loading plan for execution');
+
+        if (!this.state || !this.playerData) {
+            return false;
+        }
+
+        // TODO: Port plOpen() - Open plan file
+        // TODO: Port LoadSystem() - Load handlers and actions
+        // TODO: Port plLoadTools() - Load tool assignments
+        
+        // For now, check if we have a team
+        if (!this.state.team || this.state.team.length === 0) {
+            console.error('[PlanningService] No team members for execution');
+            return false;
+        }
+
+        // Initialize handler states
+        const burglarsNr = this.state.team.length;
+        for (let i = 0; i < PLANING_NR_PERSONS; i++) {
+            this.playerData.handlerEnded[i] = 1;
+            this.playerData.currLoudness[i] = 0;
+            this.playerData.unableToWork[i] = 0;
+            
+            this.search!.exhaust[i] = 0;
+            this.search!.walkTime[i] = 0;
+            this.search!.waitTime[i] = 0;
+            this.search!.workTime[i] = 0;
+            this.search!.killTime[i] = 0;
+            this.search!.spotTouchCount[i] = 0;
+            this.search!.guyXPos[i] = -1;
+            this.search!.guyYPos[i] = -1;
+        }
+
+        // Enable handlers for team members
+        for (let i = 0; i < burglarsNr; i++) {
+            this.playerData.handlerEnded[i] = 0;
+            // TODO: LoadHandler() - Load actions for this person
+            // TODO: Calculate maxTimer from all handlers
+        }
+
+        // Initialize guard KO states
+        for (let i = 0; i < PLANING_NR_GUARDS; i++) {
+            this.playerData.guardKO[i] = 0;
+        }
+
+        // TODO: Play music based on building
+        // if (buildingId === Building_Starford_Kaserne) play kaserne music
+        // else play standard music
+
         return true;
     }
 
