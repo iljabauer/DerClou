@@ -6,14 +6,12 @@
  */
 
 import { Scene } from 'phaser';
-import { ReplayService } from '../services/ReplayService';
-import { InputHandler } from '../services/InputHandler';
+import { SharedReplayService } from '../services/SharedReplayService';
 import { TextService } from '../services/TextService';
 import { ImageCatalog } from '../services/ImageCatalog';
 
 export class StoryScene extends Scene {
-    private replayService: ReplayService;
-    private inputHandler: InputHandler;
+    private sharedReplay: SharedReplayService | null = null;
     private textService: TextService;
     private imageCatalog: ImageCatalog;
     
@@ -26,9 +24,6 @@ export class StoryScene extends Scene {
 
     constructor() {
         super('StoryScene');
-        this.replayService = new ReplayService();
-        this.inputHandler = new InputHandler();
-        this.inputHandler.setReplayService(this.replayService);
         this.textService = new TextService();
         this.imageCatalog = new ImageCatalog(this);
     }
@@ -46,8 +41,26 @@ export class StoryScene extends Scene {
         // Setup opening sequence from story data
         this.setupOpeningSequence();
 
-        // Load replay if specified
-        this.loadReplayFile();
+        // Get shared replay service
+        this.sharedReplay = SharedReplayService.getInstance(this);
+        
+        // Check if replay is active
+        if (this.sharedReplay && this.sharedReplay.isReplayLoaded()) {
+            this.hasLoaded = true;
+            console.log('StoryScene: Using shared replay service');
+            
+            // Monitor for replay start
+            this.time.addEvent({
+                delay: 100,
+                loop: true,
+                callback: () => {
+                    if (this.sharedReplay && this.sharedReplay.isReplayPlaying() && !this.isPlaying) {
+                        console.log('StoryScene: Replay started');
+                        this.isPlaying = true;
+                    }
+                }
+            });
+        }
     }
 
     private setupOpeningSequence() {
@@ -73,19 +86,23 @@ export class StoryScene extends Scene {
         if (this.waitingForScreenshot) {
             return;
         }
+        
+        if (!this.sharedReplay) {
+            return;
+        }
 
-        if (this.isPlaying && this.hasLoaded && this.replayService.isComplete()) {
+        if (this.isPlaying && this.hasLoaded && this.sharedReplay.isReplayComplete()) {
             this.isPlaying = false;
             this.signalScreenshot('Finished');
             console.log('Replay complete.');
         }
 
-        if (this.isPlaying && this.hasLoaded && !this.replayService.isComplete()) {
-            const action = this.inputHandler.simulateTick();
+        if (this.isPlaying && this.hasLoaded && !this.sharedReplay.isReplayComplete()) {
+            const action = this.sharedReplay.simulateTick();
             
             if (action !== null) {
-                const tick = this.inputHandler.getSimulationTick();
-                const actionStr = this.replayService.actionToString(action);
+                const tick = this.sharedReplay.getSimulationTick();
+                const actionStr = this.sharedReplay.actionToString(action);
                 console.log(`[Replay] Tick ${tick}: ${actionStr}`);
 
                 // Handle story progression based on replay actions
@@ -244,43 +261,7 @@ export class StoryScene extends Scene {
         ).setOrigin(0.5);
     }
 
-    private async loadReplayFile() {
-        const urlParams = new URLSearchParams(window.location.search);
-        const replayPath = urlParams.get('replay');
 
-        if (!replayPath) {
-            console.log('No replay path provided - interactive mode');
-            // Show first dialog in interactive mode
-            if (this.dialogSequence.length > 0) {
-                this.showDialog(this.dialogSequence[0]);
-            }
-            return;
-        }
-
-        console.log(`Loading replay: ${replayPath}`);
-
-        const data = await this.replayService.loadReplay(replayPath);
-
-        if (data) {
-            this.replayService.initPlayback(data);
-            this.inputHandler.init();
-            this.hasLoaded = true;
-            console.log(`Loaded replay with ${data.records.length} records`);
-
-            // Show first dialog
-            if (this.dialogSequence.length > 0) {
-                this.showDialog(this.dialogSequence[0]);
-            }
-
-            // Expose startReplay to Playwright
-            (window as any).startReplay = () => {
-                console.log("Playwright signaled startReplay");
-                this.isPlaying = true;
-            };
-        } else {
-            console.error('Failed to load replay');
-        }
-    }
 
     private signalScreenshot(name: string) {
         if ((window as any).captureEvent) {
