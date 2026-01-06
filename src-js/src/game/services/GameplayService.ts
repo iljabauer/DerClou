@@ -21,18 +21,57 @@ export class GameplayService {
 
     /**
      * Check time clock alarms
-     * Port of tcCheckTimeClocks() from gp.c
+     * Port of tcCheckTimeClocks() from dataappl.c
      * 
      * Checks if any time clocks in the building have been triggered.
+     * Should be called every second (every 3 ticks).
      * Returns true if alarm should be triggered.
      */
     checkTimeClocks(buildingId: number): boolean {
-        // TODO: Port full implementation
-        // - Get all time clocks in building
-        // - Check if any are active and not disabled
-        // - Return true if alarm triggered
+        let alarm = false;
+
+        // Get all time clocks in the building
+        // TODO: Port hasClockAll() - gets objects with clock timers
+        // For now, get all LSObjects and check if they have timers
         
-        return false;
+        const objects = this.db.getRelatedObjects(buildingId, 'hasClock');
+        
+        for (const obj of objects) {
+            // Get timer value for this object
+            // TODO: Port ClockTimerGet() and ClockTimerSetP()
+            // For now, stub it out
+            
+            const timerId = obj.id;
+            const time = this.getClockTimer(timerId);
+            
+            if (time > 0) {
+                // Decrement timer
+                this.setClockTimer(timerId, time - 1);
+            } else if (time === 0) {
+                // Timer expired - trigger alarm
+                alarm = true;
+            }
+        }
+
+        return alarm;
+    }
+
+    /**
+     * Get clock timer value
+     * Port of ClockTimerGet() from dataappl.c
+     */
+    private getClockTimer(objectId: number): number {
+        // TODO: Port full implementation
+        // For now, return -1 (no timer)
+        return -1;
+    }
+
+    /**
+     * Set clock timer value
+     * Port of ClockTimerSetP() from dataappl.c
+     */
+    private setClockTimer(objectId: number, value: number): void {
+        // TODO: Port full implementation
     }
 
     /**
