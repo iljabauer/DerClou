@@ -45,53 +45,104 @@ export interface ReplayData {
     records: ReplayRecord[];
 }
 
+// Abstract Binary Reader to handle both Node Buffer and Browser DataView
+interface BinaryReader {
+    length: number;
+    readUInt32LE(offset: number): number;
+    readInt32LE(offset: number): number;
+    readString(offset: number, length: number): string;
+}
+
+class NodeBufferReader implements BinaryReader {
+    constructor(private buffer: any) { }
+    get length() { return this.buffer.length; }
+    readUInt32LE(offset: number) { return this.buffer.readUInt32LE(offset); }
+    readInt32LE(offset: number) { return this.buffer.readInt32LE(offset); }
+    readString(offset: number, length: number) { return this.buffer.toString('ascii', offset, offset + length); }
+}
+
+class BrowserBufferReader implements BinaryReader {
+    private view: DataView;
+    constructor(buffer: ArrayBuffer) {
+        this.view = new DataView(buffer);
+    }
+    get length() { return this.view.byteLength; }
+    readUInt32LE(offset: number) { return this.view.getUint32(offset, true); } // true for Little Endian
+    readInt32LE(offset: number) { return this.view.getInt32(offset, true); }
+    readString(offset: number, length: number) {
+        const bytes = new Uint8Array(this.view.buffer, offset, length);
+        return String.fromCharCode.apply(null, Array.from(bytes));
+    }
+}
+
 export class ReplayService {
     private records: ReplayRecord[] = [];
     private currentIndex: number = 0;
 
     async loadReplay(filePath: string): Promise<ReplayData | null> {
         try {
-            // Use nw.js fs module to read binary file
+            let reader: BinaryReader;
+
+            // Check if running in NW.js environment
             // @ts-ignore
-            const fs = nw.require('fs');
-            if (!fs.existsSync(filePath)) {
-                console.error(`Replay file not found: ${filePath}`);
-                return null;
+            if (typeof nw !== 'undefined') {
+                // Use nw.js fs module to read binary file
+                // @ts-ignore
+                const fs = nw.require('fs');
+                if (!fs.existsSync(filePath)) {
+                    console.error(`Replay file not found: ${filePath}`);
+                    return null;
+                }
+                const buffer = fs.readFileSync(filePath);
+                reader = new NodeBufferReader(buffer);
+            } else {
+                // Browser environment: usage fetch
+                try {
+                    const response = await fetch(filePath);
+                    if (!response.ok) {
+                        console.error(`Failed to fetch replay file: ${response.statusText}`);
+                        return null;
+                    }
+                    const arrayBuffer = await response.arrayBuffer();
+                    reader = new BrowserBufferReader(arrayBuffer);
+                } catch (e) {
+                    console.error(`Fetch error: ${e}`);
+                    return null;
+                }
             }
-            const buffer = fs.readFileSync(filePath);
 
             // Parse header (12 bytes)
-            if (buffer.length < HEADER_SIZE) {
+            if (reader.length < HEADER_SIZE) {
                 console.error("File smaller than header size");
                 return null;
             }
 
-            const magic = buffer.toString('ascii', 0, 4);
+            const magic = reader.readString(0, 4);
             if (magic !== REPLAY_MAGIC) {
                 console.error(`Invalid magic: ${magic}`);
                 return null;
             }
 
-            const version = buffer.readUInt32LE(4);
+            const version = reader.readUInt32LE(4);
             if (version !== REPLAY_VERSION) {
                 console.error(`Version mismatch: ${version}`);
                 return null;
             }
 
-            const rngSeed = buffer.readUInt32LE(8);
+            const rngSeed = reader.readUInt32LE(8);
 
             // Parse records
             const records: ReplayRecord[] = [];
             let offset = HEADER_SIZE;
 
-            while (offset + RECORD_SIZE <= buffer.length) {
+            while (offset + RECORD_SIZE <= reader.length) {
                 // Read 64-bit tick as two 32-bit values (little-endian)
-                const tickLow = buffer.readUInt32LE(offset);
-                const tickHigh = buffer.readUInt32LE(offset + 4);
+                const tickLow = reader.readUInt32LE(offset);
+                const tickHigh = reader.readUInt32LE(offset + 4);
                 const tick = tickLow + tickHigh * 0x100000000;
 
-                const action = buffer.readInt32LE(offset + 8);
-                const rngChecksum = buffer.readUInt32LE(offset + 12);
+                const action = reader.readInt32LE(offset + 8);
+                const rngChecksum = reader.readUInt32LE(offset + 12);
 
                 records.push({ tick, action, rngChecksum });
                 offset += RECORD_SIZE;

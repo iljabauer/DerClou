@@ -28,6 +28,7 @@
         "build-nolog": "npm run type-check && vite build --config vite/config.prod.mjs"
     },
     "devDependencies": {
+        "@playwright/test": "^1.57.0",
         "concurrently": "^9.2.1",
         "nw": "^0.106.1",
         "typescript": "~5.7.2",

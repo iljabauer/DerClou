@@ -19,6 +19,8 @@ export class GameStartScene extends Scene {
     private isPlaying: boolean = false;
     private hasLoaded: boolean = false;
 
+    private waitingForScreenshot: boolean = false;
+
     constructor() {
         super('ReplayTestScene');
         this.replayService = new ReplayService();
@@ -38,14 +40,12 @@ export class GameStartScene extends Scene {
         this.progressText = this.add.text(10, 140, 'Record: 0 / 0', style);
 
         // Play/Pause Button
-        // Play/Pause Button
         this.add.text(10, 180, 'Play/Pause', {
             backgroundColor: '#004400', padding: { x: 10, y: 5 }, ...style
         })
             .setInteractive({ useHandCursor: true })
             .on('pointerdown', () => this.togglePlayback());
 
-        // Screenshot Button
         // Screenshot Button
         this.add.text(150, 180, 'Screenshot', {
             backgroundColor: '#000044', padding: { x: 10, y: 5 }, ...style
@@ -58,6 +58,10 @@ export class GameStartScene extends Scene {
     }
 
     update(_time: number, _delta: number) {
+        if (this.waitingForScreenshot) {
+            return;
+        }
+
         if (this.isPlaying && this.hasLoaded && !this.replayService.isComplete()) {
             const action = this.inputHandler.simulateTick();
             this.updateDisplay(action);
@@ -70,7 +74,7 @@ export class GameStartScene extends Scene {
                 // Match C implementation logic:
                 // if (action & ~INP_TIME) { Replay_CaptureScreenshot(); }
                 if (action & ~INP_TIME) {
-                    this.captureScreenshot();
+                    this.signalScreenshot(`Tick_${tick}_${actionStr.replace(/\s+/g, '_')}`);
                 }
             }
 
@@ -83,6 +87,7 @@ export class GameStartScene extends Scene {
             if (this.replayService.isComplete()) {
                 this.isPlaying = false;
                 this.statusText.setText('Status: Completed');
+                this.signalScreenshot('Finished');
 
                 if (ScreenshotService.isHeadlessMode()) {
                     console.log('Replay complete in headless mode. Exiting...');
@@ -124,12 +129,20 @@ export class GameStartScene extends Scene {
                     this.simulateToTick = parseInt(arg.split('=')[1], 10);
                 }
             }
+        } else {
+            // Browser/Playwright default
+            // Playwright can inject this, or we fallback to a known test file
+            // For now, let's assume a default if not found
+            // Check URL params
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('replay')) {
+                replayPath = urlParams.get('replay')!;
+            }
         }
 
         if (!replayPath) {
-            // Default path or error
-            this.statusText.setText('Status: No replay path provided (--replay-path)');
-            console.warn('No replay path provided. Use --replay-path=...');
+            this.statusText.setText('Status: No replay path provided');
+            console.warn('No replay path provided.');
             return;
         }
 
@@ -144,6 +157,12 @@ export class GameStartScene extends Scene {
             this.statusText.setText('Status: Ready');
             this.updateDisplay(null);
             console.log(`Loaded replay with ${data.records.length} records`);
+
+            // Expose startReplay to Playwright
+            (window as any).startReplay = () => {
+                console.log("Playwright signaled startReplay");
+                this.togglePlayback();
+            };
 
             if (ScreenshotService.isHeadlessMode() || this.simulateToTick !== null) {
                 console.log('Auto-playing (Headless or Simulate-To-Tick)...');
@@ -162,4 +181,15 @@ export class GameStartScene extends Scene {
             }
         });
     }
+
+    private signalScreenshot(name: string) {
+        if ((window as any).captureEvent) {
+            this.waitingForScreenshot = true;
+            // The Playwright function is async
+            (window as any).captureEvent(name).then(() => {
+                this.waitingForScreenshot = false;
+            });
+        }
+    }
 }
+

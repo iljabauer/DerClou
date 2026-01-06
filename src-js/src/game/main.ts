@@ -20,7 +20,9 @@ const config: Types.Core.GameConfig = {
 };
 
 const StartGame = (parent: string) => {
-    return new Game({ ...config, parent });
+    const game = new Game({ ...config, parent });
+    (window as any).game = game;
+    return game;
 }
 
 export default StartGame;
