@@ -10,7 +10,6 @@ import { ReplayService } from './ReplayService';
 import { InputHandler } from './InputHandler';
 
 const REPLAY_SERVICE_KEY = 'sharedReplayService';
-const INPUT_HANDLER_KEY = 'sharedInputHandler';
 
 export class SharedReplayService {
     private static instance: SharedReplayService | null = null;
@@ -53,9 +52,9 @@ export class SharedReplayService {
      * Get the shared replay service instance from a scene
      * Call this in any scene that needs replay functionality
      */
-    static getInstance(scene: Scene): SharedReplayService | null {
+    static getInstance(scene: Scene): SharedReplayService {
         // Try to get from registry first
-        let instance = scene.registry.get(REPLAY_SERVICE_KEY) as SharedReplayService;
+        let instance = scene.registry.get(REPLAY_SERVICE_KEY) as SharedReplayService | null;
         
         if (!instance) {
             // If not in registry, try static instance
@@ -64,7 +63,7 @@ export class SharedReplayService {
         
         if (!instance) {
             console.warn('SharedReplayService: No instance found, initializing...');
-            instance = SharedReplayService.initialize(scene);
+            return SharedReplayService.initialize(scene);
         }
         
         return instance;
