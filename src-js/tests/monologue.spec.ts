@@ -1,0 +1,57 @@
+import { test, expect } from '@playwright/test';
+
+test('monologue', async ({ page }) => {
+    // 1. Setup the communication channel
+    let sequenceComplete: (value?: unknown) => void;
+    let sequenceFailed: (reason?: any) => void;
+    const allEventsCaptured = new Promise((resolve, reject) => {
+        sequenceComplete = resolve;
+        sequenceFailed = reject;
+    });
+    let screenshotIndex = 1;
+
+    // Increase timeout for long replays
+    test.setTimeout(120000);
+
+    await page.exposeFunction('captureEvent', async (eventName: string) => {
+        console.log(`📸 Capturing event: ${eventName}`);
+
+        // If 'Finished', we resolve and exit (no screenshot needed usually, or maybe one last one)
+        if (eventName === 'Finished') {
+            sequenceComplete();
+            return;
+        }
+
+        // 1. Force the game to pause visually (Engine pause)
+        // This stops rendering, physics, and global time, ensuring "Visual Freeze"
+        // The game logic is already paused by 'waitingForScreenshot' in GameStartScene
+        await page.evaluate(() => (window as any).game.loop.sleep());
+
+        try {
+            // 2. Take the screenshot
+            // We expect a canvas element to be present
+            const canvas = page.locator('canvas');
+            const indexStr = screenshotIndex.toString().padStart(4, '0');
+            screenshotIndex++;
+            await expect(canvas).toHaveScreenshot(`screenshot-${indexStr}.png`);
+        } catch (error) {
+            sequenceFailed(error);
+            throw error;
+        } finally {
+            // 3. Resume the game
+            await page.evaluate(() => (window as any).game.loop.wake());
+        }
+    });
+
+    // 2. Load Game
+    await page.goto('http://localhost:8080?replay=replays/test_monologue.rec');
+
+    // Wait for game to be ready (optional, but good practice)
+    await page.waitForFunction(() => (window as any).game && (window as any).startReplay);
+
+    // Trigger the start
+    await page.evaluate(() => (window as any).startReplay());
+
+    // 4. Wait here until the game calls captureEvent('Finished')
+    await allEventsCaptured;
+});
