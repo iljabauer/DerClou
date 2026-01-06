@@ -80,11 +80,6 @@ export const PLANING_LOOK_PLAN = 0;
 export const PLANING_LOOK_PERSON_CHANGE = 1;
 export const PLANING_LOOK_RETURN = 2;
 
-// Burglary result codes
-export const BURGLARY_SUCCESS = 1;
-export const BURGLARY_FAILED = 0;
-export const BURGLARY_ARRESTED = -1;
-
 // Constants
 export const PLANING_NR_PERSONS = 4;
 export const PLANING_NR_GUARDS = 4;
