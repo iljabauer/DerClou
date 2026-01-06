@@ -16,7 +16,6 @@ import { Scene } from 'phaser';
 import { ReplayService } from '../services/ReplayService';
 import { InputHandler } from '../services/InputHandler';
 import { TextService } from '../services/TextService';
-import { ImageService } from '../services/ImageService';
 import { ILBMLoader } from '../services/ILBMLoader';
 
 interface LocationData {
