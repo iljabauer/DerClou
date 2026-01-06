@@ -14,7 +14,6 @@ export class MainMenuScene extends Scene {
     private waitingForScreenshot: boolean = false;
     private isPlaying: boolean = false;
     private hasLoaded: boolean = false;
-    private textLoaded: boolean = false;
 
     constructor() {
         super('MainMenuScene');
@@ -42,7 +41,6 @@ export class MainMenuScene extends Scene {
 
         // Load text files
         await this.textService.loadText('MENU');
-        this.textLoaded = true;
 
         // Get title from text file
         // From C code: COSP_TITLE " v" COSP_VERSION " (Prof. CD-ROM)"

@@ -137,10 +137,10 @@ export class ImageService {
      * Ported from gfxShow()
      * 
      * @param imageId Image ID to show
-     * @param mode Display mode flags (not fully implemented)
+     * @param _mode Display mode flags (not fully implemented)
      * @returns The displayed game object
      */
-    show(imageId: number, mode: number = 0): Phaser.GameObjects.GameObject | null {
+    show(imageId: number, _mode: number = 0): Phaser.GameObjects.GameObject | null {
         const cached = this.imageCache.get(imageId);
         if (!cached) {
             console.warn(`Image ${imageId} not loaded`);
