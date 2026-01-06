@@ -26,9 +26,11 @@ export class RouterScene extends Scene {
             } else if (replayPath.includes('test_monologue')) {
                 targetScene = 'MonologueScene';
             } else if (replayPath.includes('test_go')) {
-                targetScene = 'StoryScene'; // or whatever scene 'go' uses
-            } else if (replayPath.includes('test_long')) {
-                targetScene = 'StoryScene'; // full game flow
+                // 'go' test - navigation/movement scene
+                targetScene = 'StoryScene';
+            } else if (replayPath.includes('test_long') || replayPath.includes('first-burglary')) {
+                // Full game flow
+                targetScene = 'MainMenuScene';
             } else {
                 // Default to MainMenuScene for unknown replays
                 targetScene = 'MainMenuScene';

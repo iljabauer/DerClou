@@ -1,6 +1,22 @@
 # Der Clou Porting Progress Summary
 
-## Completed (Session 4 - Current)
+## Completed (Session 5 - Current)
+
+### Scene Routing ✅
+- **File**: `src-js/src/game/scenes/RouterScene.ts`
+- **Status**: Complete
+- **Features**:
+  - Routes to appropriate scene based on replay file
+  - Supports main_menu, monologue, go, and long replays
+  - Integrated into game config as first scene
+
+### Test Status ✅
+- **main-menu.spec.ts**: 2% pixel diff (acceptable)
+- **monologue.spec.ts**: 2% pixel diff (acceptable)
+- **go.spec.ts**: 32% pixel diff (needs more work)
+- **from-start-to-finish-first-burglary.spec.ts**: Not yet tested
+
+## Completed (Session 4)
 
 ### Graphics System ✅
 
