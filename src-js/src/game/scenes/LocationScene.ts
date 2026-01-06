@@ -25,9 +25,9 @@ const GO = 1 << 0;              // 0x00000001 - Gehen
 const BUSINESS_TALK = 1 << 1;   // 0x00000002 - Reden
 const LOOK = 1 << 2;            // 0x00000004 - Umsehen
 const INVESTIGATE = 1 << 3;     // 0x00000008 - Nachdenken
-const MAKE_CALL = 1 << 4;       // 0x00000010
+// const MAKE_CALL = 1 << 4;    // 0x00000010
 const CALL_TAXI = 1 << 5;       // 0x00000020 - Taxi rufen
-const PLAN = 1 << 6;            // 0x00000040
+// const PLAN = 1 << 6;         // 0x00000040
 const WAIT = 1 << 7;            // 0x00000080 - Warten
 
 interface LocationData {
