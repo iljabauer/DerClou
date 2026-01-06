@@ -1,5 +1,4 @@
-// import { MainMenuScene } from './scenes/MainMenuScene';
-import { TextTestScene } from './scenes/TextTestScene';
+import { MainMenuScene } from './scenes/MainMenuScene';
 import { AUTO, Game, Scale, Types } from 'phaser';
 
 // Find out more information about the Game Config at:
@@ -16,8 +15,7 @@ const config: Types.Core.GameConfig = {
     },
     pixelArt: true,
     scene: [
-        TextTestScene  // Temporarily use test scene
-        // MainMenuScene
+        MainMenuScene
     ]
 };
 
