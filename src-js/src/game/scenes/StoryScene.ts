@@ -114,6 +114,10 @@ export class StoryScene extends Scene {
         this.currentDialogIndex++;
         if (this.currentDialogIndex < this.dialogSequence.length) {
             this.showDialog(this.dialogSequence[this.currentDialogIndex]);
+        } else {
+            // Story sequence complete, transition to location scene
+            console.log('StoryScene: Dialog sequence complete, transitioning to LocationScene');
+            this.scene.start('LocationScene');
         }
     }
 
