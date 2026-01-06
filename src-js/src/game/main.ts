@@ -1,6 +1,4 @@
-import { ReplayTestScene } from './scenes/ReplayTestScene';
-import { ScreenshotTestScene } from './scenes/ScreenshotTestScene';
-import { Game as MainGame } from './scenes/Game';
+import { GameStartScene } from './scenes/GameStartScene';
 import { AUTO, Game, Scale, Types } from 'phaser';
 
 // Find out more information about the Game Config at:
@@ -15,10 +13,9 @@ const config: Types.Core.GameConfig = {
         mode: Scale.FIT,
         autoCenter: Scale.CENTER_BOTH
     },
+    pixelArt: true,
     scene: [
-        ReplayTestScene,
-        ScreenshotTestScene,
-        MainGame
+        GameStartScene
     ]
 };
 

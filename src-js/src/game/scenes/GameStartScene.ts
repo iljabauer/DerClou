@@ -6,7 +6,7 @@ import { ScreenshotService } from '../services/ScreenshotService';
 
 declare const nw: any;
 
-export class ReplayTestScene extends Scene {
+export class GameStartScene extends Scene {
     private replayService: ReplayService;
     private inputHandler: InputHandler;
 
