@@ -188,6 +188,9 @@ export class GameStartScene extends Scene {
             // The Playwright function is async
             (window as any).captureEvent(name).then(() => {
                 this.waitingForScreenshot = false;
+            }).catch((e: any) => {
+                console.warn(`captureEvent failed: ${e}`);
+                this.waitingForScreenshot = false;
             });
         }
     }

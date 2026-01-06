@@ -23,15 +23,17 @@ test('from-start-to-finish-first-burglary', async ({ page }) => {
         // The game logic is already paused by 'waitingForScreenshot' in GameStartScene
         await page.evaluate(() => (window as any).game.loop.sleep());
 
-        // 2. Take the screenshot
-        // We expect a canvas element to be present
-        const canvas = page.locator('canvas');
-        const indexStr = screenshotIndex.toString().padStart(4, '0');
-        await expect(canvas).toHaveScreenshot(`screenshot-${indexStr}.png`);
-        screenshotIndex++;
-
-        // 3. Resume the game
-        await page.evaluate(() => (window as any).game.loop.wake());
+        try {
+            // 2. Take the screenshot
+            // We expect a canvas element to be present
+            const canvas = page.locator('canvas');
+            const indexStr = screenshotIndex.toString().padStart(4, '0');
+            screenshotIndex++;
+            await expect(canvas).toHaveScreenshot(`screenshot-${indexStr}.png`);
+        } finally {
+            // 3. Resume the game
+            await page.evaluate(() => (window as any).game.loop.wake());
+        }
     });
 
     // 2. Load Game
