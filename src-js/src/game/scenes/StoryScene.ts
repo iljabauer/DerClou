@@ -41,6 +41,11 @@ export class StoryScene extends Scene {
         // Setup opening sequence from story data
         this.setupOpeningSequence();
 
+        // Show first dialog
+        if (this.dialogSequence.length > 0) {
+            this.showDialog(this.dialogSequence[0]);
+        }
+        
         // Get shared replay service
         this.sharedReplay = SharedReplayService.getInstance(this);
         
