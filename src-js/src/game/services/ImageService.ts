@@ -3,9 +3,7 @@
  * 
  * Ported from src/gfx/gfx.c
  * 
- * The original game uses IFF/ILBM format images stored in collection files.
- * For now, this service provides a placeholder system that will be expanded
- * to load actual game graphics.
+ * Uses ImageCatalog to load images from PICT.LST and COLL.LST
  * 
  * Image IDs from theclou.h:
  * - 12: SPEAK_BUBBLE
@@ -14,22 +12,13 @@
  */
 
 import { Scene } from 'phaser';
-
-export interface ImageInfo {
-    id: number;
-    collectionId: number;
-    xOffset: number;
-    yOffset: number;
-    width: number;
-    height: number;
-    destX: number;
-    destY: number;
-}
+import { ImageCatalog } from './ImageCatalog';
 
 export class ImageService {
     private scene: Scene;
+    private catalog: ImageCatalog;
     private imageCache: Map<number, Phaser.GameObjects.Image | Phaser.GameObjects.Graphics> = new Map();
-    private imageInfo: Map<number, ImageInfo> = new Map();
+    private initialized: boolean = false;
     
     // Well-known image IDs
     static readonly SPEAK_BUBBLE = 12;
@@ -38,55 +27,23 @@ export class ImageService {
     
     constructor(scene: Scene) {
         this.scene = scene;
-        this.initializeImageInfo();
+        this.catalog = new ImageCatalog(scene);
     }
     
     /**
-     * Initialize image information from PICT.LST
-     * For now, hardcode some essential entries
+     * Initialize the image catalog
      */
-    private initializeImageInfo(): void {
-        // From PICT.LST:
-        // 12,129,48,54,216,54,104,0  - Speech bubble
-        this.imageInfo.set(12, {
-            id: 12,
-            collectionId: 129,
-            xOffset: 48,
-            yOffset: 54,
-            width: 216,
-            height: 54,
-            destX: 104,
-            destY: 0
-        });
+    async initialize(): Promise<boolean> {
+        if (this.initialized) {
+            return true;
+        }
         
-        // 13,129,48,54,216,54,104,0  - Think bubble
-        this.imageInfo.set(13, {
-            id: 13,
-            collectionId: 129,
-            xOffset: 48,
-            yOffset: 54,
-            width: 216,
-            height: 54,
-            destX: 104,
-            destY: 0
-        });
-        
-        // 21,128,0,60,320,60,0,140  - London background
-        this.imageInfo.set(21, {
-            id: 21,
-            collectionId: 128,
-            xOffset: 0,
-            yOffset: 60,
-            width: 320,
-            height: 60,
-            destX: 0,
-            destY: 140
-        });
+        this.initialized = await this.catalog.initialize();
+        return this.initialized;
     }
     
     /**
      * Load an image by ID
-     * For now, creates placeholder graphics
      * 
      * @param imageId Image ID to load
      * @returns Promise that resolves when image is loaded
@@ -96,15 +53,21 @@ export class ImageService {
             return true;
         }
         
-        const info = this.imageInfo.get(imageId);
-        if (!info) {
-            console.warn(`No image info for ID ${imageId}`);
-            return false;
+        if (!this.initialized) {
+            await this.initialize();
         }
         
-        // For now, create a placeholder graphic
-        const placeholder = this.createPlaceholder(info);
-        this.imageCache.set(imageId, placeholder);
+        // Load the picture texture
+        const success = await this.catalog.createPictureTexture(imageId);
+        if (!success) {
+            console.warn(`Failed to load image ${imageId}, using placeholder`);
+            const picture = this.catalog.getPicture(imageId);
+            if (picture) {
+                const placeholder = this.createPlaceholder(picture.width, picture.height, imageId);
+                this.imageCache.set(imageId, placeholder);
+            }
+            return false;
+        }
         
         return true;
     }
@@ -112,22 +75,22 @@ export class ImageService {
     /**
      * Create a placeholder graphic for an image
      */
-    private createPlaceholder(info: ImageInfo): Phaser.GameObjects.Graphics {
+    private createPlaceholder(width: number, height: number, imageId: number): Phaser.GameObjects.Graphics {
         const graphics = this.scene.add.graphics();
         graphics.setVisible(false);
         
         // Different colors for different types
         let color = 0x404040;
-        if (info.id === ImageService.SPEAK_BUBBLE || info.id === ImageService.THINK_BUBBLE) {
+        if (imageId === ImageService.SPEAK_BUBBLE || imageId === ImageService.THINK_BUBBLE) {
             color = 0x2a4a4a;
-        } else if (info.id === ImageService.BGD_LONDON) {
+        } else if (imageId === ImageService.BGD_LONDON) {
             color = 0x0a4a4a;
         }
         
         graphics.fillStyle(color, 1);
-        graphics.fillRect(0, 0, info.width, info.height);
+        graphics.fillRect(0, 0, width, height);
         graphics.lineStyle(1, 0x00ff00, 1);
-        graphics.strokeRect(0, 0, info.width, info.height);
+        graphics.strokeRect(0, 0, width, height);
         
         return graphics;
     }
@@ -142,21 +105,29 @@ export class ImageService {
      */
     show(imageId: number, _mode: number = 0): Phaser.GameObjects.GameObject | null {
         const cached = this.imageCache.get(imageId);
-        if (!cached) {
-            console.warn(`Image ${imageId} not loaded`);
-            return null;
+        if (cached) {
+            const picture = this.catalog.getPicture(imageId);
+            if (picture) {
+                cached.setPosition(picture.destX, picture.destY);
+                cached.setVisible(true);
+            }
+            return cached;
         }
         
-        const info = this.imageInfo.get(imageId);
-        if (!info) {
-            return null;
+        // Try to create image from texture if not cached
+        const textureKey = this.catalog.getPictureTextureKey(imageId);
+        if (this.scene.textures.exists(textureKey)) {
+            const picture = this.catalog.getPicture(imageId);
+            if (picture) {
+                const image = this.scene.add.image(picture.destX, picture.destY, textureKey);
+                image.setOrigin(0, 0);
+                this.imageCache.set(imageId, image);
+                return image;
+            }
         }
         
-        // Position at destination coordinates
-        cached.setPosition(info.destX, info.destY);
-        cached.setVisible(true);
-        
-        return cached;
+        console.warn(`Image ${imageId} not loaded`);
+        return null;
     }
     
     /**
@@ -170,10 +141,17 @@ export class ImageService {
     }
     
     /**
-     * Get image info
+     * Get picture info from catalog
      */
-    getInfo(imageId: number): ImageInfo | undefined {
-        return this.imageInfo.get(imageId);
+    getPicture(imageId: number) {
+        return this.catalog.getPicture(imageId);
+    }
+    
+    /**
+     * Get collection info from catalog
+     */
+    getCollection(collectionId: number) {
+        return this.catalog.getCollection(collectionId);
     }
     
     /**
