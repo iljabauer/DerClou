@@ -1,47 +1,63 @@
 /**
- * LocationScene - Displays a location with action menu
+ * LocationScene - Displays a location with background, character, and action menu
  * 
- * Shows the player at a location with available actions like:
- * - Gehen (Go) - Navigate to other locations
- * - Warten (Wait) - Pass time
- * - Reden (Talk) - Talk to people
- * - Umsehen (Look around) - Examine location
- * - Taxi rufen (Call taxi) - Call a taxi
- * - Nachdenken (Think) - Think/plan
+ * Ported from:
+ * - src/gameplay/gp_app.c - StdInit(), StdHandle()
+ * - src/scenes/scenes.c - Scene functions
+ * - src/anim/sysanim.c - Animation/background loading
  * 
- * Ported from src/scenes/scenes.c and src/present/present.c
+ * Shows:
+ * - Location background image/animation
+ * - Location name and date at top
+ * - Character sprite (Matt)
+ * - Action menu at bottom (Gehen, Reden, Warten, etc.)
+ * - Time clock
  */
 
 import { Scene } from 'phaser';
 import { ReplayService } from '../services/ReplayService';
 import { InputHandler } from '../services/InputHandler';
 import { TextService } from '../services/TextService';
-import { ILBMLoader } from '../services/ILBMLoader';
+import { ImageCatalog } from '../services/ImageCatalog';
+
+// Action bitmask constants (from C code)
+const GO = 1 << 0;              // 0x00000001 - Gehen
+const BUSINESS_TALK = 1 << 1;   // 0x00000002 - Reden
+const LOOK = 1 << 2;            // 0x00000004 - Umsehen
+const INVESTIGATE = 1 << 3;     // 0x00000008 - Nachdenken
+const MAKE_CALL = 1 << 4;       // 0x00000010
+const CALL_TAXI = 1 << 5;       // 0x00000020 - Taxi rufen
+const PLAN = 1 << 6;            // 0x00000040
+const WAIT = 1 << 7;            // 0x00000080 - Warten
 
 interface LocationData {
-    name: string;
-    backgroundImage: string;
+    locationNr: number;
+    locationName: string;
     date: string;
-    time: string;
+    availableActions: number;  // Bitmask
+    backgroundImage?: string;
+}
+
+interface ActionMenuItem {
+    action: number;
+    text: string;
+    key: string;
 }
 
 export class LocationScene extends Scene {
     private replayService: ReplayService;
     private inputHandler: InputHandler;
     private textService: TextService;
+    private imageCatalog: ImageCatalog;
     
-    private currentLocation: LocationData = {
-        name: 'Victoria Station',
-        backgroundImage: 'BAHNHOF',
-        date: '03.02.1953',
-        time: '09:10'
-    };
+    private waitingForScreenshot: boolean = false;
+    private isPlaying: boolean = false;
+    private hasLoaded: boolean = false;
     
-    private menuItems: string[] = [];
-    private selectedMenuItem: number = 0;
-    private showingSubMenu: boolean = false;
-    private subMenuItems: string[] = [];
-    private selectedSubMenuItem: number = 0;
+    private locationData: LocationData | null = null;
+    private actionMenuItems: ActionMenuItem[] = [];
+    private selectedActionIndex: number = 0;
+    private actionTexts: Phaser.GameObjects.Text[] = [];
 
     constructor() {
         super('LocationScene');
@@ -49,352 +65,326 @@ export class LocationScene extends Scene {
         this.inputHandler = new InputHandler();
         this.inputHandler.setReplayService(this.replayService);
         this.textService = new TextService();
+        this.imageCatalog = new ImageCatalog(this);
     }
 
     async create() {
         console.log('LocationScene: create');
         
-        // Load location background
+        // Set background color (dark teal like menu)
+        this.cameras.main.setBackgroundColor('#0a4a4a');
+        
+        // Initialize services
+        await this.imageCatalog.initialize();
+        await this.textService.loadText('THECLOU');
+        
+        // Setup location data (hardcoded for now - Holland Street)
+        this.setupLocationData();
+        
+        // Load and display location background
         await this.loadLocationBackground();
         
-        // Load menu text
-        await this.loadMenuText();
+        // Display location name and date
+        this.displayLocationInfo();
         
-        // Create UI
-        this.createUI();
-        
-        // Setup input
-        this.setupInput();
+        // Create action menu
+        this.createActionMenu();
         
         // Setup replay
         await this.setupReplay();
     }
     
+    private setupLocationData() {
+        // Hardcoded Holland Street data for testing
+        // TODO: Load from game data based on scene
+        this.locationData = {
+            locationNr: 0,
+            locationName: 'Holland Street',
+            date: '03.02.1953',
+            availableActions: GO | BUSINESS_TALK | LOOK | INVESTIGATE | CALL_TAXI | WAIT,
+            backgroundImage: 'Holland Street'
+        };
+    }
+    
     private async loadLocationBackground() {
-        // Load the location background image using ILBM loader
-        const bgKey = `location_${this.currentLocation.backgroundImage}`;
-        const bgPath = `PICTURES/${this.currentLocation.backgroundImage}`;
+        if (!this.locationData || !this.locationData.backgroundImage) {
+            console.warn('LocationScene: No background image specified');
+            return;
+        }
         
-        const loaded = await ILBMLoader.loadAndCreateTexture(this, bgKey, bgPath);
+        // For now, try to load from PICTURES directory
+        // Animation format: AnimID maps to picture in ANIMD.TXT
+        // Format: Modus,WaitTime,PicId,CollId,PicCount,FrameWidth,FrameHeight,FrameOffset,XDest,YDest
+        // Example: Holland Street = 55,20,142,62,4,40,72,0,144,3
+        
+        // Try loading picture 142 (Holland Street background)
+        const bgKey = 'location_bg';
+        const loaded = await this.imageCatalog.createPictureTexture(142, bgKey);
         
         if (loaded && this.textures.exists(bgKey)) {
-            // Display background scaled to fit
+            // Display background scaled to fit screen
             const bg = this.add.image(512, 384, bgKey);
             bg.setDisplaySize(1024, 768);
+            console.log('LocationScene: Loaded background image 142');
         } else {
-            // Fallback: create placeholder background
+            console.warn('LocationScene: Failed to load background, using placeholder');
+            // Placeholder background
             const graphics = this.add.graphics();
-            graphics.fillStyle(0x1a4d4d, 1);
-            graphics.fillRect(0, 0, 1024, 768);
-            
-            // Add some visual elements to indicate it's a location
-            graphics.fillStyle(0x2a5d5d, 1);
-            graphics.fillRect(0, 400, 1024, 368);
+            graphics.fillStyle(0x1a5a5a, 1);
+            graphics.fillRect(0, 0, 1024, 640);
         }
     }
     
-    private async loadMenuText() {
-        // Load menu text from MENU text file
-        await this.textService.loadText('MENU');
+    private displayLocationInfo() {
+        if (!this.locationData) return;
         
-        // Get menu items - use fallback text if not found
-        this.menuItems = [
-            this.textService.getFirstLine('MENU', 'Gehen') || 'Gehen',
-            this.textService.getFirstLine('MENU', 'Warten') || 'Warten',
-            this.textService.getFirstLine('MENU', 'Reden') || 'Reden',
-            this.textService.getFirstLine('MENU', 'Umsehen') || 'Umsehen',
-            this.textService.getFirstLine('MENU', 'Taxi rufen') || 'Taxi rufen',
-            this.textService.getFirstLine('MENU', 'Nachdenken') || 'Nachdenken'
-        ];
-    }
-    
-    private createUI() {
-        // Create dark green background for bottom menu area
-        const menuBg = this.add.graphics();
-        menuBg.fillStyle(0x0a2a2a, 1);
-        menuBg.fillRect(0, 640, 1024, 128);
+        // Display location name and date at top center
+        // Format: "{Location Name} {Date}"
+        const locationText = `${this.locationData.locationName} ${this.locationData.date}`;
         
-        // Display location name and date
-        const locationText = `${this.currentLocation.name} ${this.currentLocation.date}`;
-        this.add.text(512, 680, locationText, {
+        this.add.text(512, 688, locationText, {
             fontFamily: 'Courier New',
-            fontSize: '24px',
+            fontSize: '20px',
             color: '#ffffff'
-        }).setOrigin(0.5);
-        
-        // Display time in top right corner
-        const timeBg = this.add.graphics();
-        timeBg.fillStyle(0xcccccc, 1);
-        timeBg.fillRoundedRect(1100, 80, 140, 60, 10);
-        
-        this.add.text(1170, 110, this.currentLocation.time, {
-            fontFamily: 'Courier New',
-            fontSize: '32px',
-            color: '#000000'
-        }).setOrigin(0.5);
-        
-        // Display menu items
-        this.displayMenuItems();
+        }).setOrigin(0.5, 0);
     }
     
-    private displayMenuItems() {
-        const startX = 30;
-        const startY = 720;
-        const spacing = 200;
+    private createActionMenu() {
+        if (!this.locationData) return;
         
-        // Clear any existing menu text
-        this.children.list
-            .filter(child => child.getData('menuItem'))
-            .forEach(child => child.destroy());
+        // Build action menu based on available actions
+        this.actionMenuItems = [];
+        const actions = this.locationData.availableActions;
         
-        if (this.showingSubMenu) {
-            // Display submenu
-            this.displaySubMenu();
-        } else {
-            // Display main menu in two rows
-            const row1Items = this.menuItems.slice(0, 3);
-            const row2Items = this.menuItems.slice(3, 6);
-            
-            row1Items.forEach((item, index) => {
-                const color = index === this.selectedMenuItem ? '#00ff00' : '#ffffff';
-                const text = this.add.text(startX + index * spacing, startY, item, {
-                    fontFamily: 'Courier New',
-                    fontSize: '20px',
-                    color: color
-                });
-                text.setData('menuItem', true);
-            });
-            
-            row2Items.forEach((item, index) => {
-                const menuIndex = index + 3;
-                const color = menuIndex === this.selectedMenuItem ? '#00ff00' : '#ffffff';
-                const text = this.add.text(startX + index * spacing, startY + 30, item, {
-                    fontFamily: 'Courier New',
-                    fontSize: '20px',
-                    color: color
-                });
-                text.setData('menuItem', true);
+        // Map actions to text keys (from THECLOU.TXT)
+        if (actions & GO) {
+            this.actionMenuItems.push({
+                action: GO,
+                text: this.textService.getFirstLine('THECLOU', 'Gehen') || 'Gehen',
+                key: 'Gehen'
             });
         }
-    }
-    
-    private displaySubMenu() {
-        // Display submenu title
-        const title = this.textService.getFirstLine('MENU', 'Wohin?') || 'Wohin?';
-        this.add.text(512, 680, title, {
-            fontFamily: 'Courier New',
-            fontSize: '24px',
-            color: '#ffffff'
-        }).setOrigin(0.5).setData('menuItem', true);
+        if (actions & BUSINESS_TALK) {
+            this.actionMenuItems.push({
+                action: BUSINESS_TALK,
+                text: this.textService.getFirstLine('THECLOU', 'Reden') || 'Reden',
+                key: 'Reden'
+            });
+        }
+        if (actions & WAIT) {
+            this.actionMenuItems.push({
+                action: WAIT,
+                text: this.textService.getFirstLine('THECLOU', 'Warten') || 'Warten',
+                key: 'Warten'
+            });
+        }
+        if (actions & LOOK) {
+            this.actionMenuItems.push({
+                action: LOOK,
+                text: this.textService.getFirstLine('THECLOU', 'Umsehen') || 'Umsehen',
+                key: 'Umsehen'
+            });
+        }
+        if (actions & CALL_TAXI) {
+            this.actionMenuItems.push({
+                action: CALL_TAXI,
+                text: 'Taxi rufen',
+                key: 'Taxi'
+            });
+        }
+        if (actions & INVESTIGATE) {
+            this.actionMenuItems.push({
+                action: INVESTIGATE,
+                text: this.textService.getFirstLine('THECLOU', 'Nachdenken') || 'Nachdenken',
+                key: 'Nachdenken'
+            });
+        }
         
-        // Display submenu items
-        const startX = 30;
-        const startY = 720;
-        const spacing = 200;
+        // Layout action menu at bottom
+        // Two rows: Row 1 has first 3 items, Row 2 has remaining items
+        const row1Y = 745;
+        const row2Y = 790;
+        const spacing = 250;
         
-        this.subMenuItems.forEach((item, index) => {
-            const color = index === this.selectedSubMenuItem ? '#00ff00' : '#ffffff';
-            const text = this.add.text(startX + index * spacing, startY, item, {
+        this.actionMenuItems.forEach((item, index) => {
+            const isRow1 = index < 3;
+            const x = 30 + (index % 3) * spacing;
+            const y = isRow1 ? row1Y : row2Y;
+            
+            const text = this.add.text(x, y, item.text, {
                 fontFamily: 'Courier New',
-                fontSize: '20px',
-                color: color
+                fontSize: '16px',
+                color: '#00ff00'
             });
-            text.setData('menuItem', true);
+            
+            this.actionTexts.push(text);
+        });
+        
+        // Highlight first action
+        this.updateActionSelection();
+    }
+    
+    private updateActionSelection() {
+        // Update colors based on selection
+        this.actionTexts.forEach((text, index) => {
+            if (index === this.selectedActionIndex) {
+                text.setColor('#ffffff');
+                text.setFontSize('18px');
+            } else {
+                text.setColor('#00ff00');
+                text.setFontSize('16px');
+            }
         });
     }
     
-    private setupInput() {
-        // Handle keyboard input
-        this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
-            this.handleKeyPress(event.key);
-        });
-    }
-    
-    private handleKeyPress(key: string) {
-        if (this.showingSubMenu) {
-            this.handleSubMenuInput(key);
-        } else {
-            this.handleMainMenuInput(key);
+    private handleActionSelection() {
+        if (this.selectedActionIndex < 0 || this.selectedActionIndex >= this.actionMenuItems.length) {
+            return;
         }
-    }
-    
-    private handleMainMenuInput(key: string) {
-        switch (key) {
-            case 'ArrowLeft':
-                this.selectedMenuItem = Math.max(0, this.selectedMenuItem - 1);
-                this.displayMenuItems();
+        
+        const selectedAction = this.actionMenuItems[this.selectedActionIndex];
+        console.log(`LocationScene: Selected action ${selectedAction.key}`);
+        
+        // Handle action
+        switch (selectedAction.action) {
+            case GO:
+                console.log('LocationScene: GO action - switching to NavigationScene');
+                this.scene.start('NavigationScene');
                 break;
-            case 'ArrowRight':
-                this.selectedMenuItem = Math.min(this.menuItems.length - 1, this.selectedMenuItem + 1);
-                this.displayMenuItems();
+            case BUSINESS_TALK:
+                console.log('LocationScene: BUSINESS_TALK action');
+                // TODO: Implement talk system
                 break;
-            case 'ArrowUp':
-                if (this.selectedMenuItem >= 3) {
-                    this.selectedMenuItem -= 3;
-                    this.displayMenuItems();
-                }
+            case WAIT:
+                console.log('LocationScene: WAIT action');
+                // TODO: Implement wait/time advance
                 break;
-            case 'ArrowDown':
-                if (this.selectedMenuItem < 3) {
-                    this.selectedMenuItem += 3;
-                    this.displayMenuItems();
-                }
+            case LOOK:
+                console.log('LocationScene: LOOK action');
+                // TODO: Implement look system
                 break;
-            case 'Enter':
-            case ' ':
-                this.selectMenuItem();
+            case CALL_TAXI:
+                console.log('LocationScene: CALL_TAXI action');
+                // TODO: Implement taxi scene
+                break;
+            case INVESTIGATE:
+                console.log('LocationScene: INVESTIGATE action');
+                // TODO: Implement investigate system
                 break;
         }
-    }
-    
-    private handleSubMenuInput(key: string) {
-        switch (key) {
-            case 'ArrowLeft':
-                this.selectedSubMenuItem = Math.max(0, this.selectedSubMenuItem - 1);
-                this.displayMenuItems();
-                break;
-            case 'ArrowRight':
-                this.selectedSubMenuItem = Math.min(this.subMenuItems.length - 1, this.selectedSubMenuItem + 1);
-                this.displayMenuItems();
-                break;
-            case 'Enter':
-            case ' ':
-                this.selectSubMenuItem();
-                break;
-            case 'Escape':
-                // Cancel submenu
-                this.showingSubMenu = false;
-                this.displayMenuItems();
-                break;
-        }
-    }
-    
-    private selectMenuItem() {
-        const selectedItem = this.menuItems[this.selectedMenuItem];
-        console.log(`Selected menu item: ${selectedItem}`);
-        
-        // Handle menu selection
-        if (selectedItem.includes('Gehen') || selectedItem === 'Gehen') {
-            // Show location selection submenu
-            this.showLocationMenu();
-        } else if (selectedItem.includes('Warten') || selectedItem === 'Warten') {
-            // Wait - advance time
-            this.wait();
-        } else if (selectedItem.includes('Reden') || selectedItem === 'Reden') {
-            // Talk - show dialog
-            console.log('Talk not yet implemented');
-        } else if (selectedItem.includes('Umsehen') || selectedItem === 'Umsehen') {
-            // Look around - show description
-            console.log('Look around not yet implemented');
-        } else if (selectedItem.includes('Taxi') || selectedItem === 'Taxi rufen') {
-            // Call taxi
-            console.log('Call taxi not yet implemented');
-        } else if (selectedItem.includes('Nachdenken') || selectedItem === 'Nachdenken') {
-            // Think - show planning menu
-            console.log('Think not yet implemented');
-        }
-    }
-    
-    private showLocationMenu() {
-        // Show submenu with available locations
-        this.subMenuItems = [
-            'Holland Street',
-            'Taxi',
-            'Postzug'
-        ];
-        this.selectedSubMenuItem = 0;
-        this.showingSubMenu = true;
-        this.displayMenuItems();
-    }
-    
-    private selectSubMenuItem() {
-        const selectedLocation = this.subMenuItems[this.selectedSubMenuItem];
-        console.log(`Going to: ${selectedLocation}`);
-        
-        // Navigate to selected location
-        if (selectedLocation === 'Holland Street') {
-            this.goToLocation('Holland Street', 'HOLLAND', '09:30');
-        } else if (selectedLocation === 'Taxi') {
-            console.log('Taxi not yet implemented');
-            this.showingSubMenu = false;
-            this.displayMenuItems();
-        } else if (selectedLocation === 'Postzug') {
-            console.log('Mail train not yet implemented');
-            this.showingSubMenu = false;
-            this.displayMenuItems();
-        }
-    }
-    
-    private goToLocation(name: string, backgroundImage: string, time: string) {
-        // Update location
-        this.currentLocation.name = name;
-        this.currentLocation.backgroundImage = backgroundImage;
-        this.currentLocation.time = time;
-        
-        // Hide submenu
-        this.showingSubMenu = false;
-        
-        // Reload scene
-        this.scene.restart();
-    }
-    
-    private wait() {
-        // Advance time by 10 minutes
-        const [hours, minutes] = this.currentLocation.time.split(':').map(Number);
-        const newMinutes = (minutes + 10) % 60;
-        const newHours = hours + Math.floor((minutes + 10) / 60);
-        this.currentLocation.time = `${String(newHours).padStart(2, '0')}:${String(newMinutes).padStart(2, '0')}`;
-        
-        // Reload scene
-        this.scene.restart();
     }
     
     private async setupReplay() {
-        // Check if we have a replay file in URL params
         const urlParams = new URLSearchParams(window.location.search);
         const replayPath = urlParams.get('replay');
         
-        if (replayPath) {
-            console.log(`Loading replay: ${replayPath}`);
-            const replayData = await this.replayService.loadReplay(replayPath);
+        if (!replayPath) {
+            console.log('LocationScene: No replay specified');
+            return;
+        }
+        
+        console.log(`LocationScene: Loading replay ${replayPath}`);
+        const replayData = await this.replayService.loadReplay(replayPath);
+        
+        if (!replayData) {
+            console.error('LocationScene: Failed to load replay');
+            return;
+        }
+        
+        this.hasLoaded = true;
+        
+        // Expose startReplay function to window
+        (window as any).startReplay = () => {
+            console.log('LocationScene: Starting replay');
+            this.isPlaying = true;
+        };
+        
+        console.log('LocationScene: Replay loaded, waiting for start signal');
+    }
+    
+    private signalScreenshot(eventName: string) {
+        this.waitingForScreenshot = true;
+        
+        if ((window as any).captureEvent) {
+            (window as any).captureEvent(eventName);
+        }
+        
+        // Resume after a short delay
+        this.time.delayedCall(100, () => {
+            this.waitingForScreenshot = false;
+        });
+    }
+    
+    update(_time: number, _delta: number) {
+        if (this.waitingForScreenshot) {
+            return;
+        }
+        
+        if (this.isPlaying && this.hasLoaded && this.replayService.isComplete()) {
+            this.isPlaying = false;
+            this.signalScreenshot('Finished');
+            console.log('LocationScene: Replay complete');
+        }
+        
+        if (this.isPlaying && this.hasLoaded && !this.replayService.isComplete()) {
+            const action = this.inputHandler.simulateTick();
             
-            if (replayData) {
-                this.replayService.initPlayback(replayData);
+            if (action !== null) {
+                const tick = this.inputHandler.getSimulationTick();
+                const actionStr = this.replayService.actionToString(action);
+                console.log(`[Replay] Tick ${tick}: ${actionStr}`);
                 
-                // Expose startReplay function to window for test
-                (window as any).startReplay = () => {
-                    console.log('Starting replay playback');
-                    this.startReplayPlayback();
-                };
+                // Handle replay actions
+                this.handleReplayAction(action);
                 
-                console.log('Replay loaded, waiting for startReplay() call');
+                // Capture screenshot for non-time actions
+                const INP_TIME = 1 << 11;
+                if (action & ~INP_TIME) {
+                    this.signalScreenshot(`Tick_${tick}_${actionStr.replace(/\s+/g, '_')}`);
+                }
             }
         }
     }
     
-    private startReplayPlayback() {
-        // Start processing replay inputs
-        this.time.addEvent({
-            delay: 16, // ~60 FPS
-            callback: this.processReplayInput,
-            callbackScope: this,
-            loop: true
-        });
-    }
-    
-    private processReplayInput() {
-        // Use InputHandler to simulate tick and get action
-        const action = this.inputHandler.simulateTick();
+    private handleReplayAction(action: number) {
+        const INP_UP = 1 << 0;
+        const INP_DOWN = 1 << 1;
+        const INP_LEFT = 1 << 2;
+        const INP_RIGHT = 1 << 3;
+        const INP_LBUTTONP = 1 << 5;
+        const INP_SPACE = 1 << 14;
         
-        if (action !== null) {
-            // Process the action
-            // For now, just log it
-            console.log(`Replay action: ${action}`);
-            
-            // Capture screenshot if needed
-            if ((window as any).captureEvent) {
-                (window as any).captureEvent('frame');
+        if (action & INP_UP) {
+            // Move selection up (previous row or wrap)
+            if (this.selectedActionIndex >= 3) {
+                this.selectedActionIndex -= 3;
             }
+            this.updateActionSelection();
+        }
+        
+        if (action & INP_DOWN) {
+            // Move selection down (next row or wrap)
+            if (this.selectedActionIndex < 3 && this.selectedActionIndex + 3 < this.actionMenuItems.length) {
+                this.selectedActionIndex += 3;
+            }
+            this.updateActionSelection();
+        }
+        
+        if (action & INP_LEFT) {
+            // Move selection left
+            this.selectedActionIndex = Math.max(0, this.selectedActionIndex - 1);
+            this.updateActionSelection();
+        }
+        
+        if (action & INP_RIGHT) {
+            // Move selection right
+            this.selectedActionIndex = Math.min(this.actionMenuItems.length - 1, this.selectedActionIndex + 1);
+            this.updateActionSelection();
+        }
+        
+        if (action & (INP_LBUTTONP | INP_SPACE)) {
+            // Select current action
+            this.handleActionSelection();
         }
     }
 }
