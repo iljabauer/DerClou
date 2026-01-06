@@ -216,21 +216,72 @@ export class GameplayService {
 
     /**
      * Calculate team mood
-     * Port of tcGetTeamMood() from gp.c
+     * Port of tcGetTeamMood() from dataappl.c
      * 
      * Calculates the team's current mood/morale.
-     * Returns mood value (0-100).
+     * Returns mood value (0-255).
      */
     getTeamMood(guyIds: number[], time: number): number {
-        // TODO: Port full implementation
-        // - Calculate base mood from abilities
-        // - Factor in time elapsed
-        // - Factor in stress/exhaustion
-        // - Factor in success/failure
-        // - Return mood value (0-100)
-        
-        // For now, return a default value
-        return 100;
+        let team = 0;
+        let count = 0;
+
+        // Sum individual moods
+        for (let i = 0; i < 4 && guyIds[i]; i++) {
+            const person = this.db.getObject(guyIds[i]) as Person;
+            if (person) {
+                const mood = person.Mood || 127;  // Default mood
+                team += mood;
+                count++;
+            }
+        }
+
+        // Average mood
+        if (count > 0) {
+            team = Math.floor(team / count);
+        }
+
+        // Adjust based on plan perfection
+        const perfect = this.isPlanPerfect(time);
+        team = this.calcValue(team, 0, 255, (perfect * 20) / 35, 100);
+
+        return team;
+    }
+
+    /**
+     * Check if plan is being executed perfectly
+     * Port of tcIsPlanPerfect() from dataappl.c
+     * 
+     * Calculates how well the plan is being executed.
+     * Returns perfection value (0-255).
+     */
+    private isPlanPerfect(timer: number): number {
+        // TODO: Get actual deviation time, call value, and warning count
+        // For now, use defaults
+        const deriTime = 0;
+        const callValue = 0;
+        const warningCount = 0;
+
+        // Calculate perfection based on deviation from plan
+        let perfect = Math.floor((255 * (timer + 1 - deriTime)) / (timer + 1));
+        perfect = Math.max(perfect, 0);
+
+        // Adjust for radio calls
+        perfect = this.changeAbs(perfect, callValue, 0, 255);
+
+        // Adjust for warnings
+        perfect = this.changeAbs(perfect, warningCount * (-35), 0, 255);
+
+        return perfect;
+    }
+
+    /**
+     * Change value with bounds checking
+     * Port of ChangeAbs() from dataappl.c
+     */
+    private changeAbs(value: number, change: number, min: number, max: number): number {
+        value += change;
+        value = Math.max(min, Math.min(max, value));
+        return value;
     }
 
     /**
@@ -369,33 +420,59 @@ export class GameplayService {
 
     /**
      * Calculate exhaustion when guy is in action
-     * Port of tcGuyInAction() from gp.c
+     * Port of tcGuyInAction() from dataappl.c
      * 
      * Calculates exhaustion increase during action.
+     * Should be called every few action steps.
      * Returns new exhaustion value.
      */
     guyInAction(personId: number, currentExhaustion: number): number {
-        // TODO: Port full implementation
-        // - Get person stamina
-        // - Calculate exhaustion increase
-        // - Return new exhaustion
-        
-        return currentExhaustion + 1;
+        const state = this.getGuyState(personId);
+
+        let increase = 0;
+        if (this.randomNr(0, 15) === 1) {
+            // Exhaustion increase = inverse of state
+            increase = Math.floor((255 - state) / 90);
+        }
+
+        return this.changeAbs(currentExhaustion, increase, 0, 255);
     }
 
     /**
      * Calculate exhaustion when guy is waiting
-     * Port of tcGuyIsWaiting() from gp.c
+     * Port of tcGuyIsWaiting() from dataappl.c
      * 
      * Calculates exhaustion recovery during waiting.
+     * Should be called every few wait steps.
      * Returns new exhaustion value.
      */
     guyIsWaiting(personId: number, currentExhaustion: number): number {
-        // TODO: Port full implementation
-        // - Get person stamina
-        // - Calculate exhaustion recovery
-        // - Return new exhaustion
-        
-        return Math.max(0, currentExhaustion - 1);
+        const state = this.getGuyState(personId);
+
+        let decrease = 0;
+        if (this.randomNr(0, 4) === 1) {
+            // Exhaustion decrease
+            decrease = -Math.floor(state / 10);
+        }
+
+        return this.changeAbs(currentExhaustion, decrease, 0, 255);
+    }
+
+    /**
+     * Get guy state (combination of abilities)
+     * Port of tcGetGuyState() from dataappl.c
+     */
+    private getGuyState(personId: number): number {
+        const person = this.db.getObject(personId) as Person;
+        if (!person) return 127;
+
+        // Calculate state from person attributes
+        // TODO: Port full calculation
+        // For now, use average of key attributes
+        const skill = person.Skill || 127;
+        const stamina = person.Stamina || 127;
+        const health = person.Health || 127;
+
+        return Math.floor((skill + stamina + health) / 3);
     }
 }
