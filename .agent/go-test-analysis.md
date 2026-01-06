@@ -80,13 +80,52 @@ Analyzed replay file (71 records, RNG seed 12345):
 - Scene state management
 - Action menu system
 
+## How GO Works in C Code
+
+From `src/scenes/scenes.c` - `Go(LIST *succ)` function:
+
+```c
+uint32_t Go(LIST *succ) {
+    // If multiple locations available:
+    if (GetNrOfNodes(succ) > 1) {
+        // Show menu background
+        ShowMenuBackground();
+        
+        // Print "Gehen" (Go) as title
+        txtGetFirstLine(THECLOU_TXT, "Gehen", line);
+        PrintStatus(line);
+        
+        // Build menu from successor scenes
+        for each successor scene:
+            - Get scene's location name
+            - Add to menu
+        
+        // Show menu and get user selection
+        prob = Menu(succ, prob, 0, NULL, 0L);
+        
+        // Return selected scene's event number
+        return selected_scene->EventNr;
+    }
+    // If only one location, go there directly
+    else {
+        return first_successor->EventNr;
+    }
+}
+```
+
+**Key Points:**
+- GO shows a menu of available locations
+- Locations come from scene successors
+- User selects with Menu() function (keyboard/mouse)
+- Returns next scene to transition to
+
 ## Files to Port
 
 ### C Source (Reference)
-- `src/landscap/landscap.c` - Location/landscape system
-- `src/scenes/scenes.c` - Scene management
+- `src/scenes/scenes.c` - Scene management, Go() function
 - `src/gameplay/gp.c` - Main game loop and PlayStory()
-- `src/present/interac.c` - Interaction/menu system
+- `src/gameplay/gp_app.c` - StdHandle() for action handling
+- `src/present/interac.c` - Menu() and Bubble() functions
 
 ### TypeScript (To Create/Modify)
 - `src-js/src/game/scenes/NavigationScene.ts` - NEW
