@@ -76,31 +76,43 @@ export class GameplayService {
 
     /**
      * Calculate total loudness
-     * Port of tcGetTotalLoudness() from gp.c
+     * Port of tcGetTotalLoudness() from dataappl.c
      * 
      * Calculates the total loudness from all team members.
+     * Takes the maximum loudness and increases it by ~20%.
      */
     getTotalLoudness(loud0: number, loud1: number, loud2: number, loud3: number): number {
-        // Simple sum for now
-        // TODO: Port full calculation with distance factors
-        return loud0 + loud1 + loud2 + loud3;
+        // Get maximum loudness
+        let total = Math.max(loud0, loud1);
+        total = Math.max(total, loud2);
+        total = Math.max(total, loud3);
+
+        // Increase by ~20%
+        total = this.calcValue(total, 0, 255, 255, 20);
+
+        return total;
     }
 
     /**
      * Check alarm by loudness
-     * Port of tcAlarmByLoudness() from gp.c
+     * Port of tcAlarmByLoudness() from dataappl.c
      * 
      * Checks if the loudness level triggers an alarm.
+     * Should be called every second (every 3 ticks).
      * Returns true if alarm should be triggered.
      */
     alarmByLoudness(building: Building, totalLoudness: number): boolean {
-        // TODO: Port full implementation
-        // - Check building sensitivity
-        // - Compare with total loudness
-        // - Factor in time of day
-        // - Return true if alarm triggered
-        
-        return false;
+        // Check if loudness exceeds building's maximum volume
+        return totalLoudness > building.MaxVolume;
+    }
+
+    /**
+     * Calculate value with percentage increase
+     * Port of CalcValue() from dataappl.c
+     */
+    private calcValue(value: number, min: number, max: number, base: number, percent: number): number {
+        // Increase value by percentage
+        return Math.floor(value * (base + percent) / base);
     }
 
     /**
@@ -144,18 +156,27 @@ export class GameplayService {
 
     /**
      * Check alarm by radio
-     * Port of tcAlarmByRadio() from gp.c
+     * Port of tcAlarmByRadio() from dataappl.c
      * 
      * Checks if radio usage triggers an alarm.
+     * Should be called after each radio transmission.
      * Returns true if alarm should be triggered.
      */
     alarmByRadio(building: Building): boolean {
-        // TODO: Port full implementation
-        // - Check if building has radio detection
-        // - Calculate detection probability
-        // - Return true if alarm triggered
-        
-        return false;
+        // Calculate random value (0-5000)
+        // 10 radio calls at Guarding=250 should trigger alarm
+        const random = this.randomNr(0, 2500) + this.randomNr(0, 2500);
+
+        // Check against building's radio guarding level
+        return random < building.RadioGuarding;
+    }
+
+    /**
+     * Generate random number for game logic
+     * Port of CalcRandomNrForGameLogic() from random.c
+     */
+    private randomNr(min: number, max: number): number {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
     }
 
     /**
