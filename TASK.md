@@ -1,7 +1,7 @@
 # Task
 Your job is to port DerClou (src) to Phaser and TypeScript (src-js) and maintain the repository.
 
-You can ignore music and sound system.
+You can ignore music and sound system. Random and basic replay system is already implemented.
 
 Make a commit after every single file edit. Run npm run build.
 
@@ -20,4 +20,4 @@ Use playwright test to verify your progress - it will simulate a game player ses
 
 You can use tools/replay_dump gamedata/<name>.rec to inspect replay content as text.
 
-Keep game playable, so I can try your progress anytime.
+Keep game playable, so I can try your progress anytime. Stop after every meaningful completed session.
