@@ -1,10 +1,11 @@
 import { Scene } from 'phaser';
-import { ReplayService } from '../services/ReplayService';
-import { InputHandler } from '../services/InputHandler';
+import { SharedReplayService } from '../services/SharedReplayService';
+import { TextService } from '../services/TextService';
+import { ILBMLoader } from '../services/ILBMLoader';
 
 export class MainMenuScene extends Scene {
-    private replayService: ReplayService;
-    private inputHandler: InputHandler;
+    private sharedReplay: SharedReplayService | null = null;
+    private textService: TextService;
     
     private menuItems: Phaser.GameObjects.Text[] = [];
     private selectedIndex: number = 0;
@@ -15,32 +16,55 @@ export class MainMenuScene extends Scene {
 
     constructor() {
         super('MainMenuScene');
-        this.replayService = new ReplayService();
-        this.inputHandler = new InputHandler();
-        this.inputHandler.setReplayService(this.replayService);
+        this.textService = new TextService();
     }
 
-    create() {
+    async create() {
         // Set background color to match the original (dark teal/green)
         this.cameras.main.setBackgroundColor('#0a4a4a');
 
-        // Add a simple building silhouette at the bottom to match the screenshot
-        // This is a placeholder - the real game loads an image
-        const graphics = this.add.graphics();
-        graphics.fillStyle(0x0a3a3a, 1);
-        graphics.fillRect(0, 650, 1024, 118);
-        
-        // Add some simple building shapes to roughly match the original
-        graphics.fillStyle(0x083030, 1);
-        graphics.fillRect(450, 700, 80, 68);
-        graphics.fillRect(550, 680, 100, 88);
-        graphics.fillRect(900, 690, 120, 78);
+        // Load the MENU background image (ILBM format)
+        // From COLL.LST: 128,menu,320,140,192,246,0
+        // From PICT.LST: 21,128,0,60,320,60,0,140
+        // This loads the bottom portion of the menu image (train station scene)
+        const menuLoaded = await ILBMLoader.loadAndCreateTexture(
+            this,
+            'menu_background',
+            'PICTURES/MENU'
+        );
 
+        if (menuLoaded) {
+            // The MENU image is 320x120, we need to scale it to fit 1024x768
+            // Original game resolution was 320x200, scaled to 1024x640 (3.2x)
+            // Position at bottom: y=140 in original = y=448 in scaled (140 * 3.2)
+            const bg = this.add.image(0, 448, 'menu_background');
+            bg.setOrigin(0, 0);
+            bg.setScale(3.2); // Scale from 320 to 1024
+        } else {
+            console.warn('Failed to load MENU background, using placeholder');
+            // Fallback to placeholder graphics
+            const graphics = this.add.graphics();
+            graphics.fillStyle(0x0a3a3a, 1);
+            graphics.fillRect(0, 650, 1024, 118);
+            
+            graphics.fillStyle(0x083030, 1);
+            graphics.fillRect(450, 700, 80, 68);
+            graphics.fillRect(550, 680, 100, 88);
+            graphics.fillRect(900, 690, 120, 78);
+        }
+
+        // Load text files
+        await this.textService.loadText('MENU');
+
+        // Get title from text file
+        // From C code: COSP_TITLE " v" COSP_VERSION " (Prof. CD-ROM)"
+        const titleText = 'Der Clou! Open Source Project v0.8 (Prof. CD-ROM)';
+        
         // Title text - positioned to match screenshot
         this.add.text(
             145, 
             688, 
-            'Der Clou! Open Source Project v0.8 (Prof. CD-ROM)',
+            titleText,
             {
                 fontFamily: 'Courier New, monospace',
                 fontSize: '16px',
@@ -48,28 +72,57 @@ export class MainMenuScene extends Scene {
             }
         );
 
-        // Menu items (German text as shown in screenshot)
+        // Get menu items from text file (STARTUP_MENU key)
+        const menuLines = this.textService.getLines('MENU', 'STARTUP_MENU');
+        
+        // Menu items layout from C code:
+        // 0: Neues Spiel starten (New Game)
+        // 1: Altes Spiel fortsetzen (Load Game)  
+        // 2: Spiel beenden (Quit Game)
+        
         // Layout: Two items on first line, one on second line
         // First line: "Neues Spiel starten" (left) and "Spiel beenden" (right)
         // Second line: "Altes Spiel fortsetzen" (left)
         
-        this.add.text(30, 745, 'Neues Spiel starten', {
-            fontFamily: 'Courier New, monospace',
-            fontSize: '16px',
-            color: '#00ff00'
-        });
-        
-        this.add.text(520, 745, 'Spiel beenden', {
-            fontFamily: 'Courier New, monospace',
-            fontSize: '16px',
-            color: '#00ff00'
-        });
-        
-        this.add.text(30, 790, 'Altes Spiel fortsetzen', {
-            fontFamily: 'Courier New, monospace',
-            fontSize: '16px',
-            color: '#00ff00'
-        });
+        if (menuLines.length >= 3) {
+            this.add.text(30, 745, menuLines[0], {
+                fontFamily: 'Courier New, monospace',
+                fontSize: '16px',
+                color: '#00ff00'
+            });
+            
+            this.add.text(520, 745, menuLines[2], {
+                fontFamily: 'Courier New, monospace',
+                fontSize: '16px',
+                color: '#00ff00'
+            });
+            
+            this.add.text(30, 790, menuLines[1], {
+                fontFamily: 'Courier New, monospace',
+                fontSize: '16px',
+                color: '#00ff00'
+            });
+        } else {
+            // Fallback to hardcoded text if loading fails
+            console.warn('Failed to load menu text, using fallback');
+            this.add.text(30, 745, 'Neues Spiel starten', {
+                fontFamily: 'Courier New, monospace',
+                fontSize: '16px',
+                color: '#00ff00'
+            });
+            
+            this.add.text(520, 745, 'Spiel beenden', {
+                fontFamily: 'Courier New, monospace',
+                fontSize: '16px',
+                color: '#00ff00'
+            });
+            
+            this.add.text(30, 790, 'Altes Spiel fortsetzen', {
+                fontFamily: 'Courier New, monospace',
+                fontSize: '16px',
+                color: '#00ff00'
+            });
+        }
 
         // Load replay if specified
         this.loadReplayFile();
@@ -79,19 +132,23 @@ export class MainMenuScene extends Scene {
         if (this.waitingForScreenshot) {
             return;
         }
+        
+        if (!this.sharedReplay) {
+            return;
+        }
 
-        if (this.isPlaying && this.hasLoaded && this.replayService.isComplete()) {
+        if (this.isPlaying && this.hasLoaded && this.sharedReplay.isReplayComplete()) {
             this.isPlaying = false;
             this.signalScreenshot('Finished');
             console.log('Replay complete.');
         }
 
-        if (this.isPlaying && this.hasLoaded && !this.replayService.isComplete()) {
-            const action = this.inputHandler.simulateTick();
+        if (this.isPlaying && this.hasLoaded && !this.sharedReplay.isReplayComplete()) {
+            const action = this.sharedReplay.simulateTick();
             
             if (action !== null) {
-                const tick = this.inputHandler.getSimulationTick();
-                const actionStr = this.replayService.actionToString(action);
+                const tick = this.sharedReplay.getSimulationTick();
+                const actionStr = this.sharedReplay.actionToString(action);
                 console.log(`[Replay] Tick ${tick}: ${actionStr}`);
 
                 // Handle menu navigation based on replay actions
@@ -126,8 +183,19 @@ export class MainMenuScene extends Scene {
 
     private selectMenuItem(index: number) {
         console.log(`Menu item selected: ${index}`);
-        // For now, just log the selection
-        // In full implementation, this would trigger game start, load, or quit
+        
+        switch (index) {
+            case 0: // New Game
+                console.log('Starting new game...');
+                this.scene.start('StoryScene');
+                break;
+            case 1: // Load Game
+                console.log('Load game not yet implemented');
+                break;
+            case 2: // Quit Game
+                console.log('Quit game');
+                break;
+        }
     }
 
     private async loadReplayFile() {
@@ -139,23 +207,32 @@ export class MainMenuScene extends Scene {
             return;
         }
 
-        console.log(`Loading replay: ${replayPath}`);
+        console.log(`MainMenuScene: Loading replay: ${replayPath}`);
 
-        const data = await this.replayService.loadReplay(replayPath);
-
-        if (data) {
-            this.replayService.initPlayback(data);
-            this.inputHandler.init();
+        // Initialize shared replay service
+        this.sharedReplay = SharedReplayService.initialize(this);
+        
+        // Load replay
+        const success = await this.sharedReplay.loadReplay(replayPath);
+        
+        if (success) {
             this.hasLoaded = true;
-            console.log(`Loaded replay with ${data.records.length} records`);
-
-            // Expose startReplay to Playwright
-            (window as any).startReplay = () => {
-                console.log("Playwright signaled startReplay");
-                this.isPlaying = true;
-            };
+            console.log('MainMenuScene: Replay loaded successfully');
+            
+            // Note: startReplay is exposed by SharedReplayService.initialize()
+            // We just need to check the shared service's isPlaying flag
+            this.time.addEvent({
+                delay: 100,
+                loop: true,
+                callback: () => {
+                    if (this.sharedReplay && this.sharedReplay.isReplayPlaying() && !this.isPlaying) {
+                        console.log('MainMenuScene: Replay started');
+                        this.isPlaying = true;
+                    }
+                }
+            });
         } else {
-            console.error('Failed to load replay');
+            console.error('MainMenuScene: Failed to load replay');
         }
     }
 

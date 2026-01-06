@@ -11,7 +11,12 @@ export default defineConfig({
     /* Opt out of parallel tests on CI. */
     workers: process.env.CI ? 1 : undefined,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-    reporter: 'html',
+    reporter: [
+        ['list'], // Console reporter
+        ['html', { open: 'never' }] // HTML reporter with auto-open disabled
+    ],
+    /* Disable snapshot updates */
+    updateSnapshots: 'none',
 
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
