@@ -9,11 +9,13 @@ import { Scene } from 'phaser';
 import { ReplayService } from '../services/ReplayService';
 import { InputHandler } from '../services/InputHandler';
 import { TextService } from '../services/TextService';
+import { ImageCatalog } from '../services/ImageCatalog';
 
 export class StoryScene extends Scene {
     private replayService: ReplayService;
     private inputHandler: InputHandler;
     private textService: TextService;
+    private imageCatalog: ImageCatalog;
     
     private waitingForScreenshot: boolean = false;
     private isPlaying: boolean = false;
@@ -28,11 +30,15 @@ export class StoryScene extends Scene {
         this.inputHandler = new InputHandler();
         this.inputHandler.setReplayService(this.replayService);
         this.textService = new TextService();
+        this.imageCatalog = new ImageCatalog(this);
     }
 
     async create() {
         // Set background color
         this.cameras.main.setBackgroundColor('#0a4a4a');
+
+        // Initialize image catalog
+        await this.imageCatalog.initialize();
 
         // Load text files
         await this.textService.loadText('STORY_0');
@@ -56,7 +62,8 @@ export class StoryScene extends Scene {
                 scene: 'Victoria Station',
                 date: '03.02.1953',
                 character: 'Matt',
-                portrait: 126, // OLD_MATT_PICTID from story
+                portrait: 125, // OLD_MATT_PICTID from theclou.h
+                background: 131, // BAHNHOF collection from COLL.LST
                 text: storyText
             }
         ];
@@ -110,27 +117,69 @@ export class StoryScene extends Scene {
         }
     }
 
-    private showDialog(dialog: any) {
+    private async loadAndShowBackground(collectionId: number) {
+        // Load the collection image
+        const success = await this.imageCatalog.loadCollectionImage(collectionId);
+        if (success) {
+            const textureKey = this.imageCatalog.getCollectionTextureKey(collectionId);
+            const collection = this.imageCatalog.getCollection(collectionId);
+            
+            if (collection) {
+                // Scale to fit screen (original 320x140 -> 1024x448)
+                const bg = this.add.image(0, 0, textureKey);
+                bg.setOrigin(0, 0);
+                bg.setScale(3.2); // 320 * 3.2 = 1024
+            }
+        }
+    }
+
+    private async loadAndShowPortrait(pictureId: number) {
+        // Load the picture texture
+        const success = await this.imageCatalog.createPictureTexture(pictureId);
+        if (success) {
+            const textureKey = this.imageCatalog.getPictureTextureKey(pictureId);
+            const picture = this.imageCatalog.getPicture(pictureId);
+            
+            if (picture) {
+                // Position portrait on left side
+                // Original portrait is 62x67, scale up 3.2x = 198x214
+                const portrait = this.add.image(32, 256, textureKey);
+                portrait.setOrigin(0, 0);
+                portrait.setScale(3.2);
+            }
+        }
+    }
+
+    private async showDialog(dialog: any) {
         // Clear previous dialog
         this.children.removeAll();
 
         // Draw scene background
-        // TODO: Load actual background image
-        const graphics = this.add.graphics();
-        graphics.fillStyle(0x0a4a4a, 1);
-        graphics.fillRect(0, 0, 1024, 768);
+        if (dialog.background) {
+            await this.loadAndShowBackground(dialog.background);
+        } else {
+            // Fallback background
+            const graphics = this.add.graphics();
+            graphics.fillStyle(0x0a4a4a, 1);
+            graphics.fillRect(0, 0, 1024, 768);
+        }
 
         // Draw character portrait
-        // TODO: Load actual portrait image
-        const portraitX = 10;
-        const portraitY = 80;
-        const portraitWidth = 230;
-        const portraitHeight = 250;
-        
-        graphics.lineStyle(4, 0xccaa66);
-        graphics.strokeRect(portraitX, portraitY, portraitWidth, portraitHeight);
-        graphics.fillStyle(0x663333, 1);
-        graphics.fillRect(portraitX + 4, portraitY + 4, portraitWidth - 8, portraitHeight - 8);
+        if (dialog.portrait) {
+            await this.loadAndShowPortrait(dialog.portrait);
+        } else {
+            // Fallback portrait placeholder
+            const portraitX = 10;
+            const portraitY = 80;
+            const portraitWidth = 230;
+            const portraitHeight = 250;
+            
+            const graphics = this.add.graphics();
+            graphics.lineStyle(4, 0xccaa66);
+            graphics.strokeRect(portraitX, portraitY, portraitWidth, portraitHeight);
+            graphics.fillStyle(0x663333, 1);
+            graphics.fillRect(portraitX + 4, portraitY + 4, portraitWidth - 8, portraitHeight - 8);
+        }
 
         // Draw speech bubble with text
         const bubbleX = 250;
