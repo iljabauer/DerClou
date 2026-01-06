@@ -1,12 +1,12 @@
 # Der Clou! TypeScript Port - Current Status
 
-**Last Updated:** 2026-01-06 (Session 24)
+**Last Updated:** 2026-01-06 (Session 25)
 
 ## Overview
 
-Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundation with replay system, core architecture, complete data/text/image systems, story file loading, event tracking, landscape rendering with textures, planning actions, and burglary execution with alarm systems.
+Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundation with replay system, core architecture, complete data/text/image systems, story file loading, event tracking, landscape rendering with textures, planning actions, and burglary execution with alarm systems and gameplay functions.
 
-## Current Phase: Phase 8 - Burglary Execution (In Progress - 25% Complete)
+## Current Phase: Phase 8 - Burglary Execution (In Progress - 40% Complete)
 
 ### What Works ✅
 
@@ -340,7 +340,7 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - Integration with Marc Smith (cars)
    - Integration with fences (Maloya, Pooly, Parker)
 
-19. **Burglary Execution System** - In Progress 🚧 (NEW in Session 24)
+19. **Burglary Execution System** - In Progress 🚧 (Sessions 24-25)
    - PlayerData and SearchData interfaces ✅
    - Execution loop structure ✅
    - Alarm checking logic ✅
@@ -352,19 +352,36 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
      - Team mood checking ✅
      - Action function (timed events) ✅
      - Spot detection (if dark) ✅
-   - GameplayService for alarm/detection functions ✅
+   - GameplayService for alarm/detection functions ✅ (COMPLETE - Session 25)
      - checkTimeClocks() ✅
      - getTotalLoudness() ✅
      - alarmByLoudness() ✅
      - alarmByRadio() ✅
      - alarmByPatrol() ✅
+     - alarmByMicro() ✅ (NEW)
+     - alarmByTouch() ✅ (NEW)
+     - alarmByPowerLoss() ✅ (NEW)
+     - watchDogWarning() ✅ (NEW)
+     - wrongWatchDogWarning() ✅ (NEW)
+     - guardDetectsGuy() ✅ (NEW)
+     - guyUsesToolInPlayer() ✅ (NEW)
+     - getToolLoudness() ✅ (NEW)
+     - getWalkLoudness() ✅ (NEW)
+     - getDanger() ✅ (NEW)
+     - killTheGuard() ✅ (NEW)
      - getTeamMood() ✅
      - guyInAction() / guyIsWaiting() ✅
+   - GuardService for guard AI ✅ (STARTED - Session 25)
+     - init() / done() ✅
+     - addToList() ✅
+     - do() ✅
+     - draw() ✅
+     - update() (stubbed)
    - Display functions (timer, info) ✅
    - Execution preparation/cleanup ✅
    - Menu system (person change, radio, escape) ✅
    - ⚠️ Action execution implementations (stubbed)
-   - ⚠️ Guard system (not started)
+   - ⚠️ Guard AI implementation (structure only)
    - ⚠️ Sync system (not started)
    - ⚠️ Evidence system (not started)
 
