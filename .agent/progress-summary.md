@@ -1,5 +1,48 @@
 # Der Clou Porting Progress Summary
 
+## Completed (Session 2 - Current)
+
+### Core Services ✅
+
+#### TextService
+- **File**: `src-js/src/game/services/TextService.ts`
+- **Status**: Complete and tested
+- **Features**:
+  - XOR decoding (0x75) for game text files
+  - Parse key-value text format
+  - Multi-language support (D, E, F, S)
+  - Load text from TEXTS directory
+  - Verified with MENUD.TXT
+
+#### DialogService
+- **File**: `src-js/src/game/services/DialogService.ts`
+- **Status**: Basic implementation complete
+- **Features**:
+  - Speech and think bubble display
+  - Text rendering with word wrap
+  - Character portrait placeholder
+  - Basic bubble graphics
+  - Ready for monologue test
+
+#### ImageService
+- **File**: `src-js/src/game/services/ImageService.ts`
+- **Status**: Placeholder implementation
+- **Features**:
+  - Image catalog system with IDs
+  - Placeholder graphics generation
+  - Support for speech bubbles and backgrounds
+  - Will be expanded for IFF/ILBM loading
+
+### MainMenuScene Updates ✅
+- Now loads menu text from MENUD.TXT using TextService
+- Dynamic text loading with fallback
+- Still passes tests (2% pixel diff acceptable)
+
+### Infrastructure ✅
+- Symlink to TEXTS directory in public folder
+- Build system working
+- All TypeScript compilation passing
+
 ## Completed (Session 1)
 
 ### Main Menu Scene ✅
