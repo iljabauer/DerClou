@@ -2168,10 +2168,13 @@ export class PlanningService {
      * Port of UnableToWork() from player.c
      */
     private async unableToWork(personIndex: number, actionType: number): Promise<void> {
-        if (!this.playerData || !this.search) return;
+        if (!this.playerData || !this.search || !this.state) return;
 
         this.playerData.currLoudness[personIndex] = PLANING_LOUDNESS_STD;
-        // TODO: Search.Exhaust[personIndex] = tcGuyIsWaiting(personId, exhaust);
+        
+        // Update exhaustion (recovery during waiting)
+        const personId = this.state.team[personIndex];
+        this.search.exhaust[personIndex] = this.gameplay.guyIsWaiting(personId, this.search.exhaust[personIndex]);
         this.search.waitTime[personIndex]++;
 
         // TODO: livAnimate(name, ANM_STAND, 0, 0);
