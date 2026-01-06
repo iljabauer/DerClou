@@ -108,8 +108,9 @@ src/
 ## Build Status
 - ✅ TypeScript compilation: Passing
 - ✅ Vite build: Successful
-- ✅ Dev server: Running on port 8080
+- ✅ Dev server: Running on 0.0.0.0:8080 (accessible externally)
 - ✅ Playwright: Installed and configured
+- ✅ Gitpod preview: Configured with allowedHosts
 
 ## Next Session Goals
 1. Implement basic dialog/speech bubble system
