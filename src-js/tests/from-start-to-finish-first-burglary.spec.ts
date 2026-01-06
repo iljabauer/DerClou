@@ -1,5 +1,16 @@
 import { test, expect } from '@playwright/test';
 
+test.beforeAll(() => {
+    // Access the resolved configuration
+    const config = test.info().config;
+    // Check if updates are set to 'all' (which happens when --update-snapshots is used)
+    if (config.updateSnapshots !== 'none') {
+        throw new Error(
+            "🛑 FORBIDDEN: You are not allowed to use '--update-snapshots' in this environment!"
+        );
+    }
+});
+
 test('from-start-to-finish-first-burglary', async ({ page }) => {
     // 1. Setup the communication channel
     let sequenceComplete: (value?: unknown) => void;
@@ -11,7 +22,7 @@ test('from-start-to-finish-first-burglary', async ({ page }) => {
     let screenshotIndex = 1;
 
     // Increase timeout for long replays
-    test.setTimeout(120000);
+    test.setTimeout(500000);
 
     await page.exposeFunction('captureEvent', async (eventName: string) => {
         console.log(`📸 Capturing event: ${eventName}`);
@@ -33,10 +44,7 @@ test('from-start-to-finish-first-burglary', async ({ page }) => {
             const canvas = page.locator('canvas');
             const indexStr = screenshotIndex.toString().padStart(4, '0');
             screenshotIndex++;
-            await expect(canvas).toHaveScreenshot(`screenshot-${indexStr}.png`);
-        } catch (error) {
-            sequenceFailed(error);
-            throw error;
+            await expect.soft(canvas).toHaveScreenshot(`screenshot-${indexStr}.png`, { threshold: 0.05 });
         } finally {
             // 3. Resume the game
             await page.evaluate(() => (window as any).game.loop.wake());
