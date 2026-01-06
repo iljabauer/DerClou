@@ -53,14 +53,6 @@ interface BinaryReader {
     readString(offset: number, length: number): string;
 }
 
-class NodeBufferReader implements BinaryReader {
-    constructor(private buffer: any) { }
-    get length() { return this.buffer.length; }
-    readUInt32LE(offset: number) { return this.buffer.readUInt32LE(offset); }
-    readInt32LE(offset: number) { return this.buffer.readInt32LE(offset); }
-    readString(offset: number, length: number) { return this.buffer.toString('ascii', offset, offset + length); }
-}
-
 class BrowserBufferReader implements BinaryReader {
     private view: DataView;
     constructor(buffer: ArrayBuffer) {
@@ -83,32 +75,18 @@ export class ReplayService {
         try {
             let reader: BinaryReader;
 
-            // Check if running in NW.js environment
-            // @ts-ignore
-            if (typeof nw !== 'undefined') {
-                // Use nw.js fs module to read binary file
-                // @ts-ignore
-                const fs = nw.require('fs');
-                if (!fs.existsSync(filePath)) {
-                    console.error(`Replay file not found: ${filePath}`);
+            // Replay file loading via fetch (Browser)
+            try {
+                const response = await fetch(filePath);
+                if (!response.ok) {
+                    console.error(`Failed to fetch replay file: ${response.statusText}`);
                     return null;
                 }
-                const buffer = fs.readFileSync(filePath);
-                reader = new NodeBufferReader(buffer);
-            } else {
-                // Browser environment: usage fetch
-                try {
-                    const response = await fetch(filePath);
-                    if (!response.ok) {
-                        console.error(`Failed to fetch replay file: ${response.statusText}`);
-                        return null;
-                    }
-                    const arrayBuffer = await response.arrayBuffer();
-                    reader = new BrowserBufferReader(arrayBuffer);
-                } catch (e) {
-                    console.error(`Fetch error: ${e}`);
-                    return null;
-                }
+                const arrayBuffer = await response.arrayBuffer();
+                reader = new BrowserBufferReader(arrayBuffer);
+            } catch (e) {
+                console.error(`Fetch error: ${e}`);
+                return null;
             }
 
             // Parse header (12 bytes)

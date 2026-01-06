@@ -2,9 +2,6 @@
 import { Scene } from 'phaser';
 import { ReplayService, INP_TIME } from '../services/ReplayService';
 import { InputHandler } from '../services/InputHandler';
-import { ScreenshotService } from '../services/ScreenshotService';
-
-declare const nw: any;
 
 export class GameStartScene extends Scene {
     private replayService: ReplayService;
@@ -66,11 +63,7 @@ export class GameStartScene extends Scene {
             this.isPlaying = false;
             this.statusText.setText('Status: Completed');
             this.signalScreenshot('Finished');
-
-            if (ScreenshotService.isHeadlessMode()) {
-                console.log('Replay complete in headless mode. Exiting...');
-                ScreenshotService.exitApp();
-            }
+            console.log('Replay complete.');
         }
 
         if (this.isPlaying && this.hasLoaded && !this.replayService.isComplete()) {
@@ -91,8 +84,9 @@ export class GameStartScene extends Scene {
 
             // Check for simulate-to-tick exit
             if (this.simulateToTick !== null && this.inputHandler.getSimulationTick() >= this.simulateToTick) {
-                console.log(`Simulate-to-tick target ${this.simulateToTick} reached. Exiting...`);
-                ScreenshotService.exitApp();
+                console.log(`Simulate-to-tick target ${this.simulateToTick} reached. Stopping playback...`);
+                this.isPlaying = false;
+                this.statusText.setText('Status: Paused (Target Tick Reached)');
             }
         }
     }
@@ -119,25 +113,16 @@ export class GameStartScene extends Scene {
     private async loadReplayFile() {
         let replayPath = '';
 
-        // Check command line arguments
-        if (typeof nw !== 'undefined' && nw.App && nw.App.argv) {
-            const argv = nw.App.argv;
-            for (const arg of argv) {
-                if (arg.startsWith('--replay-path=')) {
-                    replayPath = arg.split('=')[1];
-                } else if (arg.startsWith('--simulate-to-tick=')) {
-                    this.simulateToTick = parseInt(arg.split('=')[1], 10);
-                }
-            }
-        } else {
-            // Browser/Playwright default
-            // Playwright can inject this, or we fallback to a known test file
-            // For now, let's assume a default if not found
-            // Check URL params
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('replay')) {
-                replayPath = urlParams.get('replay')!;
-            }
+        // Browser/Playwright default
+        // Playwright can inject this, or we fallback to a known test file
+        // Check URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('replay')) {
+            replayPath = urlParams.get('replay')!;
+        } else if (urlParams.has('simulate-to-tick')) {
+            // Handle simulate-to-tick if passed via URL
+            const tickVal = urlParams.get('simulate-to-tick');
+            if (tickVal) this.simulateToTick = parseInt(tickVal, 10);
         }
 
         if (!replayPath) {
@@ -164,8 +149,8 @@ export class GameStartScene extends Scene {
                 this.togglePlayback();
             };
 
-            if (ScreenshotService.isHeadlessMode() || this.simulateToTick !== null) {
-                console.log('Auto-playing (Headless or Simulate-To-Tick)...');
+            if (this.simulateToTick !== null) {
+                console.log('Auto-playing (Simulate-To-Tick)...');
                 this.togglePlayback();
             }
         } else {
@@ -176,8 +161,7 @@ export class GameStartScene extends Scene {
     private captureScreenshot() {
         this.game.renderer.snapshot((image: HTMLImageElement | any) => {
             if (image && image.src) {
-                const result = ScreenshotService.saveScreenshot(image.src);
-                console.log('Screenshot capture result:', result);
+                console.log('Screenshot captured (base64 length):', image.src.length);
             }
         });
     }
