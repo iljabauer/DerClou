@@ -14,8 +14,10 @@
 
 import { Scene } from 'phaser';
 import { ReplayService } from '../services/ReplayService';
+import { InputHandler } from '../services/InputHandler';
 import { TextService } from '../services/TextService';
 import { ImageService } from '../services/ImageService';
+import { ILBMLoader } from '../services/ILBMLoader';
 
 interface LocationData {
     name: string;
@@ -25,9 +27,10 @@ interface LocationData {
 }
 
 export class LocationScene extends Scene {
-    private replayService!: ReplayService;
-    private textService!: TextService;
-    private imageService!: ImageService;
+    private replayService: ReplayService;
+    private inputHandler: InputHandler;
+    private textService: TextService;
+    private imageService: ImageService;
     
     private currentLocation: LocationData = {
         name: 'Victoria Station',
@@ -44,21 +47,21 @@ export class LocationScene extends Scene {
 
     constructor() {
         super('LocationScene');
+        this.replayService = new ReplayService();
+        this.inputHandler = new InputHandler();
+        this.inputHandler.setReplayService(this.replayService);
+        this.textService = new TextService();
+        this.imageService = new ImageService(this);
     }
 
-    create() {
+    async create() {
         console.log('LocationScene: create');
         
-        // Get services
-        this.replayService = ReplayService.getInstance(this);
-        this.textService = TextService.getInstance(this);
-        this.imageService = ImageService.getInstance(this);
-        
         // Load location background
-        this.loadLocationBackground();
+        await this.loadLocationBackground();
         
         // Load menu text
-        this.loadMenuText();
+        await this.loadMenuText();
         
         // Create UI
         this.createUI();
@@ -66,15 +69,18 @@ export class LocationScene extends Scene {
         // Setup input
         this.setupInput();
         
-        // Start replay if available
-        this.replayService.startReplay();
+        // Setup replay
+        await this.setupReplay();
     }
     
-    private loadLocationBackground() {
-        // Load the location background image
-        const bgKey = this.imageService.getImageKey(this.currentLocation.backgroundImage);
+    private async loadLocationBackground() {
+        // Load the location background image using ILBM loader
+        const bgKey = `location_${this.currentLocation.backgroundImage}`;
+        const bgPath = `PICTURES/${this.currentLocation.backgroundImage}`;
         
-        if (this.textures.exists(bgKey)) {
+        const loaded = await ILBMLoader.loadAndCreateTexture(this, bgKey, bgPath);
+        
+        if (loaded && this.textures.exists(bgKey)) {
             // Display background scaled to fit
             const bg = this.add.image(512, 384, bgKey);
             bg.setDisplaySize(1024, 768);
@@ -91,17 +97,17 @@ export class LocationScene extends Scene {
     }
     
     private async loadMenuText() {
-        // Load menu text from MENUD.TXT
-        await this.textService.loadText('MENUD.TXT', 'D');
+        // Load menu text from MENU text file
+        await this.textService.loadText('MENU');
         
-        // Get menu items
+        // Get menu items - use fallback text if not found
         this.menuItems = [
-            this.textService.getText('Gehen') || 'Gehen',
-            this.textService.getText('Warten') || 'Warten',
-            this.textService.getText('Reden') || 'Reden',
-            this.textService.getText('Umsehen') || 'Umsehen',
-            this.textService.getText('Taxi rufen') || 'Taxi rufen',
-            this.textService.getText('Nachdenken') || 'Nachdenken'
+            this.textService.getFirstLine('MENU', 'Gehen') || 'Gehen',
+            this.textService.getFirstLine('MENU', 'Warten') || 'Warten',
+            this.textService.getFirstLine('MENU', 'Reden') || 'Reden',
+            this.textService.getFirstLine('MENU', 'Umsehen') || 'Umsehen',
+            this.textService.getFirstLine('MENU', 'Taxi rufen') || 'Taxi rufen',
+            this.textService.getFirstLine('MENU', 'Nachdenken') || 'Nachdenken'
         ];
     }
     
@@ -177,7 +183,7 @@ export class LocationScene extends Scene {
     
     private displaySubMenu() {
         // Display submenu title
-        const title = this.textService.getText('Wohin?') || 'Wohin?';
+        const title = this.textService.getFirstLine('MENU', 'Wohin?') || 'Wohin?';
         this.add.text(512, 680, title, {
             fontFamily: 'Courier New',
             fontSize: '24px',
@@ -242,9 +248,6 @@ export class LocationScene extends Scene {
                 this.selectMenuItem();
                 break;
         }
-        
-        // Capture screenshot for replay
-        this.replayService.captureScreenshot();
     }
     
     private handleSubMenuInput(key: string) {
@@ -267,9 +270,6 @@ export class LocationScene extends Scene {
                 this.displayMenuItems();
                 break;
         }
-        
-        // Capture screenshot for replay
-        this.replayService.captureScreenshot();
     }
     
     private selectMenuItem() {
@@ -350,5 +350,56 @@ export class LocationScene extends Scene {
         
         // Reload scene
         this.scene.restart();
+    }
+    
+    private async setupReplay() {
+        // Check if we have a replay file in URL params
+        const urlParams = new URLSearchParams(window.location.search);
+        const replayPath = urlParams.get('replay');
+        
+        if (replayPath) {
+            console.log(`Loading replay: ${replayPath}`);
+            const replayData = await this.replayService.loadReplay(replayPath);
+            
+            if (replayData) {
+                this.replayService.initPlayback(replayData);
+                
+                // Expose startReplay function to window for test
+                (window as any).startReplay = () => {
+                    console.log('Starting replay playback');
+                    this.startReplayPlayback();
+                };
+                
+                console.log('Replay loaded, waiting for startReplay() call');
+            }
+        }
+    }
+    
+    private startReplayPlayback() {
+        // Start processing replay inputs
+        this.time.addEvent({
+            delay: 16, // ~60 FPS
+            callback: this.processReplayInput,
+            callbackScope: this,
+            loop: true
+        });
+    }
+    
+    private processReplayInput() {
+        // Get current tick (frame count)
+        const currentTick = this.game.loop.frame;
+        
+        // Get input from replay
+        const record = this.replayService.getInput(currentTick, 0);
+        
+        if (record) {
+            // Process the replay input
+            this.inputHandler.processReplayInput(record.action);
+            
+            // Capture screenshot if needed
+            if ((window as any).captureEvent) {
+                (window as any).captureEvent('frame');
+            }
+        }
     }
 }
