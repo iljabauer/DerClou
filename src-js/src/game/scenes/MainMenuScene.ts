@@ -6,7 +6,6 @@ export class MainMenuScene extends Scene {
     private replayService: ReplayService;
     private inputHandler: InputHandler;
     
-    private titleText!: Phaser.GameObjects.Text;
     private menuItems: Phaser.GameObjects.Text[] = [];
     private selectedIndex: number = 0;
     
@@ -38,7 +37,7 @@ export class MainMenuScene extends Scene {
         graphics.fillRect(900, 690, 120, 78);
 
         // Title text - positioned to match screenshot
-        this.titleText = this.add.text(
+        this.add.text(
             145, 
             688, 
             'Der Clou! Open Source Project v0.8 (Prof. CD-ROM)',
