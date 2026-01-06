@@ -515,7 +515,7 @@ export class GameplayService {
 
     /**
      * Calculate tool usage time
-     * Port of tcGuyUsesToolInPlayer() from gp.c
+     * Port of tcGuyUsesToolInPlayer() from dataappl.c
      * 
      * Calculates the actual time needed to use a tool.
      * Returns time in seconds.
@@ -524,86 +524,282 @@ export class GameplayService {
         personId: number,
         building: Building,
         toolId: number,
-        itemType: number,
-        plannedTime: number
+        itemId: number,
+        needTime: number
     ): number {
-        // TODO: Port full implementation
-        // - Get person abilities
-        // - Get tool effectiveness
-        // - Calculate actual time based on skill
-        // - Return actual time
+        // Get base time from tool/item combination
+        let time = this.guyUsesTool(personId, building, toolId, itemId);
         
-        // For now, return planned time
-        return plannedTime;
+        // Get necessary ability for this tool
+        const ability = this.getNecessaryAbility(personId, toolId);
+        
+        // Random variation based on ability
+        if (ability < this.randomNr(0, 230)) {
+            if (this.randomNr(0, Math.floor(ability / 20)) === 1) {
+                time = this.calcValue(time, 0, time * 4, Math.floor(ability / 2), 10);
+            }
+        }
+        
+        // Ensure time is at least the planned time
+        if (time < needTime) {
+            time = needTime;
+        }
+        
+        return time;
+    }
+
+    /**
+     * Calculate base tool usage time
+     * Port of tcGuyUsesTool() from dataappl.c
+     * 
+     * This function must be deterministic (no randomness) for sync!
+     */
+    private guyUsesTool(
+        personId: number,
+        building: Building,
+        toolId: number,
+        itemId: number
+    ): number {
+        const person = this.db.getObject(personId) as Person;
+        if (!person) return 0;
+
+        // Get base time from break table
+        const origin = this.breakGet(itemId, toolId);
+        if (origin === -1) return 0;
+
+        let time = origin;
+
+        // Adjust time based on tool type and person attributes
+        // Tool IDs from GameConstants
+        const Tool_Elektrohammer = 1;
+        const Tool_Hammer = 2;
+        const Tool_Axt = 3;
+        const Tool_Hand = 4;
+        const Tool_Fusz = 5;
+        const Tool_Chloroform = 6;
+        const Tool_Bohrwinde = 7;
+        const Tool_Schloszstecher = 8;
+        const Tool_Glasschneider = 9;
+        const Tool_Bohrmaschine = 10;
+        const Tool_Brecheisen = 11;
+        const Tool_Winkelschleifer = 12;
+        const Tool_Schneidbrenner = 13;
+        const Tool_Sauerstofflanze = 14;
+        const Tool_Kernbohrer = 15;
+        const Tool_Dietrich = 16;
+        const Tool_Strickleiter = 17;
+        const Tool_Stethoskop = 18;
+        const Tool_Elektroset = 19;
+        const Tool_Dynamit = 20;
+
+        switch (toolId) {
+            case Tool_Elektrohammer:
+            case Tool_Hammer:
+            case Tool_Axt:
+                time = this.calcValue(time, 0, origin * 4, 127 + Math.floor((255 - person.Strength) / 2), 5);
+                time = this.calcValue(time, 0, origin * 4, 127 + Math.floor((255 - person.Stamina) / 2), 10);
+                break;
+            case Tool_Hand:
+            case Tool_Fusz:
+            case Tool_Chloroform:
+                time = this.calcValue(time, 0, origin * 4, 127 + Math.floor((255 - person.Skill) / 2), 5);
+                time = this.calcValue(time, 0, origin * 4, 127 + Math.floor((255 - person.Strength) / 2), 10);
+                break;
+            case Tool_Bohrwinde:
+                time = this.calcValue(time, 0, origin * 4, 127 + Math.floor((255 - person.Stamina) / 2), 5);
+                time = this.calcValue(time, 0, origin * 4, 127 + Math.floor((255 - person.Skill) / 2), 10);
+                break;
+            case Tool_Schloszstecher:
+            case Tool_Glasschneider:
+            case Tool_Bohrmaschine:
+            case Tool_Brecheisen:
+                time = this.calcValue(time, 0, origin * 4, 127 + Math.floor((255 - person.Strength) / 2), 10);
+                time = this.calcValue(time, 0, origin * 4, 127 + Math.floor((255 - person.Skill) / 2), 10);
+                break;
+            case Tool_Winkelschleifer:
+            case Tool_Schneidbrenner:
+            case Tool_Sauerstofflanze:
+            case Tool_Kernbohrer:
+                time = this.calcValue(time, 0, origin * 4, 127 + Math.floor((255 - person.Strength) / 2), 0);
+                time = this.calcValue(time, 0, origin * 4, 127 + Math.floor((255 - person.Skill) / 2), 10);
+                break;
+            case Tool_Dietrich:
+            case Tool_Strickleiter:
+                time = this.calcValue(time, 0, origin * 4, 127 + Math.floor((255 - person.Skill) / 2), 10);
+                break;
+            case Tool_Stethoskop:
+            case Tool_Elektroset:
+            case Tool_Dynamit:
+                time = this.calcValue(time, 0, origin * 4, 127 + Math.floor((255 - person.Intelligence) / 2), 10);
+                time = this.calcValue(time, 0, origin * 4, 127 + Math.floor((255 - person.Skill) / 2), 10);
+                break;
+        }
+
+        // Adjust for necessary ability
+        const ability = this.getNecessaryAbility(personId, toolId);
+        time = this.calcValue(time, 0, origin * 4, 127 + Math.floor((255 - ability) / 2), 50);
+
+        // Adjust for alarm system quality
+        const Item_Alarmanlage_X3 = 2;
+        const Item_Alarmanlage_Top = 3;
+        switch (itemId) {
+            case Item_Alarmanlage_X3:
+                time = this.calcValue(time, 0, origin * 4, 255, 30);
+                break;
+            case Item_Alarmanlage_Top:
+                time = this.calcValue(time, 0, origin * 4, 255, 50);
+                break;
+        }
+
+        // Adjust for building exactness and person panic
+        time = this.calcValue(time, 0, origin * 4, 120 + Math.floor((255 - building.Exactlyness) / 2), 20);
+        time = this.calcValue(time, 0, origin * 4, 127 + Math.floor(person.Panic / 2), 10);
+
+        // Can't be faster than base time
+        time = Math.max(origin, time);
+
+        return time;
+    }
+
+    /**
+     * Get break time for tool/item combination
+     * Port of breakGet() from dataappl.c
+     */
+    private breakGet(itemId: number, toolId: number): number {
+        // TODO: Port full break table
+        // For now, return default time
+        return 60;  // 60 seconds default
+    }
+
+    /**
+     * Get necessary ability for tool
+     * Port of tcGetNecessaryAbility() from dataappl.c
+     */
+    private getNecessaryAbility(personId: number, toolId: number): number {
+        // TODO: Port full implementation
+        // For now, return default ability
+        return 127;
     }
 
     /**
      * Calculate tool loudness
-     * Port of tcGetToolLoudness() from gp.c
+     * Port of tcGetToolLoudness() from dataappl.c
      * 
      * Calculates the loudness of using a tool.
      * Returns loudness value.
      */
-    getToolLoudness(personId: number, toolId: number, itemType: number): number {
-        // TODO: Port full implementation
-        // - Get tool loudness rating
-        // - Factor in person skill
-        // - Factor in item type
-        // - Return loudness value
-        
-        // Default loudness
-        return 10;
+    getToolLoudness(personId: number, toolId: number, itemId: number): number {
+        const person = this.db.getObject(personId) as Person;
+        if (!person) return 10;
+
+        // Get base loudness from sound table
+        let loudness = this.soundGet(itemId, toolId);
+
+        // Adjust for person skill and panic
+        loudness = this.calcValue(loudness, 0, 255, 255 - person.Skill, 10);
+        loudness = this.calcValue(loudness, 0, 255, person.Panic, 5);
+
+        return loudness;
+    }
+
+    /**
+     * Get sound level for tool/item combination
+     * Port of soundGet() from dataappl.c
+     */
+    private soundGet(itemId: number, toolId: number): number {
+        // TODO: Port full sound table
+        // For now, return default loudness
+        return 20;  // Default loudness
     }
 
     /**
      * Calculate walk loudness
-     * Port of tcGetWalkLoudness() from gp.c
+     * Port of tcGetWalkLoudness() from dataappl.c
      * 
      * Calculates the loudness of walking.
      * Returns loudness value.
      */
-    getWalkLoudness(): number {
-        // TODO: Port full implementation
-        // - Factor in floor type
-        // - Factor in person skill
-        // - Return loudness value
-        
-        // Default walk loudness
-        return 5;
+    getWalkLoudness(personId: number): number {
+        const WALK_LOUDNESS = 5;  // tcWALK_LOUDNESS
+        let loudness = WALK_LOUDNESS;
+
+        // Check if person has special shoes (reduces loudness)
+        const Tool_Schuhe = 21;  // Special shoes
+        const Person_Matt_Stuvysunt = 1;
+        if (this.db.hasRelation(Person_Matt_Stuvysunt, Tool_Schuhe, 'has')) {
+            loudness = Math.floor(loudness / 2);
+        }
+
+        return loudness;
     }
 
     /**
      * Calculate danger level
-     * Port of tcGetDanger() from gp.c
+     * Port of tcGetDanger() from dataappl.c
      * 
      * Calculates the danger of using a tool on an object.
-     * Returns true if dangerous (person gets hurt).
+     * Returns danger level (0 = no danger, >0 = injured).
      */
-    getDanger(personId: number, toolId: number, itemType: number): boolean {
-        // TODO: Port full implementation
-        // - Check tool danger rating
-        // - Check person skill
-        // - Calculate probability of injury
-        // - Return true if injured
-        
-        return false;
+    getDanger(personId: number, toolId: number, itemId: number): number {
+        const person = this.db.getObject(personId) as Person;
+        if (!person) return 0;
+
+        // Get base danger from hurt table
+        let danger = this.hurtGet(itemId, toolId);
+
+        // Adjust for person attributes
+        danger = this.calcValue(danger, 0, 255, 255 - person.Skill, 30);
+        danger = this.calcValue(danger, 0, 255, 255 - person.Stamina, 10);
+        danger = this.calcValue(danger, 0, 255, person.Panic, 5);
+
+        // Check if person gets injured
+        if (danger > this.randomNr(40, 255)) {
+            // Maybe injured
+            if (this.randomNr(0, 10) === 1) {
+                // Actually injured - reduce health
+                person.OldHealth = person.Health;
+                person.Health = this.calcValue(person.Health, 0, 255, 127 - danger, 90);
+                return danger;
+            }
+        }
+
+        return 0;
+    }
+
+    /**
+     * Get hurt level for tool/item combination
+     * Port of hurtGet() from dataappl.c
+     */
+    private hurtGet(itemId: number, toolId: number): number {
+        // TODO: Port full hurt table
+        // For now, return default danger
+        return 10;  // Default danger
     }
 
     /**
      * Kill the guard (combat)
-     * Port of tcKillTheGuard() from gp.c
+     * Port of tcKillTheGuard() from dataappl.c
      * 
      * Handles combat with a guard.
      * Returns true if guard is knocked out.
      */
     killTheGuard(personId: number, buildingId: number): boolean {
-        // TODO: Port full implementation
-        // - Check person combat ability
-        // - Check guard combat ability
-        // - Calculate combat outcome
-        // - Return true if guard knocked out
-        
-        return false;
+        const person = this.db.getObject(personId) as Person;
+        const building = this.db.getObject(buildingId) as Building;
+        if (!person || !building) return false;
+
+        // Get combat ability (Kampf)
+        const power = this.getAbilityValue(personId, 'Kampf');
+
+        // Check if person can defeat guard
+        if (power >= building.GuardStrength) {
+            return true;
+        } else {
+            // Person loses - reduce health
+            person.OldHealth = person.Health;
+            person.Health = this.calcValue(person.Health, 0, 255, 0, 90);
+            return false;
+        }
     }
 
     /**
