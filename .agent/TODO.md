@@ -1,6 +1,6 @@
 # Der Clou! Port - TODO List
 
-**Last Updated:** 2026-01-05 (Session 23)
+**Last Updated:** 2026-01-06 (Session 24)
 
 ## Current Sprint: Phase 8 - Burglary Execution
 
@@ -8,43 +8,55 @@
 
 **See BURGLARY_EXECUTION_PLAN.md for detailed implementation plan**
 
-#### Phase 1: Core Execution Loop (CRITICAL - NEXT)
-- [ ] Create PlayerData interface for PD structure
-- [ ] Port plPlayer() initialization from player.c
-- [ ] Port main execution loop
-- [ ] Port action execution switch statement
-- [ ] Implement basic timer and display
-- [ ] Add person switching menu
-- [ ] Add escape menu option
-- [ ] Test with simple burglary
+#### Phase 1: Core Execution Loop (85% COMPLETE) ✅
+- [x] Create PlayerData interface for PD structure
+- [x] Port plPlayer() initialization from player.c
+- [x] Port main execution loop
+- [x] Port action execution switch statement
+- [x] Implement basic timer and display
+- [x] Add person switching menu
+- [x] Add escape menu option
+- [ ] Test with simple burglary (IN PROGRESS)
 
-#### Phase 2: Alarm and Detection Systems (CRITICAL)
-- [ ] Port alarm checking logic
-- [ ] Port loudness calculation
-- [ ] Port patrol system integration
-- [ ] Port guard detection
-- [ ] Port police response
+#### Phase 2: Alarm and Detection Systems (60% COMPLETE) 🚧
+- [x] Port alarm checking logic
+- [x] Port loudness calculation (tcGetTotalLoudness, tcAlarmByLoudness)
+- [x] Port patrol system integration (tcAlarmByPatrol)
+- [x] Port radio alarm (tcAlarmByRadio)
+- [x] Port team mood (tcGetTeamMood)
+- [x] Port exhaustion functions (tcGuyInAction, tcGuyIsWaiting)
+- [x] Create GameplayService
+- [ ] Port guard detection (tcGuardDetectsGuy)
+- [ ] Port microphone alarm (tcAlarmByMicro)
+- [ ] Port touch alarm (tcAlarmByTouch)
+- [ ] Port power loss alarm (tcAlarmByPowerLoss)
+- [ ] Port watchdog warning (tcWatchDogWarning)
 - [ ] Add alarm sound effects (stubs)
 
-#### Phase 3: Guard System (MEDIUM)
+#### Phase 3: Guard System (NOT STARTED) ⚠️
 - [ ] Create GuardService
 - [ ] Port guard initialization from guards.c
 - [ ] Port guard movement logic
 - [ ] Integrate with execution loop
 - [ ] Add guard detection logic
 
-#### Phase 4: Sync System (MEDIUM)
+#### Phase 4: Sync System (NOT STARTED) ⚠️
 - [ ] Create SyncService
 - [ ] Port plSync() from sync.c
 - [ ] Integrate with execution loop
 - [ ] Add animation timing
 - [ ] Test with various actions
 
-#### Phase 5: Gameplay Functions (MEDIUM)
-- [ ] Create GameplayService
-- [ ] Port detection functions from gp.c
-- [ ] Port alarm functions
-- [ ] Port calculation functions
+#### Phase 5: Gameplay Functions (40% COMPLETE) 🚧
+- [x] Create GameplayService
+- [x] Port alarm functions (loudness, patrol, radio)
+- [x] Port mood calculation (tcGetTeamMood)
+- [x] Port exhaustion functions
+- [ ] Port tool usage time (tcGuyUsesToolInPlayer)
+- [ ] Port tool loudness (tcGetToolLoudness)
+- [ ] Port walk loudness (tcGetWalkLoudness)
+- [ ] Port danger calculation (tcGetDanger)
+- [ ] Port guard combat (tcKillTheGuard)
 - [ ] Integrate with execution loop
 
 ### Medium Priority 🟡 (Polish and Optimization)
@@ -191,7 +203,7 @@ None currently.
 
 ## Progress Summary
 
-**Overall Port:** ~55% complete
+**Overall Port:** ~58% complete (up from ~55%)
 - Core systems: ✅ 100%
 - Data/Text/Image: ✅ 100%
 - UI/Dialog/Living: ✅ 100%
@@ -200,14 +212,19 @@ None currently.
 - Investigation: ✅ 100%
 - Organisation: ✅ 100%
 - Commerce: ✅ 100%
-- Planning: 🚧 90% (actions done, execution pending)
-- Landscape: 🚧 85%
-- Burglary execution: ⚠️ 0% (NEXT PRIORITY)
+- Planning: ✅ 90%
+- Landscape: ✅ 85%
+- Burglary execution: 🚧 25% (up from 0%)
+  - Phase 1 (Core Loop): 85% ✅
+  - Phase 2 (Alarms): 60% 🚧
+  - Phase 3 (Guards): 0% ⚠️
+  - Phase 4 (Sync): 0% ⚠️
+  - Phase 5 (Gameplay): 40% 🚧
 
 **Estimated Remaining Work:**
-- Burglary execution: 10-15 sessions
-- MVP (core execution + alarms): 3-5 sessions
-- Full implementation: 10-15 sessions
+- Burglary execution: 8-12 sessions (down from 10-15)
+- MVP (core execution + alarms): 1-2 sessions (down from 3-5)
+- Full implementation: 8-12 sessions (down from 10-15)
 
 ## Notes
 

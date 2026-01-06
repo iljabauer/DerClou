@@ -1,12 +1,12 @@
 # Der Clou! TypeScript Port - Current Status
 
-**Last Updated:** 2026-01-05 (Session 22)
+**Last Updated:** 2026-01-06 (Session 24)
 
 ## Overview
 
-Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundation with replay system, core architecture, complete data/text/image systems, story file loading, event tracking, landscape rendering with textures, and planning actions.
+Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundation with replay system, core architecture, complete data/text/image systems, story file loading, event tracking, landscape rendering with textures, planning actions, and burglary execution with alarm systems.
 
-## Current Phase: Phase 7 - Planning Actions (Complete) / Phase 8 - Burglary Execution (Next)
+## Current Phase: Phase 8 - Burglary Execution (In Progress - 25% Complete)
 
 ### What Works ✅
 
@@ -340,7 +340,35 @@ Porting Der Clou! from C to TypeScript/Phaser. The project has a working foundat
    - Integration with Marc Smith (cars)
    - Integration with fences (Maloya, Pooly, Parker)
 
-19. **Test Scenes**
+19. **Burglary Execution System** - In Progress 🚧 (NEW in Session 24)
+   - PlayerData and SearchData interfaces ✅
+   - Execution loop structure ✅
+   - Alarm checking logic ✅
+     - Time clock alarms (every 3 ticks) ✅
+     - Loudness detection (every 15 ticks) ✅
+     - Patrol detection (varies by building) ✅
+     - Alarm timer countdown ✅
+     - Police arrival checking ✅
+     - Team mood checking ✅
+     - Action function (timed events) ✅
+     - Spot detection (if dark) ✅
+   - GameplayService for alarm/detection functions ✅
+     - checkTimeClocks() ✅
+     - getTotalLoudness() ✅
+     - alarmByLoudness() ✅
+     - alarmByRadio() ✅
+     - alarmByPatrol() ✅
+     - getTeamMood() ✅
+     - guyInAction() / guyIsWaiting() ✅
+   - Display functions (timer, info) ✅
+   - Execution preparation/cleanup ✅
+   - Menu system (person change, radio, escape) ✅
+   - ⚠️ Action execution implementations (stubbed)
+   - ⚠️ Guard system (not started)
+   - ⚠️ Sync system (not started)
+   - ⚠️ Evidence system (not started)
+
+20. **Test Scenes**
    - ReplayTestScene (original)
    - DataLoaderTestScene
    - TextTestScene
