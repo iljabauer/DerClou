@@ -1,6 +1,20 @@
 # Der Clou Porting Progress Summary
 
-## Completed (Session 5 - Current)
+## Completed (Session 6 - Current)
+
+### LocationScene ✅
+- **File**: `src-js/src/game/scenes/LocationScene.ts`
+- **Status**: Complete and building
+- **Features**:
+  - Location background display (using ILBM loader)
+  - Action menu with 6 items (Gehen, Warten, Reden, Umsehen, Taxi rufen, Nachdenken)
+  - Navigation submenu for location selection
+  - Time display and advancement
+  - Keyboard navigation
+  - Replay system integration
+  - Ported from src/scenes/scenes.c Go() function
+
+## Completed (Session 5)
 
 ### Scene Routing ✅
 - **File**: `src-js/src/game/scenes/RouterScene.ts`
@@ -322,6 +336,7 @@ src/
    - Full burglary gameplay
 
 ## Session Notes
+- Session 6: Added LocationScene with action menu and navigation
 - Session 5: Added RouterScene, verified tests, documented progress
 - Following 80/20 rule: 80% porting, 20% testing
 - Keeping game playable at all times
