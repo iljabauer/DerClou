@@ -2,6 +2,7 @@ import { Scene } from 'phaser';
 import { ReplayService } from '../services/ReplayService';
 import { InputHandler } from '../services/InputHandler';
 import { TextService } from '../services/TextService';
+import { ILBMLoader } from '../services/ILBMLoader';
 
 export class MainMenuScene extends Scene {
     private replayService: ReplayService;
@@ -27,17 +28,35 @@ export class MainMenuScene extends Scene {
         // Set background color to match the original (dark teal/green)
         this.cameras.main.setBackgroundColor('#0a4a4a');
 
-        // Add a simple building silhouette at the bottom to match the screenshot
-        // This is a placeholder - the real game loads an image
-        const graphics = this.add.graphics();
-        graphics.fillStyle(0x0a3a3a, 1);
-        graphics.fillRect(0, 650, 1024, 118);
-        
-        // Add some simple building shapes to roughly match the original
-        graphics.fillStyle(0x083030, 1);
-        graphics.fillRect(450, 700, 80, 68);
-        graphics.fillRect(550, 680, 100, 88);
-        graphics.fillRect(900, 690, 120, 78);
+        // Load the MENU background image (ILBM format)
+        // From COLL.LST: 128,menu,320,140,192,246,0
+        // From PICT.LST: 21,128,0,60,320,60,0,140
+        // This loads the bottom portion of the menu image (train station scene)
+        const menuLoaded = await ILBMLoader.loadAndCreateTexture(
+            this,
+            'menu_background',
+            'PICTURES/MENU'
+        );
+
+        if (menuLoaded) {
+            // The MENU image is 320x120, we need to scale it to fit 1024x768
+            // Original game resolution was 320x200, scaled to 1024x640 (3.2x)
+            // Position at bottom: y=140 in original = y=448 in scaled (140 * 3.2)
+            const bg = this.add.image(0, 448, 'menu_background');
+            bg.setOrigin(0, 0);
+            bg.setScale(3.2); // Scale from 320 to 1024
+        } else {
+            console.warn('Failed to load MENU background, using placeholder');
+            // Fallback to placeholder graphics
+            const graphics = this.add.graphics();
+            graphics.fillStyle(0x0a3a3a, 1);
+            graphics.fillRect(0, 650, 1024, 118);
+            
+            graphics.fillStyle(0x083030, 1);
+            graphics.fillRect(450, 700, 80, 68);
+            graphics.fillRect(550, 680, 100, 88);
+            graphics.fillRect(900, 690, 120, 78);
+        }
 
         // Load text files
         await this.textService.loadText('MENU');
