@@ -116,10 +116,10 @@ export class LocationScene extends Scene {
         
         // Map location IDs to their data
         // Location 0 = Holland Street (picture 142)
-        // Location 58 = Victoria Station (picture 131)
+        // Location 58 = Victoria Station (picture 150 - full station background)
         const locationMap: { [key: number]: { pictureId: number, actions: number } } = {
             0: { pictureId: 142, actions: GO | BUSINESS_TALK | LOOK | INVESTIGATE | CALL_TAXI | WAIT },
-            58: { pictureId: 131, actions: GO | WAIT }  // Victoria Station - only GO and WAIT
+            58: { pictureId: 150, actions: GO | WAIT }  // Victoria Station - only GO and WAIT
         };
         
         const locData = locationMap[locationId] || locationMap[0];
@@ -144,7 +144,7 @@ export class LocationScene extends Scene {
         // Map location IDs to their picture IDs
         const locationPictureMap: { [key: number]: number } = {
             0: 142,   // Holland Street
-            58: 131   // Victoria Station
+            58: 150   // Victoria Station (full background)
         };
         
         const pictureId = locationPictureMap[this.locationData.locationNr] || 142;
