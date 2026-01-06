@@ -63,8 +63,9 @@ export class LocationScene extends Scene {
         this.imageCatalog = new ImageCatalog(this);
     }
 
-    async create() {
-        console.log('LocationScene: create');
+    async create(data?: { locationId?: number }) {
+        const locationId = data?.locationId ?? 0; // Default to Holland Street
+        console.log(`LocationScene: create with locationId=${locationId}`);
         
         // Set background color (dark teal like menu)
         this.cameras.main.setBackgroundColor('#0a4a4a');
@@ -72,9 +73,10 @@ export class LocationScene extends Scene {
         // Initialize services
         await this.imageCatalog.initialize();
         await this.textService.loadText('THECLOU');
+        await this.textService.loadText('LOCATION');
         
-        // Setup location data (hardcoded for now - Holland Street)
-        this.setupLocationData();
+        // Setup location data based on locationId
+        this.setupLocationData(locationId);
         
         // Load and display location background
         await this.loadLocationBackground();
@@ -107,40 +109,57 @@ export class LocationScene extends Scene {
         }
     }
     
-    private setupLocationData() {
-        // Hardcoded Holland Street data for testing
-        // TODO: Load from game data based on scene
-        this.locationData = {
-            locationNr: 0,
-            locationName: 'Holland Street',
-            date: '03.02.1953',
-            availableActions: GO | BUSINESS_TALK | LOOK | INVESTIGATE | CALL_TAXI | WAIT,
-            backgroundImage: 'Holland Street'
+    private setupLocationData(locationId: number) {
+        // Load location name from LOCATION.LST
+        const locationLines = this.textService.getLines('LOCATION', 'LOCATION');
+        const locationName = locationLines[locationId] || `Location ${locationId}`;
+        
+        // Map location IDs to their data
+        // Location 0 = Holland Street (picture 142)
+        // Location 58 = Victoria Station (picture 131)
+        const locationMap: { [key: number]: { pictureId: number, actions: number } } = {
+            0: { pictureId: 142, actions: GO | BUSINESS_TALK | LOOK | INVESTIGATE | CALL_TAXI | WAIT },
+            58: { pictureId: 131, actions: GO | WAIT }  // Victoria Station - only GO and WAIT
         };
+        
+        const locData = locationMap[locationId] || locationMap[0];
+        
+        this.locationData = {
+            locationNr: locationId,
+            locationName: locationName,
+            date: '03.02.1953',
+            availableActions: locData.actions,
+            backgroundImage: locationName
+        };
+        
+        console.log(`LocationScene: Setup location ${locationId}: ${locationName}`);
     }
     
     private async loadLocationBackground() {
-        if (!this.locationData || !this.locationData.backgroundImage) {
-            console.warn('LocationScene: No background image specified');
+        if (!this.locationData) {
+            console.warn('LocationScene: No location data');
             return;
         }
         
-        // For now, try to load from PICTURES directory
-        // Animation format: AnimID maps to picture in ANIMD.TXT
-        // Format: Modus,WaitTime,PicId,CollId,PicCount,FrameWidth,FrameHeight,FrameOffset,XDest,YDest
-        // Example: Holland Street = 55,20,142,62,4,40,72,0,144,3
+        // Map location IDs to their picture IDs
+        const locationPictureMap: { [key: number]: number } = {
+            0: 142,   // Holland Street
+            58: 131   // Victoria Station
+        };
         
-        // Try loading picture 142 (Holland Street background)
-        const bgKey = 'location_bg';
-        const loaded = await this.imageCatalog.createPictureTexture(142, bgKey);
+        const pictureId = locationPictureMap[this.locationData.locationNr] || 142;
+        
+        // Try loading the location background picture
+        const bgKey = `location_bg_${this.locationData.locationNr}`;
+        const loaded = await this.imageCatalog.createPictureTexture(pictureId, bgKey);
         
         if (loaded && this.textures.exists(bgKey)) {
             // Display background scaled to fit screen
             const bg = this.add.image(512, 384, bgKey);
             bg.setDisplaySize(1024, 768);
-            console.log('LocationScene: Loaded background image 142');
+            console.log(`LocationScene: Loaded background image ${pictureId} for location ${this.locationData.locationNr}`);
         } else {
-            console.warn('LocationScene: Failed to load background, using placeholder');
+            console.warn(`LocationScene: Failed to load background ${pictureId}, using placeholder`);
             // Placeholder background
             const graphics = this.add.graphics();
             graphics.fillStyle(0x1a5a5a, 1);
