@@ -286,7 +286,44 @@ src/
 - ✅ Gitpod preview: Configured with allowedHosts
 
 ## Next Session Goals
-1. Implement basic dialog/speech bubble system
-2. Port image loading for backgrounds
-3. Get monologue test closer to passing
-4. Continue with 80/20 rule: 80% porting, 20% testing
+
+### High Priority
+1. **Create LocationScene / NavigationScene**
+   - Port basic location/landscape system from src/landscap/
+   - Implement navigation UI for moving between locations
+   - Get "go" test closer to passing (currently 32% diff)
+
+2. **Improve Scene Transitions**
+   - Better state management between scenes
+   - Proper scene data passing
+   - Scene history/back navigation
+
+### Medium Priority
+3. **Port Basic Data Loading**
+   - Start with simple object types (Person, Location)
+   - Load TCMAIN.DAT basics
+   - Create TypeScript interfaces for game objects
+   - Port relation system basics
+
+4. **Enhance Dialog System**
+   - Better text wrapping
+   - Character animations
+   - Multiple dialog types
+   - Load actual dialog data from story files
+
+### Low Priority
+5. **Font System**
+   - Port bitmap font loading from PICTURES/FONT
+   - Reduce pixel difference to \u003c1%
+
+6. **Full Game Flow**
+   - Complete story sequences
+   - Save/load system
+   - Full burglary gameplay
+
+## Session Notes
+- Session 5: Added RouterScene, verified tests, documented progress
+- Following 80/20 rule: 80% porting, 20% testing
+- Keeping game playable at all times
+- Committing after every file edit
+- 2% pixel difference is acceptable for now
