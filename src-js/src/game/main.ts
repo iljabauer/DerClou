@@ -2,6 +2,7 @@ import { RouterScene } from './scenes/RouterScene';
 import { MainMenuScene } from './scenes/MainMenuScene';
 import { StoryScene } from './scenes/StoryScene';
 import { MonologueScene } from './scenes/MonologueScene';
+import { LocationScene } from './scenes/LocationScene';
 import { AUTO, Game, Scale, Types } from 'phaser';
 
 // Find out more information about the Game Config at:
@@ -21,7 +22,8 @@ const config: Types.Core.GameConfig = {
         RouterScene,
         MainMenuScene,
         StoryScene,
-        MonologueScene
+        MonologueScene,
+        LocationScene
     ]
 };
 
