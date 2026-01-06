@@ -62,6 +62,17 @@ export class GameStartScene extends Scene {
             return;
         }
 
+        if (this.isPlaying && this.hasLoaded && this.replayService.isComplete()) {
+            this.isPlaying = false;
+            this.statusText.setText('Status: Completed');
+            this.signalScreenshot('Finished');
+
+            if (ScreenshotService.isHeadlessMode()) {
+                console.log('Replay complete in headless mode. Exiting...');
+                ScreenshotService.exitApp();
+            }
+        }
+
         if (this.isPlaying && this.hasLoaded && !this.replayService.isComplete()) {
             const action = this.inputHandler.simulateTick();
             this.updateDisplay(action);
@@ -82,17 +93,6 @@ export class GameStartScene extends Scene {
             if (this.simulateToTick !== null && this.inputHandler.getSimulationTick() >= this.simulateToTick) {
                 console.log(`Simulate-to-tick target ${this.simulateToTick} reached. Exiting...`);
                 ScreenshotService.exitApp();
-            }
-
-            if (this.replayService.isComplete()) {
-                this.isPlaying = false;
-                this.statusText.setText('Status: Completed');
-                this.signalScreenshot('Finished');
-
-                if (ScreenshotService.isHeadlessMode()) {
-                    console.log('Replay complete in headless mode. Exiting...');
-                    ScreenshotService.exitApp();
-                }
             }
         }
     }

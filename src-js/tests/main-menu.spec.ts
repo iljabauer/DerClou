@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('from-start-to-finish-first-burglary', async ({ page }) => {
+test('main-menu', async ({ page }) => {
     // 1. Setup the communication channel
     let sequenceComplete: (value?: unknown) => void;
     let sequenceFailed: (reason?: any) => void;
@@ -44,7 +44,7 @@ test('from-start-to-finish-first-burglary', async ({ page }) => {
     });
 
     // 2. Load Game
-    await page.goto('http://localhost:8080?replay=replays/test_long.rec');
+    await page.goto('http://localhost:8080?replay=replays/test_main_menu.rec');
 
     // Wait for game to be ready (optional, but good practice)
     await page.waitForFunction(() => (window as any).game && (window as any).startReplay);
