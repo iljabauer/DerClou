@@ -25,7 +25,19 @@ export class MainMenuScene extends Scene {
         // Set background color to match the original (dark teal/green)
         this.cameras.main.setBackgroundColor('#0a4a4a');
 
-        // Title text
+        // Add a simple building silhouette at the bottom to match the screenshot
+        // This is a placeholder - the real game loads an image
+        const graphics = this.add.graphics();
+        graphics.fillStyle(0x0a3a3a, 1);
+        graphics.fillRect(0, 650, 1024, 118);
+        
+        // Add some simple building shapes
+        graphics.fillStyle(0x083030, 1);
+        graphics.fillRect(450, 700, 80, 68);
+        graphics.fillRect(550, 680, 100, 88);
+        graphics.fillRect(900, 690, 120, 78);
+
+        // Title text - positioned to match screenshot
         this.titleText = this.add.text(
             145, 
             688, 
