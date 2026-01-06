@@ -1575,6 +1575,14 @@ export class PlanningService {
     }
 
     /**
+     * Generate random number for game logic
+     * Port of CalcRandomNrForGameLogic() from random.c
+     */
+    private randomNr(min: number, max: number): number {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+
+    /**
      * Prepare systems for execution
      */
     private async prepareExecution(buildingId: number): Promise<void> {
@@ -1684,17 +1692,118 @@ export class PlanningService {
         // Display timer
         this.displayTimer(this.playerData.realTime, false);
 
-        // TODO: Check alarms
-        // - Time clock alarms
-        // - Loudness detection
-        // - Patrol detection
-        // - Microphone detection
+        // Check time clock alarms (every 3 ticks)
+        if (!(this.search.escapeBits & FAHN_ALARM_TIMECLOCK) && !(this.playerData.timer % 3)) {
+            // TODO: Port tcCheckTimeClocks(buildingId)
+            const timeClockAlarm = false;  // Stub for now
+            if (timeClockAlarm) {
+                this.search.escapeBits |= FAHN_ALARM | FAHN_ALARM_TIMECLOCK;
+                this.search.deriTime += Math.floor(this.playerData.realTime / this.randomNr(1, 3));
+                await this.showMessage('PLAYER_TIMECLOCK', true);
+            }
+        }
 
-        // TODO: Check for police arrival
-        // if (alarm && time >= policeTime) { surrounded }
+        // Check loudness detection (every 15 ticks)
+        if (!(this.playerData.timer % 15)) {
+            // TODO: Port tcAlarmByLoudness() and tcGetTotalLoudness()
+            const totalLoudness = this.playerData.currLoudness[0] + this.playerData.currLoudness[1] + 
+                                 this.playerData.currLoudness[2] + this.playerData.currLoudness[3];
+            const loudnessAlarm = false;  // Stub for now
+            if (loudnessAlarm) {
+                this.search.escapeBits |= FAHN_QUIET_ALARM | FAHN_ALARM_LOUDN;
+            }
+        }
 
-        // TODO: Check team mood
-        // if (mood < PLANING_MOOD_MIN) { escape }
+        // Check patrol detection (varies by building)
+        let patrolCounter = 3;
+        if (this.playerData.bldId === 1) {  // Building_Tower_of_London
+            patrolCounter = 9;
+        } else if (this.playerData.bldId === 2) {  // Building_Starford_Kaserne
+            patrolCounter = 30;
+        }
+
+        if (!(this.playerData.timer % patrolCounter)) {
+            // TODO: Port tcAlarmByPatrol()
+            const patrolAlarm = false;  // Stub for now
+            if (patrolAlarm) {
+                await this.showMessage('PLAYER_PATROL', true);
+                this.playerData.patrolCount++;
+                this.search.escapeBits |= FAHN_QUIET_ALARM | FAHN_ALARM_PATRO;
+            }
+        }
+
+        // Check alarm timer (every 180 ticks)
+        if (this.playerData.alarmTimer && !(this.playerData.timer % 180)) {
+            this.playerData.alarmTimer--;
+            if (!this.playerData.alarmTimer) {
+                this.search.escapeBits |= FAHN_QUIET_ALARM | FAHN_ALARM_TIMER;
+            }
+        }
+
+        // Check for police arrival
+        if ((this.search.escapeBits & FAHN_QUIET_ALARM) || (this.search.escapeBits & FAHN_ALARM)) {
+            if (!this.search.timeOfAlarm) {
+                this.search.timeOfAlarm = this.playerData.realTime;
+                
+                if (this.search.escapeBits & FAHN_ALARM) {
+                    // TODO: Play alarm sound
+                    console.log('[PlanningService] ALARM! Playing siren sound');
+                }
+            }
+
+            // Play siren periodically
+            if ((this.search.escapeBits & FAHN_ALARM) && 
+                (((this.playerData.realTime - this.search.timeOfAlarm) % 120) === 119)) {
+                // TODO: Play alarm sound
+                console.log('[PlanningService] Playing periodic siren sound');
+            }
+
+            // Check if police arrived
+            if (this.playerData.realTime >= (this.search.timeOfAlarm + this.playerData.bldObj.PoliceTime)) {
+                this.search.escapeBits |= FAHN_SURROUNDED;
+                
+                for (let i = 0; i < PLANING_NR_PERSONS; i++) {
+                    this.playerData.handlerEnded[i] = 1;
+                }
+                
+                // TODO: Play police horn sound
+                console.log('[PlanningService] SURROUNDED! Police arrived');
+            }
+        }
+
+        // Check team mood (every 15 ticks, not for Kaserne)
+        if (this.playerData.bldId !== 2 && !(this.playerData.timer % 15)) {  // Not Building_Starford_Kaserne
+            this.playerData.mood = this.getMood(this.playerData.realTime);
+            
+            if (this.playerData.mood < PLANING_MOOD_MIN) {
+                await this.showMessage('PLAYER_FLUCHT', true);
+                this.search.escapeBits |= FAHN_ESCAPE;
+                
+                for (let i = 0; i < PLANING_NR_PERSONS; i++) {
+                    this.playerData.handlerEnded[i] = 1;
+                }
+            }
+        }
+
+        // Check action function (timed event)
+        if (this.playerData.realTime === this.playerData.actionTime && this.playerData.actionFunc) {
+            const actionRet = this.playerData.actionFunc(this.playerData.actionTime, this.playerData.bldId);
+            
+            if (actionRet) {
+                await this.showMessage(`PLAYER_ACTION_${actionRet}`, true);
+                this.search.escapeBits |= FAHN_ESCAPE;
+                
+                for (let i = 0; i < PLANING_NR_PERSONS; i++) {
+                    this.playerData.handlerEnded[i] = 1;
+                }
+            }
+        }
+
+        // Check spot detection (every 3 ticks, if dark)
+        if (!(this.playerData.timer % 3) && this.playerData.isItDark) {
+            // TODO: Port lsGuyInsideSpot()
+            // This checks if any burglar is inside a guard patrol spot
+        }
 
         // Execute actions for each person
         const burglarsNr = this.state.team.length;
