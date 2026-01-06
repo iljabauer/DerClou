@@ -30,7 +30,6 @@ export class LocationScene extends Scene {
     private replayService: ReplayService;
     private inputHandler: InputHandler;
     private textService: TextService;
-    private imageService: ImageService;
     
     private currentLocation: LocationData = {
         name: 'Victoria Station',
@@ -51,7 +50,6 @@ export class LocationScene extends Scene {
         this.inputHandler = new InputHandler();
         this.inputHandler.setReplayService(this.replayService);
         this.textService = new TextService();
-        this.imageService = new ImageService(this);
     }
 
     async create() {
@@ -386,15 +384,13 @@ export class LocationScene extends Scene {
     }
     
     private processReplayInput() {
-        // Get current tick (frame count)
-        const currentTick = this.game.loop.frame;
+        // Use InputHandler to simulate tick and get action
+        const action = this.inputHandler.simulateTick();
         
-        // Get input from replay
-        const record = this.replayService.getInput(currentTick, 0);
-        
-        if (record) {
-            // Process the replay input
-            this.inputHandler.processReplayInput(record.action);
+        if (action !== null) {
+            // Process the action
+            // For now, just log it
+            console.log(`Replay action: ${action}`);
             
             // Capture screenshot if needed
             if ((window as any).captureEvent) {
