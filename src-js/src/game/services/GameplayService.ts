@@ -117,9 +117,10 @@ export class GameplayService {
 
     /**
      * Check alarm by patrol
-     * Port of tcAlarmByPatrol() from gp.c
+     * Port of tcAlarmByPatrol() from dataappl.c
      * 
      * Checks if patrol detection triggers an alarm.
+     * Patrols detect changes faster now: 100 -> 125.
      * Returns true if alarm should be triggered.
      */
     alarmByPatrol(
@@ -128,13 +129,15 @@ export class GameplayService {
         totalCount: number,
         patrolCount: number
     ): boolean {
-        // TODO: Port full implementation
-        // - Calculate detection probability
-        // - Factor in changes made
-        // - Factor in patrol frequency
-        // - Return true if alarm triggered
-        
-        return false;
+        // Constant from C code
+        const tcPATROL_ALARM = 100;
+
+        // Calculate threshold
+        // More changes = higher chance of detection
+        // More patrols = higher chance of detection
+        const threshold = (totalCount * tcPATROL_ALARM) / (125 * patrolCount);
+
+        return changeCount > threshold;
     }
 
     /**
