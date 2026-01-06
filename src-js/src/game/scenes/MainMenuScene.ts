@@ -1,12 +1,10 @@
 import { Scene } from 'phaser';
-import { ReplayService } from '../services/ReplayService';
-import { InputHandler } from '../services/InputHandler';
+import { SharedReplayService } from '../services/SharedReplayService';
 import { TextService } from '../services/TextService';
 import { ILBMLoader } from '../services/ILBMLoader';
 
 export class MainMenuScene extends Scene {
-    private replayService: ReplayService;
-    private inputHandler: InputHandler;
+    private sharedReplay: SharedReplayService | null = null;
     private textService: TextService;
     
     private menuItems: Phaser.GameObjects.Text[] = [];
@@ -18,9 +16,6 @@ export class MainMenuScene extends Scene {
 
     constructor() {
         super('MainMenuScene');
-        this.replayService = new ReplayService();
-        this.inputHandler = new InputHandler();
-        this.inputHandler.setReplayService(this.replayService);
         this.textService = new TextService();
     }
 
@@ -137,19 +132,23 @@ export class MainMenuScene extends Scene {
         if (this.waitingForScreenshot) {
             return;
         }
+        
+        if (!this.sharedReplay) {
+            return;
+        }
 
-        if (this.isPlaying && this.hasLoaded && this.replayService.isComplete()) {
+        if (this.isPlaying && this.hasLoaded && this.sharedReplay.isReplayComplete()) {
             this.isPlaying = false;
             this.signalScreenshot('Finished');
             console.log('Replay complete.');
         }
 
-        if (this.isPlaying && this.hasLoaded && !this.replayService.isComplete()) {
-            const action = this.inputHandler.simulateTick();
+        if (this.isPlaying && this.hasLoaded && !this.sharedReplay.isReplayComplete()) {
+            const action = this.sharedReplay.simulateTick();
             
             if (action !== null) {
-                const tick = this.inputHandler.getSimulationTick();
-                const actionStr = this.replayService.actionToString(action);
+                const tick = this.sharedReplay.getSimulationTick();
+                const actionStr = this.sharedReplay.actionToString(action);
                 console.log(`[Replay] Tick ${tick}: ${actionStr}`);
 
                 // Handle menu navigation based on replay actions
@@ -208,23 +207,32 @@ export class MainMenuScene extends Scene {
             return;
         }
 
-        console.log(`Loading replay: ${replayPath}`);
+        console.log(`MainMenuScene: Loading replay: ${replayPath}`);
 
-        const data = await this.replayService.loadReplay(replayPath);
-
-        if (data) {
-            this.replayService.initPlayback(data);
-            this.inputHandler.init();
+        // Initialize shared replay service
+        this.sharedReplay = SharedReplayService.initialize(this);
+        
+        // Load replay
+        const success = await this.sharedReplay.loadReplay(replayPath);
+        
+        if (success) {
             this.hasLoaded = true;
-            console.log(`Loaded replay with ${data.records.length} records`);
-
-            // Expose startReplay to Playwright
-            (window as any).startReplay = () => {
-                console.log("Playwright signaled startReplay");
-                this.isPlaying = true;
-            };
+            console.log('MainMenuScene: Replay loaded successfully');
+            
+            // Note: startReplay is exposed by SharedReplayService.initialize()
+            // We just need to check the shared service's isPlaying flag
+            this.time.addEvent({
+                delay: 100,
+                loop: true,
+                callback: () => {
+                    if (this.sharedReplay && this.sharedReplay.isReplayPlaying() && !this.isPlaying) {
+                        console.log('MainMenuScene: Replay started');
+                        this.isPlaying = true;
+                    }
+                }
+            });
         } else {
-            console.error('Failed to load replay');
+            console.error('MainMenuScene: Failed to load replay');
         }
     }
 
