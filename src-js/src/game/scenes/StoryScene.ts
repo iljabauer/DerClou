@@ -35,10 +35,9 @@ export class StoryScene extends Scene {
         this.cameras.main.setBackgroundColor('#0a4a4a');
 
         // Load text files
-        await this.textService.loadText('STORY');
+        await this.textService.loadText('STORY_0');
 
-        // For now, create a simple opening sequence
-        // This will be expanded to load from story data files
+        // Setup opening sequence from story data
         this.setupOpeningSequence();
 
         // Load replay if specified
@@ -47,14 +46,18 @@ export class StoryScene extends Scene {
 
     private setupOpeningSequence() {
         // Opening monologue at Victoria Station
-        // This is a placeholder - will be loaded from story data
+        // Load text from STORY_0D.TXT
+        const storyLines = this.textService.getLines('STORY_0', 'ST_30_OLD');
+        const storyText = storyLines.length > 0 ? storyLines.join('\n') : 
+            'Ja, genau auf diesen, heute verschlissenen,\nMarmorfliesen begann meine Geschichte\nvor 41 Jahren.\nDamals wollte man den 2. Weltkrieg mit all\ndem Elend, den Entbehrungen und seinen Toten';
+        
         this.dialogSequence = [
             {
                 scene: 'Victoria Station',
                 date: '03.02.1953',
                 character: 'Matt',
-                portrait: 126, // FACE_GLUDO_SAILOR from story.h
-                text: 'Ja, genau auf diesen, heute verschlissenen,\nNorwerfliessen begann meine Geschichte\nvor 41 Jahren.\nDamals wollte man den 2. Weltkrieg mit all\nden Elend, den Entbehrungen und seinen Toten'
+                portrait: 126, // OLD_MATT_PICTID from story
+                text: storyText
             }
         ];
     }
