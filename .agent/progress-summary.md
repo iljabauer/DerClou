@@ -112,37 +112,56 @@
 
 ## Known Issues / TODOs
 
-### Font System
-- Currently using web font (Courier New)
-- Original uses bitmap font from `gamedata/PICTURES/FONT`
-- Need to port bitmap font rendering for pixel-perfect accuracy
+### Game Flow
+- **Scene Transitions**: Need shared replay service across scenes
+- **State Management**: Pass game state between MainMenuScene and StoryScene
+- **Menu Selection**: MainMenuScene needs to properly trigger StoryScene with replay
 
 ### Graphics System
-- Using placeholder graphics (solid colors)
-- Need to load actual game images
-- Background image ID 21 (BGD_LONDON) needs to be loaded
+- **Placeholder Graphics**: Using solid colors instead of actual images
+- **IFF/ILBM Loading**: Need to port image loading from src/gfx/
+- **Background Images**: Train station, building scenes, etc.
+- **Character Portraits**: Need to load portrait images (OLD_MATT_PICTID, etc.)
+
+### Font System
+- **Web Font**: Currently using Courier New
+- **Bitmap Font**: Original uses bitmap font from `gamedata/PICTURES/FONT`
+- **Pixel-Perfect**: Need bitmap font for exact rendering
+
+### Data System
+- **Game Data Loading**: Need to load TCMAIN.DAT, TCBUILD.DAT
+- **Relations**: Need to port relation system from src/data/relation.c
+- **Object Types**: Need to define all object types (Person, Location, etc.)
+
+### Story System
+- **Story Flow**: Need to port PlayStory() and story management
+- **Scene Sequences**: Multiple dialog sequences per scene
+- **Story Data**: Load story definitions from data files
 
 ### Next Priority Systems
 
-1. **Dialog/Speech Bubble System** (for monologue test)
-   - Character portraits
-   - Speech bubbles with text
-   - Text wrapping and formatting
+1. **Shared Replay Service**
+   - Make replay work across scene transitions
+   - Global replay state management
+   - Scene data passing
    
-2. **Scene Rendering System**
-   - Load and display background scenes
-   - Character sprites
-   - Scene composition
+2. **Graphics Loading (IFF/ILBM)**
+   - Port image loading from src/gfx/
+   - Load background images
+   - Load character portraits
+   - Image catalog system
 
-3. **Text System**
-   - Load text from .txt files
-   - Multi-language support (German, English, etc.)
-   - Text key lookup
+3. **Data Loading**
+   - Port database loading from src/data/
+   - Load TCMAIN.DAT and TCBUILD.DAT
+   - Parse object data structures
+   - Relation system
 
-4. **Asset Loading**
-   - IFF/ILBM image format support
-   - Image database/catalog system
-   - Resource management
+4. **Story System**
+   - Port story management from src/story/
+   - Scene sequencing
+   - Dialog flow
+   - Game state management
 
 ## Architecture Notes
 
