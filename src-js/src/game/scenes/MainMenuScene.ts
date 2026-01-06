@@ -30,7 +30,7 @@ export class MainMenuScene extends Scene {
         graphics.fillStyle(0x0a3a3a, 1);
         graphics.fillRect(0, 650, 1024, 118);
         
-        // Add some simple building shapes
+        // Add some simple building shapes to roughly match the original
         graphics.fillStyle(0x083030, 1);
         graphics.fillRect(450, 700, 80, 68);
         graphics.fillRect(550, 680, 100, 88);
@@ -42,34 +42,33 @@ export class MainMenuScene extends Scene {
             688, 
             'Der Clou! Open Source Project v0.8 (Prof. CD-ROM)',
             {
-                fontFamily: 'monospace',
+                fontFamily: 'Courier New, monospace',
                 fontSize: '16px',
                 color: '#ffffff'
             }
         );
 
         // Menu items (German text as shown in screenshot)
-        const menuTexts = [
-            'Neues Spiel starten',      // New Game
-            'Spiel beenden',             // Quit Game
-            'Altes Spiel fortsetzen'    // Load Game
-        ];
-
-        const startY = 745;
-        const spacing = 45;
-
-        menuTexts.forEach((text, index) => {
-            const menuItem = this.add.text(
-                30,
-                startY + (index * spacing),
-                text,
-                {
-                    fontFamily: 'monospace',
-                    fontSize: '16px',
-                    color: '#00ff00'
-                }
-            );
-            this.menuItems.push(menuItem);
+        // Layout: Two items on first line, one on second line
+        // First line: "Neues Spiel starten" (left) and "Spiel beenden" (right)
+        // Second line: "Altes Spiel fortsetzen" (left)
+        
+        this.add.text(30, 745, 'Neues Spiel starten', {
+            fontFamily: 'Courier New, monospace',
+            fontSize: '16px',
+            color: '#00ff00'
+        });
+        
+        this.add.text(520, 745, 'Spiel beenden', {
+            fontFamily: 'Courier New, monospace',
+            fontSize: '16px',
+            color: '#00ff00'
+        });
+        
+        this.add.text(30, 790, 'Altes Spiel fortsetzen', {
+            fontFamily: 'Courier New, monospace',
+            fontSize: '16px',
+            color: '#00ff00'
         });
 
         // Load replay if specified
