@@ -1,4 +1,5 @@
 import { MainMenuScene } from './scenes/MainMenuScene';
+import { StoryScene } from './scenes/StoryScene';
 import { AUTO, Game, Scale, Types } from 'phaser';
 
 // Find out more information about the Game Config at:
@@ -15,7 +16,8 @@ const config: Types.Core.GameConfig = {
     },
     pixelArt: true,
     scene: [
-        MainMenuScene
+        MainMenuScene,
+        StoryScene
     ]
 };
 

@@ -165,8 +165,19 @@ export class MainMenuScene extends Scene {
 
     private selectMenuItem(index: number) {
         console.log(`Menu item selected: ${index}`);
-        // For now, just log the selection
-        // In full implementation, this would trigger game start, load, or quit
+        
+        switch (index) {
+            case 0: // New Game
+                console.log('Starting new game...');
+                this.scene.start('StoryScene');
+                break;
+            case 1: // Load Game
+                console.log('Load game not yet implemented');
+                break;
+            case 2: // Quit Game
+                console.log('Quit game');
+                break;
+        }
     }
 
     private async loadReplayFile() {

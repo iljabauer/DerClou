@@ -1,8 +1,8 @@
-# Current Session Plan
+# Current Session Plan - Session 3
 
-## Session 2 Summary - COMPLETED ✅
+## Previous Sessions Summary
 
-### Achievements
+### Session 2 - COMPLETED ✅
 1. ✅ Created TextService - XOR decoding, text loading from TEXTS directory
 2. ✅ Created DialogService - Speech/think bubbles, basic rendering
 3. ✅ Created ImageService - Image catalog system (placeholder graphics)
@@ -11,49 +11,68 @@
 6. ✅ All builds passing
 7. ✅ Main menu test still passing (2% pixel diff acceptable)
 
-### Core Services Implemented
-- **TextService**: Load and decode game text files (XOR 0x75)
-- **DialogService**: Display speech bubbles with text
-- **ImageService**: Manage game images by ID (placeholders for now)
+### Session 1 - COMPLETED ✅
+1. ✅ Created MainMenuScene with basic menu structure
+2. ✅ Integrated replay system
+3. ✅ Basic test passing
 
-### Infrastructure
-- Symlink to TEXTS directory in public folder
-- Text files loading correctly
-- Build system working perfectly
+## Session 3 Goals
 
-### What's Next
-The monologue test requires:
-1. Full game flow implementation (main menu → new game → story)
-2. Scene transition system
-3. Story system integration
-4. Character portrait loading
-5. Actual game graphics (IFF/ILBM conversion)
+### Understanding the Game Architecture
+From C code analysis:
+- **tcStartGame()** - Initialize game, parse args, init subsystems
+- **tcDo()** - Main game loop
+  - ShowMenuBackground()
+  - StartupMenu() - Show main menu (✅ DONE in MainMenuScene)
+  - InitData() or tcLoadTheClou() - Start new game or load
+  - PlayStory() - Run the story/game
+- **tcDone()** - Cleanup
 
-This is a larger task that requires understanding the full game architecture.
-For now, focus on continuing to port core systems.
+### Priority 1: Continue Porting Core Systems (80% time)
 
-### 2. Port Next Critical System
-Based on test requirements, likely need:
-- Dialog/Speech Bubble System (for monologue test)
-- Text Loading System (to load German/English text)
-- Image Loading System (to load backgrounds and portraits)
+Next critical systems to port:
 
-### 3. Keep Game Playable
-- Ensure builds work after each change
-- Commit after each file edit
-- Test frequently
+#### 1. Data System (src/data/)
+- Database and data structures
+- Character data, location data, object data
+- Essential for InitData() / game initialization
 
-## Work Distribution
-- 80% porting C code to TypeScript
-- 20% testing and verification
+#### 2. Story System (src/story/)
+- Story/narrative system
+- Scene transitions
+- Game flow control (PlayStory())
 
-## Next Files to Port (Priority Order)
-1. Text system (src/text/) - Load .txt files with game text
-2. Dialog system (src/dialog/) - Speech bubbles and conversations
-3. Graphics system (src/gfx/) - Image loading and rendering
-4. Scene system (src/scenes/) - Scene management
+#### 3. Scene System (src/scenes/)
+- Scene rendering
+- Background loading
+- Scene composition
+
+#### 4. Graphics System (src/gfx/)
+- IFF/ILBM image loading
+- Bitmap font rendering
+- Color palette management
+
+### Priority 2: Testing (20% time)
+- Run `npm run build` after each file edit
+- Test main menu periodically
+- Keep game playable
+
+## Work Plan for This Session
+
+1. **Explore data system** - Understand data structures in src/data/
+2. **Port basic data structures** - Start with core data types
+3. **Port story system basics** - Scene flow and transitions
+4. **Test and verify** - Ensure builds work
+5. **Commit after each file** - One commit per file edit
 
 ## Commit Strategy
-- One commit per file
-- Clear messages referencing C source
+- One commit per file edit
+- Clear messages: "Port [system] from src/[path]/[file]"
 - Include: Co-authored-by: Ona <no-reply@ona.com>
+
+## Next Files to Port (In Order)
+1. src/data/ - Database and data structures
+2. src/story/ - Story system
+3. src/scenes/ - Scene management
+4. src/gfx/ - Graphics loading (IFF/ILBM)
+5. src/present/ - Presentation layer
