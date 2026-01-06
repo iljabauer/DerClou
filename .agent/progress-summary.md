@@ -1,6 +1,46 @@
 # Der Clou Porting Progress Summary
 
-## Completed (Session 2 - Current)
+## Completed (Session 3 - Current)
+
+### Core Data Structures ✅
+
+#### List
+- **File**: `src-js/src/game/core/List.ts`
+- **Status**: Complete
+- **Features**:
+  - Doubly-linked list implementation
+  - Node management (add, remove, get)
+  - Iteration and search functions
+  - Ported from src/list/list.h
+
+#### Database
+- **File**: `src-js/src/game/core/Database.ts`
+- **Status**: Complete
+- **Features**:
+  - Object management system
+  - Type-based object tracking
+  - Object queries and lookups
+  - ObjectNode for list integration
+  - Ported from src/data/database.h
+
+### Story System ✅
+
+#### StoryScene
+- **File**: `src-js/src/game/scenes/StoryScene.ts`
+- **Status**: Basic implementation
+- **Features**:
+  - Scene rendering with backgrounds
+  - Character portrait display
+  - Speech bubble rendering
+  - Date/location display
+  - Dialog sequence management
+  - Replay integration
+
+### Scene Transitions ✅
+- MainMenuScene now transitions to StoryScene on "New Game"
+- Game config updated with both scenes
+
+## Completed (Session 2)
 
 ### Core Services ✅
 
