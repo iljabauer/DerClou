@@ -82,7 +82,6 @@ export const ScreenshotService = {
 
                 let fullPath = '';
 
-                
                 // Find next available filename
                 let index = 1;
                 let fileName = '';
@@ -100,7 +99,7 @@ export const ScreenshotService = {
                         };
                     }
                 } while (fs.existsSync(fullPath));
-                
+
 
                 fs.writeFileSync(fullPath, base64Image, { encoding: 'base64' });
                 return {

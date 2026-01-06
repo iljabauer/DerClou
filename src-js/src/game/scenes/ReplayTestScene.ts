@@ -38,14 +38,16 @@ export class ReplayTestScene extends Scene {
         this.progressText = this.add.text(10, 140, 'Record: 0 / 0', style);
 
         // Play/Pause Button
-        const playBtn = this.add.text(10, 180, 'Play/Pause', {
+        // Play/Pause Button
+        this.add.text(10, 180, 'Play/Pause', {
             backgroundColor: '#004400', padding: { x: 10, y: 5 }, ...style
         })
             .setInteractive({ useHandCursor: true })
             .on('pointerdown', () => this.togglePlayback());
 
         // Screenshot Button
-        const screenBtn = this.add.text(150, 180, 'Screenshot', {
+        // Screenshot Button
+        this.add.text(150, 180, 'Screenshot', {
             backgroundColor: '#000044', padding: { x: 10, y: 5 }, ...style
         })
             .setInteractive({ useHandCursor: true })
@@ -55,7 +57,7 @@ export class ReplayTestScene extends Scene {
         this.loadReplayFile();
     }
 
-    update(time: number, delta: number) {
+    update(_time: number, _delta: number) {
         if (this.isPlaying && this.hasLoaded && !this.replayService.isComplete()) {
             const action = this.inputHandler.simulateTick();
             this.updateDisplay(action);
@@ -153,10 +155,8 @@ export class ReplayTestScene extends Scene {
     }
 
     private captureScreenshot() {
-        const tick = this.inputHandler.getSimulationTick();
         this.game.renderer.snapshot((image: HTMLImageElement | any) => {
             if (image && image.src) {
-                const filename = `replay_tick_${tick}_screenshot.png`;
                 const result = ScreenshotService.saveScreenshot(image.src);
                 console.log('Screenshot capture result:', result);
             }
