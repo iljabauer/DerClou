@@ -146,3 +146,43 @@ Below is an annotated hex dump of a hypothetical replay file.
     *   The recorded `rngChecksum` is compared against the live game's RNG state. A mismatch triggers a warning log ("RNG Drift").
     *   The next record is read from disk.
 4.  If `currentTick` does not match, normal processing continues (usually implying "no input" for that tick in a replay context).
+
+## TypeScript Implementation
+
+The TypeScript port (`src-js`) replicates this system using a Phaser Plugin and Service architecture.
+
+### 1. ReplayService (`src/game/services/ReplayService.ts`)
+- **Responsibility**: Handles file I/O, binary parsing, and data management.
+- **Functionality**:
+    - Loads `.rec` files using `fetch` and parses them with a custom `BrowserBufferReader` (handling Little Endian binary data).
+    - Provides `getInput(tick)` to retrieve actions for a specific simulation tick.
+    - Manages the `ReplayData` structure (Header + Records).
+
+### 2. InputPlugin (`src/game/plugins/InputPlugin.ts`)
+- **Responsibility**: Acts as the central input manager and the "Game Loop" driver for deterministic replay.
+- **Key Mechanics**:
+    - **Fixed Time Step**: Implements an accumulator mechanism in the Phaser `update` loop to ensure game logic processes exactly 60 times per second of game time, adhering to the original C logic.
+    - **Input Mapping**: Listeners map Phaser input events (Keyboard, Mouse) to the `INP_*` bitmasks defined in `ReplayService`.
+    - **Playback**: In Replay Mode, it pulls input actions from `ReplayService` based on the current simulation tick instead of reading live device input.
+    - **Wait For**: Exposes `waitFor(mask)`, an async Promise-based equivalent of the C `inpWaitFor`. This allows the game logic (e.g., in Scenes) to pause execution until specific input criteria are met, while the underlying input loop continues to process time and events.
+
+### 3. Integration Example (`GameStartScene`)
+
+Game scenes interact with the system via `this.inputSystem`.
+
+```typescript
+// Initializing Replay Mode
+await this.inputSystem.loadReplay('path/to/replay.rec');
+
+// Waiting for input (mirrors C inpWaitFor)
+// Waits for ANY input validation pattern, effectively ticking the simulation 
+// until an event matching the mask occurs.
+const action = await this.inputSystem.waitFor(INP_LBUTTONP | INP_KEYBOARD);
+```
+
+### 4. Playwright Testing
+Automated tests use `main-menu.spec.ts` (and others) to verify the replay system.
+- The test loads the game with `?replay=...`.
+- The `InputPlugin` automatically starts playback.
+- As the replay progresses, `InputPlugin` triggers `captureEvent` calls (via `window.captureEvent`) for each input action processed.
+- Playwright captures these events and takes screenshots to verify visual state against expected golden images.

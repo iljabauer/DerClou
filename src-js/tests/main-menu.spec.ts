@@ -24,6 +24,8 @@ test('main-menu', async ({ page }) => {
     // Increase timeout for long replays
     test.setTimeout(30000);
 
+    page.on('console', msg => console.log(`BROWSER: ${msg.text()}`));
+
     await page.exposeFunction('captureEvent', async (eventName: string) => {
         console.log(`📸 Capturing event: ${eventName}`);
 
