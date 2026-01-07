@@ -4,8 +4,8 @@ import { InputPlugin } from '../plugins/InputPlugin';
 
 
 export class GameStartScene extends Scene {
-    // @ts-ignore - Injected by Plugin Manager
-    inputSystem: InputPlugin;
+    // Injected by Plugin Manager
+    inputSystem!: InputPlugin;
 
     constructor() {
         super('ReplayTestScene');
@@ -22,7 +22,8 @@ export class GameStartScene extends Scene {
 
 
     private async loadReplayIfRequested() {
-        (window as any).startReplay = () => console.log("Playwright startReplay");
+        const win = window as unknown as { startReplay: () => void | Promise<void> };
+        win.startReplay = () => console.log("Playwright startReplay");
 
         // Check URL params
         const urlParams = new URLSearchParams(window.location.search);
@@ -44,12 +45,13 @@ export class GameStartScene extends Scene {
             console.log('Status: Ready');
 
             // Expose startReplay for Playwright compatibility (if needed)
-            (window as any).startReplay = async () => {
+            const win = window as unknown as { startReplay: () => Promise<void> };
+            win.startReplay = async () => {
                 console.log("Playwright signaled startReplay (Auto-started by InputPlugin)");
 
                 // Playback Loop to consume events and trigger screenshots
                 // We monitor isPlaying from the plugin
-                while ((this.inputSystem as any).isPlaying) {
+                while (this.inputSystem.isPlayingValue) {
                     // Wait for ANY input (excluding Time for now, or including?)
                     // If we wait for anything, we catch all recorded actions.
                     // 0xFFFFFFFF covers all bits.
@@ -59,7 +61,8 @@ export class GameStartScene extends Scene {
             };
 
             // Auto-start loop if already playing (which it is)
-            (window as any).startReplay();
+            const winRun = window as unknown as { startReplay: () => void };
+            winRun.startReplay();
         } else {
             console.log('Status: No replay path provided. Waiting for manual input...');
         }

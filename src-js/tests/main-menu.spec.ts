@@ -14,10 +14,10 @@ test.beforeAll(() => {
 test('main-menu', async ({ page }) => {
     // 1. Setup the communication channel
     let sequenceComplete: (value?: unknown) => void;
-    let sequenceFailed: (reason?: any) => void;
-    const allEventsCaptured = new Promise((resolve, reject) => {
+
+
+    const allEventsCaptured = new Promise((resolve) => {
         sequenceComplete = resolve;
-        sequenceFailed = reject;
     });
     let screenshotIndex = 1;
 
@@ -38,7 +38,7 @@ test('main-menu', async ({ page }) => {
         // 1. Force the game to pause visually (Engine pause)
         // This stops rendering, physics, and global time, ensuring "Visual Freeze"
         // The game logic is already paused by 'waitingForScreenshot' in GameStartScene
-        await page.evaluate(() => (window as any).game.loop.sleep());
+        await page.evaluate(() => (window as unknown as { game: { loop: { sleep: () => void } } }).game.loop.sleep());
 
         try {
             // 2. Take the screenshot
@@ -49,7 +49,7 @@ test('main-menu', async ({ page }) => {
             await expect.soft(canvas).toHaveScreenshot(`screenshot-${indexStr}.png`, { threshold: 0.05 });
         } finally {
             // 3. Resume the game
-            await page.evaluate(() => (window as any).game.loop.wake());
+            await page.evaluate(() => (window as unknown as { game: { loop: { wake: () => void } } }).game.loop.wake());
         }
     });
 
@@ -57,10 +57,10 @@ test('main-menu', async ({ page }) => {
     await page.goto('http://localhost:8080?replay=replays/test_main_menu.rec');
 
     // Wait for game to be ready (optional, but good practice)
-    await page.waitForFunction(() => (window as any).game && (window as any).startReplay);
+    await page.waitForFunction(() => (window as unknown as { game: unknown }).game && (window as unknown as { startReplay: unknown }).startReplay);
 
     // Trigger the start
-    await page.evaluate(() => (window as any).startReplay());
+    await page.evaluate(() => (window as unknown as { startReplay: () => void }).startReplay());
 
     // 4. Wait here until the game calls captureEvent('Finished')
     await allEventsCaptured;

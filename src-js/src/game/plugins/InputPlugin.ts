@@ -24,6 +24,10 @@ export class InputPlugin extends Plugins.ScenePlugin {
     private isPlaying: boolean = false;
     private simulateToTick: number | null = null;
 
+    public get isPlayingValue(): boolean {
+        return this.isPlaying;
+    }
+
     constructor(scene: Scene, pluginManager: Plugins.PluginManager, pluginKey: string) {
         super(scene, pluginManager, pluginKey);
         this.replayService = new ReplayService();
@@ -41,7 +45,7 @@ export class InputPlugin extends Plugins.ScenePlugin {
         if (!this.scene || !this.scene.input) return;
 
         // Mouse Motion
-        this.scene.input.on('pointermove', (_pointer: Phaser.Input.Pointer) => {
+        this.scene.input.on('pointermove', () => {
             // this.mouseX = pointer.x;
             // this.mouseY = pointer.y;
             // TODO: directional checks relative to center or previous pos?
@@ -102,7 +106,7 @@ export class InputPlugin extends Plugins.ScenePlugin {
         }
     }
 
-    // @ts-ignore - ScenePlugin update is not typed but exists
+    // ScenePlugin update is not typed but exists
     update(_time: number, delta: number) {
         if (!this.replayService) return;
 
@@ -216,9 +220,10 @@ export class InputPlugin extends Plugins.ScenePlugin {
     }
 
     private signalScreenshot(tick: number, action: number) {
-        if ((window as any).captureEvent) {
+        const win = window as unknown as { captureEvent: (name: string) => Promise<void> };
+        if (win.captureEvent) {
             const name = action === -1 ? 'Finished' : `Tick_${tick}_Action_${action}`;
-            (window as any).captureEvent(name).catch((e: any) => console.error(e));
+            win.captureEvent(name).catch((e: unknown) => console.error(e));
         }
     }
 

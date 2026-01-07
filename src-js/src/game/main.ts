@@ -26,7 +26,7 @@ const config: Types.Core.GameConfig = {
 
 const StartGame = (parent: string) => {
     const game = new Game({ ...config, parent });
-    (window as any).game = game;
+    (window as unknown as Window & { game: Game }).game = game;
     return game;
 }
 
