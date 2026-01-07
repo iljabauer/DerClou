@@ -1,0 +1,22 @@
+{
+    "mcpServers": {
+        "image-vision": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "ai-vision-mcp"
+            ],
+            "env": {
+                "IMAGE_PROVIDER": "google",
+                "VIDEO_PROVIDER": "google",
+                "GEMINI_API_KEY": "$GEMINI_API_KEY",
+                "IMAGE_MODEL": "gemini-3-flash-preview"
+            },
+            "timeout": 300000,
+            "includeTools": [
+                "analyze_image",
+                "compare_images"
+            ]
+        }
+    }
+}
