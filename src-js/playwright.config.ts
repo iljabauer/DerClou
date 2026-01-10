@@ -21,7 +21,7 @@ export default defineConfig({
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {
         // Exact size you want your canvas to be
-        viewport: { width: 320, height: 240 },
+        viewport: { width: 320, height: 200 },
         // Ensure scaling is 1:1 (no high-DPI scaling)
         deviceScaleFactor: 1,
         /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
